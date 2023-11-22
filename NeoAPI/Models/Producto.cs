@@ -19,5 +19,5 @@ public partial class Producto
 
     public virtual TipoProd IdTipoProdNavigation { get; set; } = null!;
 
-    public virtual ICollection<Rago> Ragos { get; set; } = new List<Rago>();
+    public virtual ICollection<Rango> Rangos { get; set; } = new List<Rango>();
 }

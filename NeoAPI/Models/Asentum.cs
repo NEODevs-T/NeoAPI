@@ -19,5 +19,5 @@ public partial class Asentum
 
     public virtual InfoAse IdInfoAseNavigation { get; set; } = null!;
 
-    public virtual Rago IdRangoNavigation { get; set; } = null!;
+    public virtual Rango IdRangoNavigation { get; set; } = null!;
 }

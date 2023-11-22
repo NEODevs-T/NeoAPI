@@ -51,7 +51,7 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Producto> Productos { get; set; }
 
-    public virtual DbSet<Rago> Ragos { get; set; }
+    public virtual DbSet<Rango> Rangos { get; set; }
 
     public virtual DbSet<Seccion> Seccions { get; set; }
 
@@ -61,11 +61,12 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Unidad> Unidads { get; set; }
 
-    public virtual DbSet<Unidad1> Unidads1 { get; set; }
-
     public virtual DbSet<Variable> Variables { get; set; }
 
-   
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=10.20.1.60\\DESARROLLO;Initial Catalog=DbNeoII;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncuesta;Password=Enc2022**Ing");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Asentum>(entity =>
@@ -453,11 +454,11 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_Producto_TipoProd");
         });
 
-        modelBuilder.Entity<Rago>(entity =>
+        modelBuilder.Entity<Rango>(entity =>
         {
-            entity.HasKey(e => e.IdRango);
+            entity.HasKey(e => e.IdRango).HasName("PK_Rago");
 
-            entity.ToTable("Rago", "ase");
+            entity.ToTable("Rango", "ase");
 
             entity.Property(e => e.Ractivo).HasColumnName("RActivo");
             entity.Property(e => e.RfechaCrea).HasColumnName("RFechaCrea");
@@ -473,17 +474,17 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.Robj).HasColumnName("RObj");
             entity.Property(e => e.Rorden).HasColumnName("ROrden");
 
-            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.Ragos)
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.Rangos)
                 .HasForeignKey(d => d.IdMaster)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Rago_Master");
 
-            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Ragos)
+            entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Rangos)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Rago_Producto");
 
-            entity.HasOne(d => d.IdVariableNavigation).WithMany(p => p.Ragos)
+            entity.HasOne(d => d.IdVariableNavigation).WithMany(p => p.Rangos)
                 .HasForeignKey(d => d.IdVariable)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Rago_Variable");
@@ -561,24 +562,6 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.UfechaCrea).HasColumnName("UFechaCrea");
             entity.Property(e => e.Unombre)
                 .HasMaxLength(100)
-                .IsUnicode(false)
-                .HasColumnName("UNombre");
-        });
-
-        modelBuilder.Entity<Unidad1>(entity =>
-        {
-            entity.HasKey(e => e.IdUnidad);
-
-            entity.ToTable("Unidad", "pnc");
-
-            entity.Property(e => e.IdUnidad).ValueGeneratedNever();
-            entity.Property(e => e.Udescri)
-                .HasMaxLength(200)
-                .IsUnicode(false)
-                .HasColumnName("UDescri");
-            entity.Property(e => e.Uestado).HasColumnName("UEstado");
-            entity.Property(e => e.Unombre)
-                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("UNombre");
         });

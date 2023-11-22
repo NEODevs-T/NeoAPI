@@ -15,5 +15,5 @@ public partial class BloqRang
 
     public virtual Bloque IdBloqueNavigation { get; set; } = null!;
 
-    public virtual Rago IdRangoNavigation { get; set; } = null!;
+    public virtual Rango IdRangoNavigation { get; set; } = null!;
 }

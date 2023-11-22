@@ -27,5 +27,5 @@ public partial class Master
 
     public virtual Pai IdPaisNavigation { get; set; } = null!;
 
-    public virtual ICollection<Rago> Ragos { get; set; } = new List<Rago>();
+    public virtual ICollection<Rango> Rangos { get; set; } = new List<Rango>();
 }
