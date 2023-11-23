@@ -25,7 +25,7 @@ public partial class Variable
 
     public bool VisObser { get; set; }
 
-    public DateOnly VfechaCrea { get; set; }
+    public DateTime VfechaCrea { get; set; }
 
     public bool Vestado { get; set; }
 

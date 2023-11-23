@@ -23,9 +23,9 @@ public partial class Rango
 
     public double RlimMax { get; set; }
 
-    public int Rorden { get; set; }
+    public int? Rorden { get; set; }
 
-    public DateOnly RfechaCrea { get; set; }
+    public DateTime RfechaCrea { get; set; }
 
     public bool Ractivo { get; set; }
 

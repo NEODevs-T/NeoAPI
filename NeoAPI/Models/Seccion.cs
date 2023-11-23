@@ -11,7 +11,7 @@ public partial class Seccion
 
     public string? Sdescri { get; set; }
 
-    public DateOnly SfechaCrea { get; set; }
+    public DateTime SfechaCrea { get; set; }
 
     public bool Sestado { get; set; }
 

@@ -17,7 +17,7 @@ public partial class InfoAse
 
     public string? Iaobser { get; set; }
 
-    public DateOnly IafechCrea { get; set; }
+    public DateTime? IafechCrea { get; set; }
 
     public virtual ICollection<Asentum> Asenta { get; set; } = new List<Asentum>();
 

@@ -11,7 +11,7 @@ public partial class Unidad
 
     public string? Udescri { get; set; }
 
-    public DateOnly UfechaCrea { get; set; }
+    public DateTime UfechaCrea { get; set; }
 
     public bool Uestado { get; set; }
 
