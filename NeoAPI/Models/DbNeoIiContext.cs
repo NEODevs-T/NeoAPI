@@ -62,11 +62,6 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<Unidad> Unidads { get; set; }
 
     public virtual DbSet<Variable> Variables { get; set; }
-
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=10.20.1.60\\DESARROLLO;Initial Catalog=DbNeoII;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncuesta;Password=Enc2022**Ing");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Asentum>(entity =>
@@ -132,14 +127,17 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Categori", "ase");
 
+            entity.Property(e => e.Ccodigo)
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .HasColumnName("CCodigo");
             entity.Property(e => e.Cdescri)
                 .HasMaxLength(300)
                 .IsUnicode(false)
                 .HasColumnName("CDescri");
             entity.Property(e => e.Cesta).HasColumnName("CEsta");
             entity.Property(e => e.CfechaCrea)
-                .HasMaxLength(10)
-                .IsFixedLength()
+                .HasColumnType("datetime")
                 .HasColumnName("CFechaCrea");
             entity.Property(e => e.Cnombre)
                 .HasMaxLength(100)
@@ -314,7 +312,9 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("InfoAse", "ase");
 
-            entity.Property(e => e.IafechCrea).HasColumnName("IAFechCrea");
+            entity.Property(e => e.IafechCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("IAFechCrea");
             entity.Property(e => e.Iaficha)
                 .HasMaxLength(5)
                 .IsUnicode(false)
@@ -461,7 +461,9 @@ public partial class DbNeoIiContext : DbContext
             entity.ToTable("Rango", "ase");
 
             entity.Property(e => e.Ractivo).HasColumnName("RActivo");
-            entity.Property(e => e.RfechaCrea).HasColumnName("RFechaCrea");
+            entity.Property(e => e.RfechaCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("RFechaCrea");
             entity.Property(e => e.RfechaDesa).HasColumnName("RFechaDesa");
             entity.Property(e => e.RlimMax).HasColumnName("RLimMax");
             entity.Property(e => e.RlimMin).HasColumnName("RLimMin");
@@ -477,17 +479,17 @@ public partial class DbNeoIiContext : DbContext
             entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.Rangos)
                 .HasForeignKey(d => d.IdMaster)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Rago_Master");
+                .HasConstraintName("FK_Rango_Master");
 
             entity.HasOne(d => d.IdProductoNavigation).WithMany(p => p.Rangos)
                 .HasForeignKey(d => d.IdProducto)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Rago_Producto");
+                .HasConstraintName("FK_Rango_Producto");
 
             entity.HasOne(d => d.IdVariableNavigation).WithMany(p => p.Rangos)
                 .HasForeignKey(d => d.IdVariable)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_Rago_Variable");
+                .HasConstraintName("FK_Rango_Variable");
         });
 
         modelBuilder.Entity<Seccion>(entity =>
@@ -501,7 +503,9 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("SDescri");
             entity.Property(e => e.Sestado).HasColumnName("SEstado");
-            entity.Property(e => e.SfechaCrea).HasColumnName("SFechaCrea");
+            entity.Property(e => e.SfechaCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("SFechaCrea");
             entity.Property(e => e.Snombre)
                 .HasMaxLength(100)
                 .IsUnicode(false)
@@ -559,7 +563,9 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("UDescri");
             entity.Property(e => e.Uestado).HasColumnName("UEstado");
-            entity.Property(e => e.UfechaCrea).HasColumnName("UFechaCrea");
+            entity.Property(e => e.UfechaCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("UFechaCrea");
             entity.Property(e => e.Unombre)
                 .HasMaxLength(100)
                 .IsUnicode(false)
@@ -577,7 +583,9 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("VDescri");
             entity.Property(e => e.Vestado).HasColumnName("VEstado");
-            entity.Property(e => e.VfechaCrea).HasColumnName("VFechaCrea");
+            entity.Property(e => e.VfechaCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("VFechaCrea");
             entity.Property(e => e.VisObser).HasColumnName("VIsObser");
             entity.Property(e => e.Vnombre)
                 .HasMaxLength(100)
