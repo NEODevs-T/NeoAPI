@@ -107,24 +107,45 @@ namespace NeoAPI.Controllers.Asentamientos
 
         //Todo: Metodo de actualizacion
 
-        // [HttpPut("UpdateAsentamientosDelDia")]
-        // public async Task<IActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientos asentamientos){
-        //     InfoAse? data;
+        [HttpPut("UpdateAsentamientosDelDia")]
+        public async Task<IActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientos asentamientos){
+            InfoAse? data;
+            bool correcto;
+
+            if (idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
+            {
+                return BadRequest();
+            }
+
+            data = await _context.InfoAses.Where(i => i.IdInfoAse == idInforme).AsNoTracking().FirstOrDefaultAsync();
+
+            if(data == null){
+                return NotFound();
+            }
+
+            foreach (Asentum item in asentamientos.Asentamientos)
+            {
+                item.IdInfoAseNavigation = asentamientos.InformaDeAsentamientos;
+                _context.Entry(item).State = EntityState.Modified;
+            }
+
+            try
+            {
+                correcto = await _context.SaveChangesAsync() > 0;
+
+                if(!correcto){
+                    return  BadRequest();
+                }
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                return NotFound();
+            }
+            return NoContent();
+        }
 
 
-        //     if (idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
-        //     {
-        //         return BadRequest();
-        //     }
-
-        //     data = await _context.InfoAses.Where(i => i.IdInfoAse == idInforme).AsNoTracking().FirstOrDefaultAsync();
-
-        //     if(data == null){
-        //         return NotFound();
-        //     }
-
-        // }
-
+        //TODO: Pendiente
         [HttpPost("AddOrUpdateAsentamientosDelDia")]
         public async Task<bool> AddOrUpdateAsentamientosDelDia([FromQuery] InformeConAsentamientos asentamientos,[FromQuery] Dictionary<string,string> filtros){
             bool band;
@@ -142,8 +163,8 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
         
-        [HttpGet("GetAsentamientos")]
-        public async Task<List<ValoresDeAsentamientosV>?> GetAsentamientos([FromQuery] Dictionary<string,string> filtros){
+        [HttpGet("GetAsentamientosViews")]
+        public async Task<List<ValoresDeAsentamientosV>?> GetAsentamientosViews([FromQuery] Dictionary<string,string> filtros){
             InfoAse? informe = new InfoAse();
             List<ValoresDeAsentamientosV>? valores = new List<ValoresDeAsentamientosV>();
             informe = await this._context.InfoAses.Where(i => 
