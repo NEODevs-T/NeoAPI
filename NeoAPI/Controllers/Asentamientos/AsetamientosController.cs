@@ -7,8 +7,9 @@ using NeoAPI.DTOs.Asentamientos;
 
 namespace NeoAPI.Controllers.Asentamientos
 {
+    //Todo: cambiar a las salidas de codigos de api
     [ApiController]
-    [Route("[controller]")]
+    [Route("api/[controller]")]
 
     public class AsentamientosController : ControllerBase
     {
@@ -102,10 +103,52 @@ namespace NeoAPI.Controllers.Asentamientos
             return await _context.SaveChangesAsync() > 0;            
         }
 
-        [HttpGet("GetIdHorarios")]
-        public System.Collections.ObjectModel.ReadOnlyCollection<System.TimeZoneInfo> GetIdHorarios(){
-            return TimeZoneInfo.GetSystemTimeZones();         
+        //Todo: Metodo de actualizacion
+
+        // [HttpPut("UpdateAsentamientosDelDia")]
+        // public async Task<IActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientos asentamientos){
+        //     InfoAse? data;
+
+
+        //     if (idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
+        //     {
+        //         return BadRequest();
+        //     }
+
+        //     data = await _context.InfoAses.Where(i => i.IdInfoAse == idInforme).AsNoTracking().FirstOrDefaultAsync();
+
+        //     if(data == null){
+        //         return NotFound();
+        //     }
+
+        // }
+
+        [HttpPost("AddOrUpdateAsentamientosDelDia")]
+        public async Task<bool> AddOrUpdateAsentamientosDelDia([FromQuery] InformeConAsentamientos asentamientos,[FromQuery] Dictionary<string,string> filtros){
+            bool band;
+            bool estado = false;
+
+            band = await this.GetIsAsentamientoHoy(filtros);
+
+            if (band){
+
+            }else{
+                estado = await this.AddAsentamientosDelDia(asentamientos);
+            }
+
+            return estado;
         }
+
+        //TODO: Terminar con una View
+        // [HttpPost("GetAsentamientos")]
+        // public async Task<InformeConAsentamientos> GetAsentamientos([FromQuery] Dictionary<string,string> filtros){
+        //     InformeConAsentamientos obj = new InformeConAsentamientos();
+        //     obj.InformaDeAsentamientos = await this._context.InfoAses.Where(i => 
+        //                                 i.Iaturno == filtros["Turno"] &&
+        //                                 i.Iagrupo == filtros["Grupo"] && 
+        //                                 i.IafechCrea.Value.Date == DateTime.Parse(filtros["Fecha"]).Date
+        //                                 ).Include(i => i.Asenta).ThenInclude(a => a.id).AsNoTracking().FirstOrDefaultAsync();
+        // }
 
         [HttpGet("GetEjemploDataAsentamientos")]
         public InformeConAsentamientos GetEjemploDataAsentamientos(){

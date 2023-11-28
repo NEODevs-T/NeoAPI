@@ -7,8 +7,8 @@ namespace NeoAPI.DTOs.Asentamientos
 {
     public class InformeConAsentamientos
     {
-        public Models.InfoAse InformaDeAsentamientos { get; set; } = null!;
-        public List<Models.Asentum> Asentamientos { get; set; } = null!;
+        public Models.InfoAse? InformaDeAsentamientos { get; set; } = null!;
+        public List<Models.Asentum>? Asentamientos { get; set; } = null!;
 
     }
 }
