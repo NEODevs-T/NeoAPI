@@ -105,14 +105,14 @@ namespace NeoAPI.Controllers.Asentamientos
             return await _context.SaveChangesAsync() > 0;            
         }
 
-        //Todo: Metodo de actualizacion
+        //Todo: Pendiente probar
 
         [HttpPut("UpdateAsentamientosDelDia")]
         public async Task<IActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientos asentamientos){
             InfoAse? data;
             bool correcto;
 
-            if (idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
+            if (asentamientos.InformaDeAsentamientos == null || idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
             {
                 return BadRequest();
             }
@@ -123,7 +123,7 @@ namespace NeoAPI.Controllers.Asentamientos
                 return NotFound();
             }
 
-            foreach (Asentum item in asentamientos.Asentamientos)
+            foreach (Asentum item in asentamientos.Asentamientos ?? new List<Asentum>())
             {
                 item.IdInfoAseNavigation = asentamientos.InformaDeAsentamientos;
                 _context.Entry(item).State = EntityState.Modified;
@@ -154,7 +154,7 @@ namespace NeoAPI.Controllers.Asentamientos
             band = await this.GetIsAsentamientoHoy(filtros);
 
             if (band){
-
+                estado = await this.UpdateAsentamientosDelDia(asentamientos.InformaDeAsentamientos.IdInfoAse,asentamientos);
             }else{
                 estado = await this.AddAsentamientosDelDia(asentamientos);
             }
