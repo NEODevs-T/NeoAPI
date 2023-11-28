@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using NeoAPI.Models;
+using NeoAPI.ModelsViews;
 using NeoAPI.DTOs.Asentamientos;
 
 namespace NeoAPI.Controllers.Asentamientos
@@ -14,10 +15,12 @@ namespace NeoAPI.Controllers.Asentamientos
     public class AsentamientosController : ControllerBase
     {
         private readonly DbNeoIiContext _context;
+        private readonly ViewsContext _views;
 
-        public AsentamientosController(DbNeoIiContext context)
+        public AsentamientosController(DbNeoIiContext context,ViewsContext views)
         {
             _context = context;
+            _views = views;
         }
         
 
@@ -87,7 +90,6 @@ namespace NeoAPI.Controllers.Asentamientos
             InfoAse informeDeAsentamientos = asentamientos.InformaDeAsentamientos;
             List<Asentum> listaAsentamientos = asentamientos.Asentamientos;
 
-
             //TODO: Pendiente cambio de horario segun pais
             //var info = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time"); 
             //DateTimeOffset localServerTime = DateTimeOffset.Now;
@@ -139,16 +141,21 @@ namespace NeoAPI.Controllers.Asentamientos
             return estado;
         }
 
-        //TODO: Terminar con una View
-        // [HttpPost("GetAsentamientos")]
-        // public async Task<InformeConAsentamientos> GetAsentamientos([FromQuery] Dictionary<string,string> filtros){
-        //     InformeConAsentamientos obj = new InformeConAsentamientos();
-        //     obj.InformaDeAsentamientos = await this._context.InfoAses.Where(i => 
-        //                                 i.Iaturno == filtros["Turno"] &&
-        //                                 i.Iagrupo == filtros["Grupo"] && 
-        //                                 i.IafechCrea.Value.Date == DateTime.Parse(filtros["Fecha"]).Date
-        //                                 ).Include(i => i.Asenta).ThenInclude(a => a.id).AsNoTracking().FirstOrDefaultAsync();
-        // }
+        
+        [HttpGet("GetAsentamientos")]
+        public async Task<List<ValoresDeAsentamientosV>?> GetAsentamientos([FromQuery] Dictionary<string,string> filtros){
+            InfoAse? informe = new InfoAse();
+            List<ValoresDeAsentamientosV>? valores = new List<ValoresDeAsentamientosV>();
+            informe = await this._context.InfoAses.Where(i => 
+                                        i.Iaturno == filtros["Turno"] &&
+                                        i.Iagrupo == filtros["Grupo"] && 
+                                        i.IafechCrea.Value.Date == DateTime.Parse(filtros["Fecha"]).Date
+                                        ).AsNoTracking().FirstOrDefaultAsync();
+            if(informe != null){
+                valores = await this._views.ValoresDeAsentamientosVs.Where(v => v.IdInfoAse == informe.IdInfoAse).AsNoTracking().ToListAsync();
+            }
+            return valores;
+        }
 
         [HttpGet("GetEjemploDataAsentamientos")]
         public InformeConAsentamientos GetEjemploDataAsentamientos(){
