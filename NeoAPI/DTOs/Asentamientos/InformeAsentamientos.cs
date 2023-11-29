@@ -9,6 +9,5 @@ namespace NeoAPI.DTOs.Asentamientos
     {
         public Models.InfoAse? InformaDeAsentamientos { get; set; } = null!;
         public List<Models.Asentum>? Asentamientos { get; set; } = null!;
-
     }
 }

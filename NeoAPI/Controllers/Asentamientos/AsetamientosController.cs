@@ -13,7 +13,6 @@ namespace NeoAPI.Controllers.Asentamientos
 
     public class AsentamientosController : ControllerBase
     {
-        //TODO: cambiar a las salidas de codigos de api
         private readonly DbNeoIiContext _context;
         private readonly ViewsContext _views;
 
@@ -54,7 +53,7 @@ namespace NeoAPI.Controllers.Asentamientos
                                 x.Ractivo == true)
                                 .AsNoTracking().ToListAsync();
 
-            if(listaVariables == null){
+            if(listaVariables.Count == 0){
                 return NotFound();
             }
             return listaVariables;
@@ -128,7 +127,7 @@ namespace NeoAPI.Controllers.Asentamientos
 
             foreach (Asentum item in asentamientos.Asentamientos ?? new List<Asentum>())
             {
-                item.IdInfoAseNavigation = asentamientos.InformaDeAsentamientos;
+                //item.IdInfoAseNavigation = asentamientos.InformaDeAsentamientos;
                 _context.Entry(item).State = EntityState.Modified;
             }
 
@@ -148,7 +147,7 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
 
-        
+        //TODO: REVISION
         [HttpPost("AddOrUpdateAsentamientosDelDia")]
         public async Task<ActionResult<bool>> AddOrUpdateAsentamientosDelDia([FromQuery] InformeConAsentamientos asentamientos,[FromQuery] Dictionary<string,string> filtros){
             ActionResult<bool> band = false;
