@@ -8,12 +8,12 @@ using NeoAPI.DTOs.Asentamientos;
 
 namespace NeoAPI.Controllers.Asentamientos
 {
-    //Todo: cambiar a las salidas de codigos de api
     [ApiController]
     [Route("api/[controller]")]
 
     public class AsentamientosController : ControllerBase
     {
+        //TODO: cambiar a las salidas de codigos de api
         private readonly DbNeoIiContext _context;
         private readonly ViewsContext _views;
 
@@ -27,7 +27,7 @@ namespace NeoAPI.Controllers.Asentamientos
         [HttpGet("GetRangoDeControl")]
         public async Task<ActionResult<List<Rango>>> GetRangoDeControl([FromQuery] Dictionary<string,int> filtros)
         {
-            List<Rango> listaVariables;
+            List<Rango>? listaVariables = null; 
             int producto = 0;
             int master = 0;
             int tipo = 0;
@@ -54,11 +54,14 @@ namespace NeoAPI.Controllers.Asentamientos
                                 x.Ractivo == true)
                                 .AsNoTracking().ToListAsync();
 
+            if(listaVariables == null){
+                return NotFound();
+            }
             return listaVariables;
         }
 
         [HttpGet("GetIsAsentamientoHoy")]
-        public async Task<bool> GetIsAsentamientoHoy([FromQuery] Dictionary<string,string> filtros){
+        public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] Dictionary<string,string> filtros){
             bool ok = false;
             InfoAse? oka;
             Asentum? primerAsenta;
@@ -86,7 +89,7 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
         [HttpPost("AddAsentamientosDelDia")]
-        public async Task<bool> AddAsentamientosDelDia(InformeConAsentamientos asentamientos){
+        public async Task<ActionResult<bool>> AddAsentamientosDelDia(InformeConAsentamientos asentamientos){
             InfoAse informeDeAsentamientos = asentamientos.InformaDeAsentamientos;
             List<Asentum> listaAsentamientos = asentamientos.Asentamientos;
 
@@ -108,7 +111,7 @@ namespace NeoAPI.Controllers.Asentamientos
         //Todo: Pendiente probar
 
         [HttpPut("UpdateAsentamientosDelDia")]
-        public async Task<IActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientos asentamientos){
+        public async Task<ActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientos asentamientos){
             InfoAse? data;
             bool correcto;
 
@@ -145,16 +148,16 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
 
-        //TODO: Pendiente
+        
         [HttpPost("AddOrUpdateAsentamientosDelDia")]
-        public async Task<bool> AddOrUpdateAsentamientosDelDia([FromQuery] InformeConAsentamientos asentamientos,[FromQuery] Dictionary<string,string> filtros){
-            bool band;
-            bool estado = false;
+        public async Task<ActionResult<bool>> AddOrUpdateAsentamientosDelDia([FromQuery] InformeConAsentamientos asentamientos,[FromQuery] Dictionary<string,string> filtros){
+            ActionResult<bool> band = false;
+            ActionResult<bool> estado = false;
 
             band = await this.GetIsAsentamientoHoy(filtros);
 
-            if (band){
-                estado = await this.UpdateAsentamientosDelDia(asentamientos.InformaDeAsentamientos.IdInfoAse,asentamientos);
+            if (band.Value == true){
+                estado = await this.UpdateAsentamientosDelDia(asentamientos.InformaDeAsentamientos.IdInfoAse,asentamientos) == NoContent();
             }else{
                 estado = await this.AddAsentamientosDelDia(asentamientos);
             }
@@ -164,7 +167,7 @@ namespace NeoAPI.Controllers.Asentamientos
 
         
         [HttpGet("GetAsentamientosViews")]
-        public async Task<List<ValoresDeAsentamientosV>?> GetAsentamientosViews([FromQuery] Dictionary<string,string> filtros){
+        public async Task<ActionResult<List<ValoresDeAsentamientosV>>> GetAsentamientosViews([FromQuery] Dictionary<string,string> filtros){
             InfoAse? informe = new InfoAse();
             List<ValoresDeAsentamientosV>? valores = new List<ValoresDeAsentamientosV>();
             informe = await this._context.InfoAses.Where(i => 
@@ -174,6 +177,10 @@ namespace NeoAPI.Controllers.Asentamientos
                                         ).AsNoTracking().FirstOrDefaultAsync();
             if(informe != null){
                 valores = await this._views.ValoresDeAsentamientosVs.Where(v => v.IdInfoAse == informe.IdInfoAse).AsNoTracking().ToListAsync();
+            }
+
+            if(valores == null || informe == null){
+                return NotFound();
             }
             return valores;
         }

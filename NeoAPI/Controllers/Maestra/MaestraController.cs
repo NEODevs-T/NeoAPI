@@ -1,15 +1,15 @@
 using Microsoft.AspNetCore.Mvc;
 using NeoAPI.Models;
 
-namespace NeoAPI.Controllers.Master
+namespace NeoAPI.Controllers.Maestra
 {
     [ApiController]
     [Route("api/[controller]")]
-    public class AsentamientosController : ControllerBase
+    public class MaestraController : ControllerBase
     {
         private readonly DbNeoIiContext _context;
 
-        public AsentamientosController(DbNeoIiContext context)
+        public MaestraController(DbNeoIiContext context)
         {
             _context = context;
         }
