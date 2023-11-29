@@ -2,10 +2,10 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeoAPI.Models;
-using static System.Runtime.InteropServices.JavaScript.JSType;
+//using static System.Runtime.InteropServices.JavaScript.JSType;
 using NeoAPI.DTOs.Asentamientos;
 using AutoMapper;
-using System.ComponentModel;
+//using System.ComponentModel;
 
 namespace NeoAPI.Controllers.Asentamientos
 {
@@ -176,7 +176,7 @@ namespace NeoAPI.Controllers.Asentamientos
 
         //PUTS
 
-        //modifica un  objetos o inserta nuevoo
+        //modifica un  objetos o inserta nuevo
         [HttpPut("UpdateCategoria")]
         public async Task<ActionResult<string>> UpdateCategoria(CategoriaDTO categoria)
         {
