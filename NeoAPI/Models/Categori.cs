@@ -1,4 +1,5 @@
-﻿using System;
+﻿using NeoAPI.DTOs.Asentamientos;
+using System;
 using System.Collections.Generic;
 
 namespace NeoAPI.Models;
@@ -18,4 +19,9 @@ public partial class Categori
     public bool Cesta { get; set; }
 
     public virtual ICollection<CorteDi> CorteDis { get; set; } = new List<CorteDi>();
+
+    //public static implicit operator Categori(CategoriaDTO v)
+    //{
+    //    throw new NotImplementedException();
+    //}
 }
