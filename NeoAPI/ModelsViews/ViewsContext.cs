@@ -1,0 +1,266 @@
+﻿using System;
+using System.Collections.Generic;
+using Microsoft.EntityFrameworkCore;
+
+namespace NeoAPI.ModelsViews;
+
+public partial class ViewsContext : DbContext
+{
+    public ViewsContext()
+    {
+    }
+
+    public ViewsContext(DbContextOptions<ViewsContext> options)
+        : base(options)
+    {
+    }
+
+    public virtual DbSet<AsentamientosFueraRangoV> AsentamientosFueraRangoVs { get; set; }
+
+    public virtual DbSet<MaestraV> MaestraVs { get; set; }
+
+    public virtual DbSet<RangoDeControlActivosV> RangoDeControlActivosVs { get; set; }
+
+    public virtual DbSet<ValoresDeAsentamientosV> ValoresDeAsentamientosVs { get; set; }
+
+    public virtual DbSet<VariablesAsentamientosV> VariablesAsentamientosVs { get; set; }
+
+    protected override void OnModelCreating(ModelBuilder modelBuilder)
+    {
+        modelBuilder.Entity<AsentamientosFueraRangoV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("AsentamientosFueraRango_V");
+
+            entity.Property(e => e.Activo).HasColumnName("ACTIVO");
+            entity.Property(e => e.Centro)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("CENTRO");
+            entity.Property(e => e.Division)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("DIVISION");
+            entity.Property(e => e.Empresa)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("EMPRESA");
+            entity.Property(e => e.Fecha)
+                .HasColumnType("datetime")
+                .HasColumnName("FECHA");
+            entity.Property(e => e.Ficha)
+                .HasMaxLength(5)
+                .IsUnicode(false)
+                .HasColumnName("FICHA");
+            entity.Property(e => e.FichaCorte)
+                .HasMaxLength(5)
+                .IsUnicode(false)
+                .HasColumnName("FICHA CORTE");
+            entity.Property(e => e.Grupo)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("GRUPO");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("LINEA");
+            entity.Property(e => e.Max).HasColumnName("MAX");
+            entity.Property(e => e.Min).HasColumnName("MIN");
+            entity.Property(e => e.Onservacion)
+                .HasMaxLength(300)
+                .IsUnicode(false)
+                .HasColumnName("ONSERVACION");
+            entity.Property(e => e.Pais)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("PAIS");
+            entity.Property(e => e.Turno)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("TURNO");
+            entity.Property(e => e.Unidad)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("UNIDAD");
+            entity.Property(e => e.Valor).HasColumnName("VALOR");
+            entity.Property(e => e.Variable)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("VARIABLE");
+        });
+
+        modelBuilder.Entity<MaestraV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Maestra_V");
+
+            entity.Property(e => e.Centro)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.División)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Empresa)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Linea)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Pais)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<RangoDeControlActivosV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("RangoDeControlActivos_V");
+
+            entity.Property(e => e.Centro)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Clasificación)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.División)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Empresa)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.EquipoDeMedición)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Equipo de medición");
+            entity.Property(e => e.FechaDeCreacionDelRango)
+                .HasColumnType("datetime")
+                .HasColumnName("Fecha de Creacion del Rango");
+            entity.Property(e => e.IsObservable).HasColumnName("Is observable");
+            entity.Property(e => e.LimiteMaximo).HasColumnName("Limite maximo");
+            entity.Property(e => e.LimiteMinimo).HasColumnName("Limite minimo");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.NombreDeLaVariable)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Nombre de la variable");
+            entity.Property(e => e.Pais)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Producto)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Sección)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Tipo)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.TipoDeProducto)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Producto");
+            entity.Property(e => e.Unidad)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<ValoresDeAsentamientosV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ValoresDeAsentamientos_V");
+
+            entity.Property(e => e.Centro)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Clasificación)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.División)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.Empresa)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.EquipoDeMedición)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Equipo de medición");
+            entity.Property(e => e.FechaDeCreacionDelRango)
+                .HasColumnType("datetime")
+                .HasColumnName("Fecha de Creacion del Rango");
+            entity.Property(e => e.IsObservable).HasColumnName("Is observable");
+            entity.Property(e => e.LimiteMaximo).HasColumnName("Limite maximo");
+            entity.Property(e => e.LimiteMinimo).HasColumnName("Limite minimo");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+            entity.Property(e => e.NombreDeLaVariable)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Nombre de la variable");
+            entity.Property(e => e.Pais)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Producto)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Sección)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Tipo)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.TipoDeProducto)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Producto");
+            entity.Property(e => e.Unidad)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<VariablesAsentamientosV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("VariablesAsentamientos_V");
+
+            entity.Property(e => e.Clasificación)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.DescripcionDeLaVariable)
+                .HasMaxLength(300)
+                .IsUnicode(false)
+                .HasColumnName("Descripcion de la variable");
+            entity.Property(e => e.EquipoDeMedición)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Equipo de medición");
+            entity.Property(e => e.FechaDeCreación).HasColumnName("Fecha de creación");
+            entity.Property(e => e.IsObservable).HasColumnName("Is observable");
+            entity.Property(e => e.NombreDeLaVariable)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Nombre de la variable");
+            entity.Property(e => e.Sección)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Tipo)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Unidad)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
+        OnModelCreatingPartial(modelBuilder);
+    }
+
+    partial void OnModelCreatingPartial(ModelBuilder modelBuilder);
+}

@@ -22,6 +22,11 @@ namespace NeoAPI.Controllers.Maestra
             _mapper = maper;
         }
 
+        [HttpGet("GetIdHorarios")]
+        public System.Collections.ObjectModel.ReadOnlyCollection<System.TimeZoneInfo> GetIdHorarios()
+        {
+            return TimeZoneInfo.GetSystemTimeZones();
+        }
 
         //Obtener Categorias para corte de discrepancias
         [HttpGet("MaestrasxEmpresas")]
@@ -34,14 +39,14 @@ namespace NeoAPI.Controllers.Maestra
                 .Include(c => c.IdDivisionNavigation)
                 .Include(c => c.IdLineaNavigation)
                 .AsNoTracking()
-                .Select(m=> new Master
+                .Select(m => new Master
                 {
-                    IdMaster=m.IdMaster,
-                    IdPaisNavigation=m.IdPaisNavigation,
-                    IdEmpresaNavigation=m.IdEmpresaNavigation,
-                    IdCentroNavigation=m.IdCentroNavigation,
-                    IdDivisionNavigation=m.IdDivisionNavigation,
-                    IdLineaNavigation=m.IdLineaNavigation,
+                    IdMaster = m.IdMaster,
+                    IdPaisNavigation = m.IdPaisNavigation,
+                    IdEmpresaNavigation = m.IdEmpresaNavigation,
+                    IdCentroNavigation = m.IdCentroNavigation,
+                    IdDivisionNavigation = m.IdDivisionNavigation,
+                    IdLineaNavigation = m.IdLineaNavigation,
                 })
                 .ToListAsync();
 
@@ -58,14 +63,11 @@ namespace NeoAPI.Controllers.Maestra
                 .Include(c => c.IdCentroNavigation)
                 .Include(c => c.IdDivisionNavigation)
                 .Include(c => c.IdLineaNavigation)
-                .Where(id=>id.IdMaster.Equals(idmaster))
+                .Where(id => id.IdMaster.Equals(idmaster))
                 .ToListAsync();
 
 
             return result;
         }
-
-
-
     }
 }

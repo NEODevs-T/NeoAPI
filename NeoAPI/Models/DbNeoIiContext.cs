@@ -62,8 +62,6 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<Unidad> Unidads { get; set; }
 
     public virtual DbSet<Variable> Variables { get; set; }
-
-   
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Asentum>(entity =>
