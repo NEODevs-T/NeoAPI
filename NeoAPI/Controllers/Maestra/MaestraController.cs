@@ -1,10 +1,14 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
+﻿using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using AutoMapper;
+using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models;
+using NeoAPI.ModelsViews;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
-namespace NeoAPI.Controllers.Maestra
+
+namespace NeoAPI.Controllers.Maestras
 {
     [AllowAnonymous]
     [Route("api/[controller]")]
@@ -15,11 +19,13 @@ namespace NeoAPI.Controllers.Maestra
 
         private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
+        private readonly ViewsContext _views;
 
-        public MaestraController(DbNeoIiContext _DbNeo, IMapper maper)
+        public MaestraController(DbNeoIiContext DbNeo, IMapper maper,ViewsContext views)
         {
-            _context = _DbNeo;
+            _context = DbNeo;
             _mapper = maper;
+            _views = views;
         }
 
         [HttpGet("GetIdHorarios")]
@@ -28,46 +34,73 @@ namespace NeoAPI.Controllers.Maestra
             return TimeZoneInfo.GetSystemTimeZones();
         }
 
-        //Obtener Categorias para corte de discrepancias
-        [HttpGet("MaestrasxEmpresas")]
-        public async Task<ActionResult<List<Master>>> GetMaestrasGeneral()
+        [HttpGet("GetPaises")]
+        public async Task<ActionResult<List<Pai>>> GetPaises()
         {
-            var result = await _context.Masters
-                .Include(c => c.IdPaisNavigation)
-                .Include(c => c.IdEmpresaNavigation)
-                .Include(c => c.IdCentroNavigation)
-                .Include(c => c.IdDivisionNavigation)
-                .Include(c => c.IdLineaNavigation)
-                .AsNoTracking()
-                .Select(m => new Master
-                {
-                    IdMaster = m.IdMaster,
-                    IdPaisNavigation = m.IdPaisNavigation,
-                    IdEmpresaNavigation = m.IdEmpresaNavigation,
-                    IdCentroNavigation = m.IdCentroNavigation,
-                    IdDivisionNavigation = m.IdDivisionNavigation,
-                    IdLineaNavigation = m.IdLineaNavigation,
-                })
-                .ToListAsync();
-
-
-            return result;
+            try{
+                return await this._context.Pais.Where(p => p.Pestado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
         }
-        //Obtener Categorias para corte de discrepancias
-        [HttpGet("MaestraId")]//TODO: Crear DTOs para maestra
-        public async Task<ActionResult<List<Master>>> GetMaestrasId(int idmaster)
+        [HttpGet("GetEmpresas")]
+        public async Task<ActionResult<List<EmpresasV>>> GetEmpresas(int idPais)
         {
-            var result = await _context.Masters
-                .Include(c => c.IdPaisNavigation)
-                .Include(c => c.IdEmpresaNavigation)
-                .Include(c => c.IdCentroNavigation)
-                .Include(c => c.IdDivisionNavigation)
-                .Include(c => c.IdLineaNavigation)
-                .Where(id => id.IdMaster.Equals(idmaster))
-                .ToListAsync();
+            try{
+                return await this._views.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+
+        [HttpGet("GetCentros")]
+        public async Task<ActionResult<List<CentrosV>>> GetCentros(int idEmpresa)
+        {
+            try{
+                return await this._views.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+
+        [HttpGet("GetDivisiones")]
+        public async Task<ActionResult<List<DivisionesV>>> GetDivisiones(int idCentro)
+        {
+            try{
+                return await this._views.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
 
 
-            return result;
+        [HttpGet("GetLineas")]
+        public async Task<ActionResult<List<LineaV>>> GetLineas(int idDivision)
+        {
+            try{
+                return await this._views.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+
+        [HttpGet("GetMaestraPorFiltros")]
+        public async Task<ActionResult<List<Master>>> GetMaestraPorFiltros([FromQuery] MaestraDTO maestra)
+        {
+            try{
+                if(maestra.idDivision != 0){
+                    return await this._context.Masters.Where(m => m.IdDivision == maestra.idDivision).Include(m => m.IdLineaNavigation).ToListAsync();
+                }else if(maestra.idCentro != 0){
+                    return await this._context.Masters.Where(m => m.IdCentro == maestra.idCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
+                }else if(maestra.idEmpresa != 0){
+                    return await this._context.Masters.Where(m => m.IdEmpresa == maestra.idEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
+                }else if(maestra.idPais != 0){
+                    return await this._context.Masters.Where(m => m.IdPais == maestra.idPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
+                }
+                return BadRequest();
+            }catch{
+                return NotFound();
+            }
         }
     }
 }

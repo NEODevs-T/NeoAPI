@@ -17,6 +17,14 @@ public partial class ViewsContext : DbContext
 
     public virtual DbSet<AsentamientosFueraRangoV> AsentamientosFueraRangoVs { get; set; }
 
+    public virtual DbSet<CentrosV> CentrosVs { get; set; }
+
+    public virtual DbSet<DivisionesV> DivisionesVs { get; set; }
+
+    public virtual DbSet<EmpresasV> EmpresasVs { get; set; }
+
+    public virtual DbSet<LineaV> LineaVs { get; set; }
+
     public virtual DbSet<MaestraV> MaestraVs { get; set; }
 
     public virtual DbSet<RangoDeControlActivosV> RangoDeControlActivosVs { get; set; }
@@ -24,6 +32,10 @@ public partial class ViewsContext : DbContext
     public virtual DbSet<ValoresDeAsentamientosV> ValoresDeAsentamientosVs { get; set; }
 
     public virtual DbSet<VariablesAsentamientosV> VariablesAsentamientosVs { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=10.20.1.60\\DESARROLLO;Initial Catalog=DbNeoII;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncNeo;Password=L3C7U3A2023*");
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -88,6 +100,50 @@ public partial class ViewsContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("VARIABLE");
+        });
+
+        modelBuilder.Entity<CentrosV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Centros_V");
+
+            entity.Property(e => e.Centro)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<DivisionesV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Divisiones_V");
+
+            entity.Property(e => e.División)
+                .HasMaxLength(500)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<EmpresasV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Empresas_V");
+
+            entity.Property(e => e.Empresa)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<LineaV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Linea_V");
+
+            entity.Property(e => e.Linea)
+                .HasMaxLength(500)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<MaestraV>(entity =>
