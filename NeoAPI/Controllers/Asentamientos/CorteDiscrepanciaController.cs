@@ -35,17 +35,17 @@ namespace NeoAPI.Controllers.Asentamientos
         {
             //retorna fuera de rango de un centro
             var result = await _context.Asenta
-           .AsNoTracking()
-           .Include(r => r.IdRangoNavigation)
-           .Include(r => r.IdRangoNavigation.IdVariableNavigation)
-           .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation)
-           .Include(r => r.IdRangoNavigation.IdProductoNavigation)
-           .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+            .AsNoTracking()
+            .Include(r => r.IdRangoNavigation)
+            .Include(r => r.IdRangoNavigation.IdVariableNavigation)
+            .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation)
+            .Include(r => r.IdRangoNavigation.IdProductoNavigation)
+            .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
             && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
             && f.AisActivo == true
             && f.IdInfoAseNavigation.Iaturno == turno
             && f.IdRangoNavigation.IdMasterNavigation.IdCentro == idfiltroarea)
-           .ToListAsync();
+            .ToListAsync();
 
             return Ok(result);
         }
@@ -56,13 +56,13 @@ namespace NeoAPI.Controllers.Asentamientos
         public async Task<ActionResult<bool>> GetAnyAsentamientoFueraRango()
         {
             var result = await _context.Asenta
-           .AsNoTracking()
-           .Include(r => r.IdRangoNavigation)
-           .Include(c => c.CorteDis)
-           .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax
-           || f.Avalor < f.IdRangoNavigation.Rmin)
-           && (f.IdInfoAseNavigation.IafechCrea.Date == DateTime.Now.Date && f.AisActivo == true))
-           .AnyAsync();
+            .AsNoTracking()
+            .Include(r => r.IdRangoNavigation)
+            .Include(c => c.CorteDis)
+            .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax
+            || f.Avalor < f.IdRangoNavigation.Rmin)
+            && (f.IdInfoAseNavigation.IafechCrea.Date == DateTime.Now.Date && f.AisActivo == true))
+            .AnyAsync();
 
             return Ok(result);
         }
@@ -108,7 +108,7 @@ namespace NeoAPI.Controllers.Asentamientos
                 try
                 {
                     bool existe = _context.Categoris.Any(c => c.Ccodigo == categori.Ccodigo);
-                    // Si no existe el codigo, insertar la nueva categoría
+                    // Si no existe el codigo, insertar la nueva categorï¿½a
                     if (!existe)
                     {
                         var entity = _mapper.Map<Categori>(categori);
@@ -118,8 +118,8 @@ namespace NeoAPI.Controllers.Asentamientos
                     }
                     else
                     {
-                        // Mostrar un mensaje de error o hacer otra acción
-                        return BadRequest("Código ya registrado");
+                        // Mostrar un mensaje de error o hacer otra acciï¿½n
+                        return BadRequest("Cï¿½digo ya registrado");
                     }
                 }
                 catch (Exception ex)
@@ -155,7 +155,7 @@ namespace NeoAPI.Controllers.Asentamientos
             try
             {
 
-                var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno); // Si no existe el codigo, insertar la nueva categoría
+                var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno); // Si no existe el codigo, insertar la nueva categorï¿½a
                 if (corte == null)
                 {
                     var lista = _mapper.Map<List<CorteDi>>(cortedis);
