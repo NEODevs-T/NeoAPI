@@ -27,7 +27,11 @@ public partial class ViewsContext : DbContext
 
     public virtual DbSet<MaestraV> MaestraVs { get; set; }
 
+    public virtual DbSet<ProductosV> ProductosVs { get; set; }
+
     public virtual DbSet<RangoDeControlActivosV> RangoDeControlActivosVs { get; set; }
+
+    public virtual DbSet<SeccionesV> SeccionesVs { get; set; }
 
     public virtual DbSet<ValoresDeAsentamientosV> ValoresDeAsentamientosVs { get; set; }
 
@@ -169,6 +173,24 @@ public partial class ViewsContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<ProductosV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Productos_V");
+
+            entity.Property(e => e.Codigo)
+                .HasMaxLength(9)
+                .IsUnicode(false);
+            entity.Property(e => e.Producto)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.TipoDeProducto)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Producto");
+        });
+
         modelBuilder.Entity<RangoDeControlActivosV>(entity =>
         {
             entity
@@ -221,6 +243,17 @@ public partial class ViewsContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("Tipo de Producto");
             entity.Property(e => e.Unidad)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<SeccionesV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Secciones_V");
+
+            entity.Property(e => e.Seccion)
                 .HasMaxLength(100)
                 .IsUnicode(false);
         });

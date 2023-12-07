@@ -21,5 +21,25 @@ namespace NeoAPI.Controllers.RangoControl
             _context = context;
             _views = views;
         }
+
+        [HttpGet("GetProductosPorLinea")]
+        public async Task<ActionResult<List<ProductosV>>> GetProductosPorLinea(int idLinea)
+        {
+            try{
+                return await this._views.ProductosVs.Where(p => p.IdLinea == idLinea).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+
+        [HttpGet("GetSeccionesPorLinea")]
+        public async Task<ActionResult<List<SeccionesV>>> GetSeccionesPorLinea(int idLinea)
+        {
+            try{
+                return await this._views.SeccionesVs.Where(s => s.IdLinea == idLinea).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
     }
 }

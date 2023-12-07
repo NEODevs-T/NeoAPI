@@ -84,6 +84,16 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
+        [HttpGet("GetLineaPorId")]
+        public async Task<ActionResult<LineaV>> GetLineaPorId(int idLineas)
+        {
+            try{
+                return await this._views.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
+            }catch{
+                return NotFound();
+            }
+        }
+
         [HttpGet("GetMaestraPorFiltros")]
         public async Task<ActionResult<List<Master>>> GetMaestraPorFiltros([FromQuery] MaestraDTO maestra)
         {
