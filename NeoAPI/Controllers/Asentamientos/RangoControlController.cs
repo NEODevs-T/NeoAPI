@@ -43,27 +43,14 @@ namespace NeoAPI.Controllers.RangoControl
         }
 
         [HttpGet("GetRangoDeControl")]
-        public async Task<ActionResult<List<Rango>>> GetRangoDeControl([FromQuery] Dictionary<string,int> filtros)
+        public async Task<ActionResult<List<Rango>>> GetRangoDeControl([FromQuery] FiltrosRangoControlDTO filtros)
         {
             List<Rango>? listaVariables = null; 
-            int producto = 0;
-            int master = 0;
-            int tipo = 0;
-            int seccion = 0;
+            int producto = filtros.producto;
+            int master = filtros.master;
+            int tipo = filtros.tipo;
+            int seccion = filtros.seccion;
 
-            foreach (var item in filtros)
-            {
-                if(item.Key == "Producto"){
-                    producto = item.Value;
-                }else if(item.Key == "Master"){
-                    master = item.Value;
-                }else if(item.Key == "Tipo"){
-                    tipo = item.Value;
-                }else if(item.Key == "Seccion"){
-                    seccion = item.Value;
-                }
-            }
-            
             listaVariables = await this._context.Rangos.Where(
                                 x => x.IdProducto == producto && 
                                 x.IdMaster == master && 

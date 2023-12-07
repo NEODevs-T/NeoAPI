@@ -5,6 +5,7 @@ using System.Text.Json;
 using NeoAPI.Models;
 using NeoAPI.ModelsViews;
 using NeoAPI.DTOs.Asentamientos;
+using NeoAPI.DTOs.Maestra;
 
 namespace NeoAPI.Controllers.Asentamientos
 {
@@ -24,14 +25,14 @@ namespace NeoAPI.Controllers.Asentamientos
         
 
         [HttpGet("GetIsAsentamientoHoy")]
-        public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] Dictionary<string,string> filtros){
+        public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] FiltrosRangoControlDTO filtros,[FromQuery] FiltroGTDTO filtroGT){
             bool ok = false;
             InfoAse? oka;
             Asentum? primerAsenta;
 
             oka = await this._context.InfoAses.Where(i => 
-                                            i.Iaturno == filtros["Turno"] &&
-                                            i.Iagrupo == filtros["Grupo"] && 
+                                            i.Iaturno == filtroGT.turno &&
+                                            i.Iagrupo == filtroGT.grupo && 
                                             i.Asenta.FirstOrDefault() != null &&
                                             i.IafechCrea.Date == DateTime.Now.Date 
                                             ).AsNoTracking().FirstOrDefaultAsync();
@@ -39,10 +40,10 @@ namespace NeoAPI.Controllers.Asentamientos
 
                 primerAsenta = await this._context.Asenta.Where(a => 
                                                         a.IdInfoAse == oka.IdInfoAse &&
-                                                        a.IdRangoNavigation.IdVariableNavigation.IdSeccion == int.Parse(filtros["Seccion"]) &&
-                                                        a.IdRangoNavigation.IdVariableNavigation.IdTipoVar == int.Parse(filtros["TipoVar"]) &&
-                                                        a.IdRangoNavigation.IdMaster == int.Parse(filtros["Master"]) &&
-                                                        a.IdRangoNavigation.IdProducto == int.Parse(filtros["Producto"])
+                                                        a.IdRangoNavigation.IdVariableNavigation.IdSeccion == filtros.seccion &&
+                                                        a.IdRangoNavigation.IdVariableNavigation.IdTipoVar == filtros.tipo &&
+                                                        a.IdRangoNavigation.IdMaster == filtros.master &&
+                                                        a.IdRangoNavigation.IdProducto == filtros.producto
                                                         ).AsNoTracking().FirstOrDefaultAsync();
                 if(primerAsenta != null){
                     return  true;
@@ -52,7 +53,7 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
         [HttpPost("AddAsentamientosDelDia")]
-        public async Task<ActionResult<bool>> AddAsentamientosDelDia(InformeConAsentamientos asentamientos){
+        public async Task<ActionResult<bool>> AddAsentamientosDelDia(InformeConAsentamientosDTO asentamientos){
             InfoAse informeDeAsentamientos = asentamientos.InformaDeAsentamientos;
             List<Asentum> listaAsentamientos = asentamientos.Asentamientos;
 
@@ -71,10 +72,8 @@ namespace NeoAPI.Controllers.Asentamientos
             return await _context.SaveChangesAsync() > 0;            
         }
 
-        //Todo: Pendiente probar
-
         [HttpPut("UpdateAsentamientosDelDia")]
-        public async Task<ActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientos asentamientos){
+        public async Task<ActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientosDTO asentamientos){
             InfoAse? data;
             bool correcto;
 
@@ -109,34 +108,15 @@ namespace NeoAPI.Controllers.Asentamientos
             }
             return NoContent();
         }
-
-
-        //TODO: REVISION
-        [HttpPost("AddOrUpdateAsentamientosDelDia")]
-        public async Task<ActionResult<bool>> AddOrUpdateAsentamientosDelDia([FromQuery] InformeConAsentamientos asentamientos,[FromQuery] Dictionary<string,string> filtros){
-            ActionResult<bool> band = false;
-            ActionResult<bool> estado = false;
-
-            band = await this.GetIsAsentamientoHoy(filtros);
-
-            if (band.Value == true){
-                estado = await this.UpdateAsentamientosDelDia(asentamientos.InformaDeAsentamientos.IdInfoAse,asentamientos) == NoContent();
-            }else{
-                estado = await this.AddAsentamientosDelDia(asentamientos);
-            }
-
-            return estado;
-        }
-
         
         [HttpGet("GetAsentamientosViews")]
-        public async Task<ActionResult<List<ValoresDeAsentamientosV>>> GetAsentamientosViews([FromQuery] Dictionary<string,string> filtros){
+        public async Task<ActionResult<List<ValoresDeAsentamientosV>>> GetAsentamientosViews([FromQuery] FiltroGTDTO filtro, [FromQuery] string Fecha){
             InfoAse? informe = new InfoAse();
             List<ValoresDeAsentamientosV>? valores = new List<ValoresDeAsentamientosV>();
             informe = await this._context.InfoAses.Where(i => 
-                                        i.Iaturno == filtros["Turno"] &&
-                                        i.Iagrupo == filtros["Grupo"] && 
-                                        i.IafechCrea.Date == DateTime.Parse(filtros["Fecha"]).Date
+                                        i.Iaturno == filtro.turno &&
+                                        i.Iagrupo == filtro.grupo && 
+                                        i.IafechCrea.Date == DateTime.Parse(Fecha).Date
                                         ).AsNoTracking().FirstOrDefaultAsync();
             if(informe != null){
                 valores = await this._views.ValoresDeAsentamientosVs.Where(v => v.IdInfoAse == informe.IdInfoAse).AsNoTracking().ToListAsync();
@@ -149,8 +129,8 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
         [HttpGet("GetEjemploDataAsentamientos")]
-        public InformeConAsentamientos GetEjemploDataAsentamientos(){
-            InformeConAsentamientos infoAsentamientos = new InformeConAsentamientos();
+        public InformeConAsentamientosDTO GetEjemploDataAsentamientos(){
+            InformeConAsentamientosDTO infoAsentamientos = new InformeConAsentamientosDTO();
 
             infoAsentamientos.Asentamientos = new List<Asentum>();
             infoAsentamientos.Asentamientos.Add(new Asentum());
