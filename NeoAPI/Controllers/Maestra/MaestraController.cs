@@ -43,7 +43,7 @@ namespace NeoAPI.Controllers.Maestras
                 return NotFound();
             }
         }
-        [HttpGet("GetEmpresas")]
+        [HttpGet("GetEmpresas/{idPais:int}")]
         public async Task<ActionResult<List<EmpresasV>>> GetEmpresas(int idPais)
         {
             try{
@@ -53,7 +53,7 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
-        [HttpGet("GetCentros")]
+        [HttpGet("GetCentros/{idEmpresa:int}")]
         public async Task<ActionResult<List<CentrosV>>> GetCentros(int idEmpresa)
         {
             try{
@@ -63,7 +63,7 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
-        [HttpGet("GetDivisiones")]
+        [HttpGet("GetDivisiones/{idCentro:int}")]
         public async Task<ActionResult<List<DivisionesV>>> GetDivisiones(int idCentro)
         {
             try{
@@ -74,7 +74,7 @@ namespace NeoAPI.Controllers.Maestras
         }
 
 
-        [HttpGet("GetLineas")]
+        [HttpGet("GetLineas/{idDivision:int}")]
         public async Task<ActionResult<List<LineaV>>> GetLineas(int idDivision)
         {
             try{
@@ -84,7 +84,7 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
-        [HttpGet("GetLineaPorId")]
+        [HttpGet("GetLineaPorId/{idLineas:int}")]
         public async Task<ActionResult<LineaV>> GetLineaPorId(int idLineas)
         {
             try{
@@ -95,7 +95,7 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetMaestraPorFiltros")]
-        public async Task<ActionResult<List<Master>>> GetMaestraPorFiltros([FromQuery] MaestraDTO maestra)
+        public async Task<ActionResult<List<Master>>> GetMaestraPorFiltros( [FromQuery] MaestraDTO maestra)
         {
             try{
                 if(maestra.idDivision != 0){

@@ -22,7 +22,7 @@ namespace NeoAPI.Controllers.RangoControl
             _views = views;
         }
 
-        [HttpGet("GetProductosPorLinea")]
+        [HttpGet("GetProductosPorLinea/{idLinea:int}")]
         public async Task<ActionResult<List<ProductosV>>> GetProductosPorLinea(int idLinea)
         {
             try{
@@ -32,7 +32,7 @@ namespace NeoAPI.Controllers.RangoControl
             }
         }
 
-        [HttpGet("GetSeccionesPorLinea")]
+        [HttpGet("GetSeccionesPorLinea/{idLinea:int}")]
         public async Task<ActionResult<List<SeccionesV>>> GetSeccionesPorLinea(int idLinea)
         {
             try{
