@@ -123,7 +123,7 @@ public partial class ViewsContext : DbContext
                 .HasNoKey()
                 .ToView("Divisiones_V");
 
-            entity.Property(e => e.División)
+            entity.Property(e => e.NDivision)
                 .HasMaxLength(500)
                 .IsUnicode(false);
         });

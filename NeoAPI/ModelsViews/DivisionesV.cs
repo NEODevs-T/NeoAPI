@@ -9,7 +9,7 @@ public partial class DivisionesV
 
     public int IdDivision { get; set; }
 
-    public string? División { get; set; }
+    public string? NDivision { get; set; }
 
     public bool? Estado { get; set; }
 }
