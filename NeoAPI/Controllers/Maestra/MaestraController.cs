@@ -112,5 +112,15 @@ namespace NeoAPI.Controllers.Maestras
                 return NotFound();
             }
         }
+
+        [HttpGet("GetMaestraPorLinea/{idLinea:int}")]
+        public async Task<ActionResult<int>> GetMaestraPorLinea(int idLinea)
+        {
+            try{
+                return await this._context.Masters.Where(m => m.IdLinea == idLinea).Select(m => m.IdMaster).FirstOrDefaultAsync();
+            }catch{
+                return NotFound();
+            }
+        }
     }
 }
