@@ -35,6 +35,10 @@ public partial class ViewsContext : DbContext
 
     public virtual DbSet<ValoresDeAsentamientosV> ValoresDeAsentamientosVs { get; set; }
 
+    public virtual DbSet<VarClasificacionV> VarClasificacionVs { get; set; }
+
+    public virtual DbSet<VarTipoV> VarTipoVs { get; set; }
+
     public virtual DbSet<VariablesAsentamientosV> VariablesAsentamientosVs { get; set; }
 
     protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
@@ -123,9 +127,10 @@ public partial class ViewsContext : DbContext
                 .HasNoKey()
                 .ToView("Divisiones_V");
 
-            entity.Property(e => e.NDivision)
+            entity.Property(e => e.Ndivision)
                 .HasMaxLength(500)
-                .IsUnicode(false);
+                .IsUnicode(false)
+                .HasColumnName("NDivision");
         });
 
         modelBuilder.Entity<EmpresasV>(entity =>
@@ -312,6 +317,29 @@ public partial class ViewsContext : DbContext
             entity.Property(e => e.Unidad)
                 .HasMaxLength(100)
                 .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<VarClasificacionV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("VarClasificacion_V");
+
+            entity.Property(e => e.Clasificación)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+        });
+
+        modelBuilder.Entity<VarTipoV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("VarTipo_V");
+
+            entity.Property(e => e.TipoDeVariable)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Variable");
         });
 
         modelBuilder.Entity<VariablesAsentamientosV>(entity =>

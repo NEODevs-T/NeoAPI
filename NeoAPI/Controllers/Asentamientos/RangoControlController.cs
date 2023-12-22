@@ -26,7 +26,7 @@ namespace NeoAPI.Controllers.RangoControl
         public async Task<ActionResult<List<ProductosV>>> GetProductosPorLinea(int idLinea)
         {
             try{
-                return await this._views.ProductosVs.Where(p => p.IdLinea == idLinea).ToListAsync();
+                return await this._views.ProductosVs.Where(p => p.IdLinea == idLinea && p.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
@@ -36,7 +36,27 @@ namespace NeoAPI.Controllers.RangoControl
         public async Task<ActionResult<List<SeccionesV>>> GetSeccionesPorLinea(int idLinea)
         {
             try{
-                return await this._views.SeccionesVs.Where(s => s.IdLinea == idLinea).ToListAsync();
+                return await this._views.SeccionesVs.Where(s => s.IdLinea == idLinea && s.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+
+        [HttpGet("GetTipoVariblePorLinea/{idLinea:int}")]
+        public async Task<ActionResult<List<VarTipoV>>> GetTipoVariblePorLinea(int idLinea)
+        {
+            try{
+                return await this._views.VarTipoVs.Where(t => t.IdLinea == idLinea && t.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+
+        [HttpGet("GetClasificacionVariblePorLinea/{idLinea:int}")]
+        public async Task<ActionResult<List<VarClasificacionV>>> GetClasificacionVariblePorLinea(int idLinea)
+        {
+            try{
+                return await this._views.VarClasificacionVs.Where(c => c.IdLinea == idLinea && c.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
