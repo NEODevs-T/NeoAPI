@@ -77,8 +77,10 @@ namespace NeoAPI.Controllers.RangoControl
                                 x.IdVariableNavigation.IdTipoVar == tipo && 
                                 x.IdVariableNavigation.IdSeccion == seccion && 
                                 x.Ractivo == true)
-                                .AsNoTracking().ToListAsync();
-
+                                .AsNoTracking()
+                                .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdSeccionNavigation)
+                                .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdUnidadNavigation)
+                                .ToListAsync();
             if(listaVariables.Count == 0){
                 return NotFound();
             }
