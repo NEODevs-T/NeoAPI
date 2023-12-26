@@ -325,7 +325,7 @@ public partial class ViewsContext : DbContext
                 .HasNoKey()
                 .ToView("VarClasificacion_V");
 
-            entity.Property(e => e.Clasificación)
+            entity.Property(e => e.Clasificacion)
                 .HasMaxLength(100)
                 .IsUnicode(false);
         });

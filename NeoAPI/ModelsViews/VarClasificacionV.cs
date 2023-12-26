@@ -11,7 +11,7 @@ public partial class VarClasificacionV
 
     public int IdClasiVar { get; set; }
 
-    public string Clasificación { get; set; } = null!;
+    public string Clasificacion { get; set; } = null!;
 
     public bool Estado { get; set; }
 }
