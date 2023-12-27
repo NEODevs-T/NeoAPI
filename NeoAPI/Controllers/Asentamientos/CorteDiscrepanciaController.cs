@@ -40,6 +40,7 @@ namespace NeoAPI.Controllers.Asentamientos
             .Include(r => r.IdRangoNavigation.IdVariableNavigation)
             .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation)
             .Include(r => r.IdRangoNavigation.IdProductoNavigation)
+            .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation)
             .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
             && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
             && f.AisActivo == true
