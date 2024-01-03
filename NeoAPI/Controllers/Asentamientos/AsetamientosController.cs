@@ -67,6 +67,10 @@ namespace NeoAPI.Controllers.Asentamientos
             foreach (var item in listaAsentamientos)
             {
                 item.IdInfoAseNavigation = informeDeAsentamientos;
+                if(item.IdRangoNavigation != null){
+                    item.IdRango = item.IdRangoNavigation.IdRango;
+                    item.IdRangoNavigation = null;
+                }
                 _context.Asenta.Add(item);
             }
             return await _context.SaveChangesAsync() > 0;            
