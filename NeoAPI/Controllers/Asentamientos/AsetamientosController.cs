@@ -26,28 +26,23 @@ namespace NeoAPI.Controllers.Asentamientos
 
         [HttpGet("GetIsAsentamientoHoy")]
         public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] FiltrosRangoControlDTO filtros,[FromQuery] FiltroGTDTO filtroGT){
-            bool ok = false;
             InfoAse? oka;
             Asentum? primerAsenta;
 
             oka = await this._context.InfoAses.Where(i => 
                                             i.Iaturno == filtroGT.turno &&
                                             i.Iagrupo == filtroGT.grupo && 
-                                            i.Asenta.FirstOrDefault() != null &&
+                                            i.Asenta.Where(a => 
+                                                            a.IdRangoNavigation.IdVariableNavigation.IdSeccion == filtros.seccion &&
+                                                            a.IdRangoNavigation.IdVariableNavigation.IdTipoVar == filtros.tipo &&
+                                                            a.IdRangoNavigation.IdMaster == filtros.master &&
+                                                            a.IdRangoNavigation.IdProducto == filtros.producto
+                                                        ).FirstOrDefault() != null &&
                                             i.IafechCrea.Date == DateTime.Now.Date 
                                             ).AsNoTracking().FirstOrDefaultAsync();
+                                            
             if(oka != null){
-
-                primerAsenta = await this._context.Asenta.Where(a => 
-                                                        a.IdInfoAse == oka.IdInfoAse &&
-                                                        a.IdRangoNavigation.IdVariableNavigation.IdSeccion == filtros.seccion &&
-                                                        a.IdRangoNavigation.IdVariableNavigation.IdTipoVar == filtros.tipo &&
-                                                        a.IdRangoNavigation.IdMaster == filtros.master &&
-                                                        a.IdRangoNavigation.IdProducto == filtros.producto
-                                                        ).AsNoTracking().FirstOrDefaultAsync();
-                if(primerAsenta != null){
-                    return  true;
-                }
+                return true;
             }
             return false;
         }
@@ -61,19 +56,22 @@ namespace NeoAPI.Controllers.Asentamientos
             //var info = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time"); 
             //DateTimeOffset localServerTime = DateTimeOffset.Now;
             //informeDeAsentamientos.IafechCrea = TimeZoneInfo.ConvertTime(DateTime.Now, info)
+            try{
+                asentamientos.InformaDeAsentamientos.IafechCrea = DateTime.Now;
 
-            asentamientos.InformaDeAsentamientos.IafechCrea = DateTime.Now;
-
-            foreach (var item in listaAsentamientos)
-            {
-                item.IdInfoAseNavigation = informeDeAsentamientos;
-                if(item.IdRangoNavigation != null){
-                    item.IdRango = item.IdRangoNavigation.IdRango;
-                    item.IdRangoNavigation = null;
+                foreach (var item in listaAsentamientos)
+                {
+                    item.IdInfoAseNavigation = informeDeAsentamientos;
+                    if(item.IdRangoNavigation != null){
+                        item.IdRango = item.IdRangoNavigation.IdRango;
+                        item.IdRangoNavigation = null;
+                    }
+                    _context.Asenta.Add(item);
                 }
-                _context.Asenta.Add(item);
+                return await _context.SaveChangesAsync() > 0;    
+            }catch(Exception e){
+                return BadRequest(e);
             }
-            return await _context.SaveChangesAsync() > 0;            
         }
 
         [HttpPut("UpdateAsentamientosDelDia")]
@@ -138,7 +136,8 @@ namespace NeoAPI.Controllers.Asentamientos
 
             infoAsentamientos.Asentamientos = new List<Asentum>();
             infoAsentamientos.Asentamientos.Add(new Asentum());
-            infoAsentamientos.Asentamientos.Add(new Asentum());
+            //infoAsentamientos.Asentamientos.Add(new Asentum());
+            infoAsentamientos.Asentamientos[0].IdRangoNavigation = new Rango();
             infoAsentamientos.InformaDeAsentamientos = new InfoAse();
 
             return infoAsentamientos;
