@@ -40,7 +40,7 @@ namespace NeoAPI.Controllers.Asentamientos
                                                         ).FirstOrDefault() != null &&
                                             i.IafechCrea.Date == DateTime.Now.Date 
                                             ).AsNoTracking().FirstOrDefaultAsync();
-                                            
+
             if(oka != null){
                 return true;
             }
@@ -49,23 +49,35 @@ namespace NeoAPI.Controllers.Asentamientos
 
         [HttpPost("AddAsentamientosDelDia")]
         public async Task<ActionResult<bool>> AddAsentamientosDelDia(InformeConAsentamientosDTO asentamientos){
-            InfoAse informeDeAsentamientos = asentamientos.InformaDeAsentamientos;
-            List<Asentum> listaAsentamientos = asentamientos.Asentamientos;
 
             //TODO: Pendiente cambio de horario segun pais
             //var info = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time"); 
             //DateTimeOffset localServerTime = DateTimeOffset.Now;
             //informeDeAsentamientos.IafechCrea = TimeZoneInfo.ConvertTime(DateTime.Now, info)
-            try{
-                asentamientos.InformaDeAsentamientos.IafechCrea = DateTime.Now;
 
+            InfoAse informeDeAsentamientos = new InfoAse();
+            InfoAseDTO informeDeAsentamientosDTO = asentamientos.InformaDeAsentamientosDTO ?? new InfoAseDTO();
+
+            informeDeAsentamientos.Iagrupo = informeDeAsentamientosDTO.Iagrupo;
+            informeDeAsentamientos.Iaturno = informeDeAsentamientosDTO.Iaturno;
+            informeDeAsentamientos.Iaficha = informeDeAsentamientosDTO.Iaficha;
+            informeDeAsentamientos.Iaobser = informeDeAsentamientosDTO.Iaobser;
+            informeDeAsentamientos.IafechCrea = DateTime.Now;
+
+            List<AsentumDTO> listaAsentamientosDTO = asentamientos.AsentamientosDTO ?? new List<AsentumDTO>();
+            List<Asentum> listaAsentamientos = new List<Asentum>(listaAsentamientosDTO.Count);
+            for (int i = 0; i < listaAsentamientosDTO.Count; i++)
+            {
+                listaAsentamientos.Add(new Asentum());
+                listaAsentamientos[i].Avalor =  listaAsentamientosDTO[i].Avalor;
+                listaAsentamientos[i].AisActivo = listaAsentamientosDTO[i].AisActivo;
+                listaAsentamientos[i].IdRango = listaAsentamientosDTO[i].IdRango;
+            }
+
+            try{
                 foreach (var item in listaAsentamientos)
                 {
                     item.IdInfoAseNavigation = informeDeAsentamientos;
-                    if(item.IdRangoNavigation != null){
-                        item.IdRango = item.IdRangoNavigation.IdRango;
-                        item.IdRangoNavigation = null;
-                    }
                     _context.Asenta.Add(item);
                 }
                 return await _context.SaveChangesAsync() > 0;    
@@ -74,42 +86,43 @@ namespace NeoAPI.Controllers.Asentamientos
             }
         }
 
-        [HttpPut("UpdateAsentamientosDelDia")]
-        public async Task<ActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientosDTO asentamientos){
-            InfoAse? data;
-            bool correcto;
+        // [HttpPut("UpdateAsentamientosDelDia")]
+        // public async Task<ActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientosDTO asentamientos){
+        //     InfoAse? data;
+        //     bool correcto;
 
-            if (asentamientos.InformaDeAsentamientos == null || idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
-            {
-                return BadRequest();
-            }
+        //     if (asentamientos.InformaDeAsentamientos == null || idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
+        //     {
+        //         return BadRequest();
+        //     }
 
-            data = await _context.InfoAses.Where(i => i.IdInfoAse == idInforme).AsNoTracking().FirstOrDefaultAsync();
+        //     data = await _context.InfoAses.Where(i => i.IdInfoAse == idInforme).AsNoTracking().FirstOrDefaultAsync();
 
-            if(data == null){
-                return NotFound();
-            }
+        //     if(data == null){
+        //         return NotFound();
+        //     }
 
-            foreach (Asentum item in asentamientos.Asentamientos ?? new List<Asentum>())
-            {
-                //item.IdInfoAseNavigation = asentamientos.InformaDeAsentamientos;
-                _context.Entry(item).State = EntityState.Modified;
-            }
+        //     foreach (AsentumDTO item in asentamientos.AsentamientosDTO ?? new List<AsentumDTO>())
+        //     {
+        //         //item.IdInfoAseNavigation = asentamientos.InformaDeAsentamientos;
+        //         var asenta = 
+        //         _context.Entry(item).State = EntityState.Modified;
+        //     }
 
-            try
-            {
-                correcto = await _context.SaveChangesAsync() > 0;
+        //     try
+        //     {
+        //         correcto = await _context.SaveChangesAsync() > 0;
 
-                if(!correcto){
-                    return  BadRequest();
-                }
-            }
-            catch (DbUpdateConcurrencyException)
-            {
-                return NotFound();
-            }
-            return NoContent();
-        }
+        //         if(!correcto){
+        //             return  BadRequest();
+        //         }
+        //     }
+        //     catch (DbUpdateConcurrencyException)
+        //     {
+        //         return NotFound();
+        //     }
+        //     return NoContent();
+        // }
         
         [HttpGet("GetAsentamientosViews")]
         public async Task<ActionResult<List<ValoresDeAsentamientosV>>> GetAsentamientosViews([FromQuery] FiltroGTDTO filtro, [FromQuery] string Fecha){
@@ -134,11 +147,10 @@ namespace NeoAPI.Controllers.Asentamientos
         public InformeConAsentamientosDTO GetEjemploDataAsentamientos(){
             InformeConAsentamientosDTO infoAsentamientos = new InformeConAsentamientosDTO();
 
-            infoAsentamientos.Asentamientos = new List<Asentum>();
-            infoAsentamientos.Asentamientos.Add(new Asentum());
-            //infoAsentamientos.Asentamientos.Add(new Asentum());
-            infoAsentamientos.Asentamientos[0].IdRangoNavigation = new Rango();
-            infoAsentamientos.InformaDeAsentamientos = new InfoAse();
+            infoAsentamientos.AsentamientosDTO = new List<AsentumDTO>();
+            infoAsentamientos.AsentamientosDTO.Add(new AsentumDTO());
+            infoAsentamientos.AsentamientosDTO.Add(new AsentumDTO());
+            infoAsentamientos.InformaDeAsentamientosDTO = new InfoAseDTO();
 
             return infoAsentamientos;
         }
