@@ -1,4 +1,6 @@
-﻿namespace NeoAPI.DTOs.Asentamientos
+﻿using NeoAPI.Models;
+
+namespace NeoAPI.DTOs.Asentamientos
 {
     public class CategoriaDTO
     {
@@ -13,5 +15,8 @@
         public string? Cdescri { get; set; }
 
         public bool Cesta { get; set; }
+
+        public virtual ICollection<CorteDiscDTO> CorteDisDTO { get; set; } = new List<CorteDiscDTO>();
+
     }
 }

@@ -30,24 +30,24 @@ namespace NeoAPI.Controllers.Asentamientos
         //GETS
 
         //Obtener Asentamientos fuera de rango 
-        [HttpGet("AsentamientoFueraRango/{turno}/{fecha:datetime}/{idfiltroarea:int}")]
-        public async Task<ActionResult<List<Asentum>>> GetAsentamientosFueraRango(string turno, DateTime fecha, int idfiltroarea)
+        [HttpGet("AsentamientoFueraRango/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
+        public async Task<ActionResult<List<Asentum>>> GetAsentamientosFueraRango(string turno, DateTime fecha, int idfiltrolinea)
         {
             //retorna fuera de rango de un centro
             var result = await _context.Asenta
-            .AsNoTracking()
-            .Include(r => r.IdRangoNavigation)
-            .Include(r => r.IdRangoNavigation.IdVariableNavigation)
-            .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation)
-            .Include(r => r.IdRangoNavigation.IdProductoNavigation)
-            .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation)
-            .Include(r => r.CorteDis)
-            .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
-            && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-            && f.AisActivo == true
-            && f.IdInfoAseNavigation.Iaturno == turno
-            && f.IdRangoNavigation.IdMasterNavigation.IdCentro == idfiltroarea)
-            .ToListAsync();
+                .Include(r => r.IdRangoNavigation)
+                .Include(r => r.IdRangoNavigation.IdVariableNavigation)
+                .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation)
+                .Include(r => r.IdRangoNavigation.IdProductoNavigation)
+                .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation)
+                .Include(r => r.CorteDis)
+                .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                    && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                    && f.AisActivo == true
+                    && f.IdInfoAseNavigation.Iaturno == turno
+                    && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea)
+                .AsNoTracking()
+                .ToListAsync();
 
             return Ok(result);
         }
@@ -69,6 +69,24 @@ namespace NeoAPI.Controllers.Asentamientos
             return Ok(result);
         }
 
+        //Obtener Cortes de discrepancias del día
+        [HttpGet("CortesDelDia/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
+        public async Task<ActionResult<List<CorteDiscDTO>>> GetCortesTotales(string turno, DateTime fecha, int idfiltrolinea)
+        {
+            var corteDisc = await _context.CorteDis
+                .Where(c=>c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date==fecha.Date
+                    && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno==turno 
+                    && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea)
+                .Include(ca => ca.IdCategoriNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+
+            // Obtén la entidad CorteDisc de la base de datos
+            var corteDiscDTO = _mapper.Map<List<CorteDiscDTO>>(corteDisc);
+            return Ok(corteDiscDTO);
+        }
+
+
 
         //Obtener Categorias para corte de discrepancias
         [HttpGet("CategoriasCorte")]
@@ -81,22 +99,6 @@ namespace NeoAPI.Controllers.Asentamientos
             return Ok(result);
         }
 
-        //Obtener Categorias para corte de discrepancias
-        [HttpGet("CortesTotales")]
-        public async Task<ActionResult<List<CorteDi>>> GetCortesTotales()
-        {
-            var result = await _context.CorteDis
-            .AsNoTracking()
-            .Select(c => new CorteDi
-            {
-                IdCorteDis = c.IdCorteDis,
-                CdaccCorr = c.CdaccCorr,
-                IdCategoriNavigation = c.IdCategoriNavigation
-            })
-            .ToListAsync();
-
-            return Ok(result);
-        }
 
 
         //POST
@@ -182,7 +184,7 @@ namespace NeoAPI.Controllers.Asentamientos
         [HttpPut("UpdateCategoria")]
         public async Task<ActionResult<string>> UpdateCategoria(CategoriaDTO categoria)
         {
-            var entity = _mapper.Map<Categori>(categoria);            
+            var entity = _mapper.Map<Categori>(categoria);
             _context.Update(entity);// Update actualiza entidad y colecciones o inserta si no tiene id
             await _context.SaveChangesAsync();
             return Ok("Registro exitoso");
@@ -201,14 +203,14 @@ namespace NeoAPI.Controllers.Asentamientos
 
         //Modifica un objeto
         [HttpPut("UpdateCorte")]
-        public async Task<ActionResult<CorteDiscDTO>> UpdateCorte(CorteDiscDTO corte) 
-        { 
-            var entity = await _context.CorteDis.FindAsync(corte.IdCorteDis); 
-            _mapper.Map(corte, entity); 
-            _context.Update(entity); 
-            await _context.SaveChangesAsync(); 
-            var corteDTO = _mapper.Map<CorteDiscDTO>(entity); 
-            return Ok(corteDTO); 
+        public async Task<ActionResult<CorteDiscDTO>> UpdateCorte(CorteDiscDTO corte)
+        {
+            var entity = await _context.CorteDis.FindAsync(corte.IdCorteDis);
+            _mapper.Map(corte, entity);
+            _context.Update(entity);
+            await _context.SaveChangesAsync();
+            var corteDTO = _mapper.Map<CorteDiscDTO>(entity);
+            return Ok(corteDTO);
         }
     }
 }

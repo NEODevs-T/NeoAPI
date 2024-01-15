@@ -1,4 +1,6 @@
-﻿namespace NeoAPI.DTOs.Asentamientos
+﻿using NeoAPI.Models;
+
+namespace NeoAPI.DTOs.Asentamientos
 {
     public class CorteDiscDTO
     {
@@ -11,6 +13,8 @@
         public bool CdisListo { get; set; }
 
         public int IdAsenta { get; set; }
+
+        public virtual CategoriaDTO CategoriaDTONavigation { get; set; } = null!;
 
     }
 }
