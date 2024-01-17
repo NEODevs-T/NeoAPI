@@ -28,12 +28,6 @@ namespace NeoAPI.Controllers.Maestras
             _views = views;
         }
 
-        [HttpGet("GetIdHorarios")]
-        public System.Collections.ObjectModel.ReadOnlyCollection<System.TimeZoneInfo> GetIdHorarios()
-        {
-            return TimeZoneInfo.GetSystemTimeZones();
-        }
-
         [HttpGet("GetPaises")]
         public async Task<ActionResult<List<Pai>>> GetPaises()
         {
