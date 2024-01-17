@@ -36,20 +36,22 @@ namespace NeoAPI.Controllers.Asentamientos
             //retorna fuera de rango de un centro
             var result = await _context.Asenta
                 .Include(r => r.IdRangoNavigation)
-                .Include(r => r.IdRangoNavigation.IdVariableNavigation)
-                .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation)
-                .Include(r => r.IdRangoNavigation.IdProductoNavigation)
-                .Include(r => r.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdUnidadNavigation)             
+                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdSeccionNavigation)              
+                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdProductoNavigation)
                 .Include(r => r.CorteDis)
                 .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
                     && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
                     && f.AisActivo == true
                     && f.IdInfoAseNavigation.Iaturno == turno
-                    && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea)
+                    && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                    && f.CorteDis.Count==0)
                 .AsNoTracking()
                 .ToListAsync();
 
-            return Ok(result);
+            var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
+
+            return Ok(corteDiscDTO);
         }
 
 
@@ -73,19 +75,61 @@ namespace NeoAPI.Controllers.Asentamientos
         [HttpGet("CortesDelDia/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
         public async Task<ActionResult<List<CorteDiscDTO>>> GetCortesTotales(string turno, DateTime fecha, int idfiltrolinea)
         {
+
             var corteDisc = await _context.CorteDis
-                .Where(c=>c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date==fecha.Date
-                    && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno==turno 
+                .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                    && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
                     && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea)
-                .Include(ca => ca.IdCategoriNavigation)
+                 .Include(ca => ca.IdCategoriNavigation)
+                .Include(ca => ca.IdAsentaNavigation).ThenInclude(info => info.IdInfoAseNavigation)
+                .Include(ca => ca.IdAsentaNavigation)
+                    .ThenInclude(rango => rango.IdRangoNavigation)
+                    .ThenInclude(vari => vari.IdVariableNavigation)
+                    .ThenInclude(uni => uni.IdUnidadNavigation)
                 .AsNoTracking()
                 .ToListAsync();
 
-            // Obtén la entidad CorteDisc de la base de datos
             var corteDiscDTO = _mapper.Map<List<CorteDiscDTO>>(corteDisc);
             return Ok(corteDiscDTO);
         }
 
+        //Obtener Cortes de discrepancias del día con dto CortesVista
+        [HttpGet("CortesDelDiaLineaPorTurno/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
+        public async Task<ActionResult<List<CortesVistaDTO>>> GetCortesTotales2(string turno, DateTime fecha, int idfiltrolinea)
+        {
+
+            var corteDisc = await _context.CorteDis
+            .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+             && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
+             && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea)
+            .Select(c => new
+            {
+                c.IdCorteDis,
+                c.IdCategori,
+                c.IdAsenta,
+                c.CdaccCorr,
+                c.CdisListo,
+                c.IdCategoriNavigation.Cnombre,
+                c.IdAsentaNavigation.Avalor,
+                c.IdAsentaNavigation.IdRangoNavigation.IdRango,
+                c.IdAsentaNavigation.IdRangoNavigation.RlimMax,
+                c.IdAsentaNavigation.IdRangoNavigation.RlimMin,
+                c.IdAsentaNavigation.IdRangoNavigation.Rmax,
+                c.IdAsentaNavigation.IdRangoNavigation.Rmin,
+                c.IdAsentaNavigation.IdRangoNavigation.Robj,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariable,
+                c.IdAsentaNavigation.IdRangoNavigation.IdProducto,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation.Unombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.IdSeccion,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vnombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vdescri,
+
+            })
+             .AsNoTracking()
+             .ToListAsync();
+            return Ok(corteDisc);
+        }
 
 
         //Obtener Categorias para corte de discrepancias
@@ -96,7 +140,9 @@ namespace NeoAPI.Controllers.Asentamientos
             .AsNoTracking()
             .ToListAsync();
 
-            return Ok(result);
+            var categoriaDTO = _mapper.Map<List<CategoriaDTO>>(result);
+
+            return Ok(categoriaDTO);
         }
 
 
@@ -149,10 +195,44 @@ namespace NeoAPI.Controllers.Asentamientos
             }
         }
 
-
-        //insertarcorte validando si existe uno
+        //add corte por asentamiento individual
+        
         [HttpPost("AddCorte")]
-        //[ProducesResponseType(StatusCodes.Status201Created)]
+        [ProducesResponseType(StatusCodes.Status400BadRequest)]
+        public async Task<ActionResult<bool>> AddCorte(CorteDiscDTO cortedis)
+        {
+            try
+            {
+                var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsenta == cortedis.IdAsenta);
+                if (corte == null)
+                {
+                    var entity = _mapper.Map<CorteDi>(cortedis);
+                    _context.CorteDis.Add(entity);
+
+                    //// Actualizar AsentumDTO
+                    //var asentum = await _context.Asenta.FirstOrDefaultAsync(a => a.IdAsenta == cortedis.IdAsenta);
+                    //if (asentum != null)
+                    //{
+                    //    _mapper.Map(cortedis.AsentumDTONavigation, asentum);
+                    //    _context.Entry(asentum).State = EntityState.Modified;
+                    //}
+
+                    await _context.SaveChangesAsync();
+                }
+                else
+                {
+                    return BadRequest(new { message = "Carte ya realizado" });
+                }
+                return Ok("Registro exitoso");
+            }
+            catch (Exception ex)
+            {
+                return Problem("Error, intente nuevamente" + ex.Message);
+            }
+        }
+        //insertarcorte como lista validando si existe uno
+        [HttpPost("AddListaCortes")]
+       
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(List<CorteDiscDTO> cortedis, string turno, DateTime fecha) //TODO agrgar id del master del la linea
         {
