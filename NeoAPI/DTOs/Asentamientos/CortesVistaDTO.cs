@@ -19,6 +19,8 @@ namespace NeoAPI.DTOs.Asentamientos
         public double RlimMax { get; set; }
         public int IdVariable { get; set; }
         public int IdProducto { get; set; }
+        public string Pnombre { get; set; } = null!;
+
         public string Unombre { get; set; } = null!;
         public int IdSeccion { get; set; }
        

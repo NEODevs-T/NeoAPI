@@ -29,7 +29,7 @@ namespace NeoAPI.Controllers.Asentamientos
 
         //GETS
 
-        //Obtener Asentamientos fuera de rango 
+        //Obtener Asentamientos fuera de rango TODO:DTO
         [HttpGet("AsentamientoFueraRango/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
         public async Task<ActionResult<List<Asentum>>> GetAsentamientosFueraRango(string turno, DateTime fecha, int idfiltrolinea)
         {
@@ -45,7 +45,35 @@ namespace NeoAPI.Controllers.Asentamientos
                     && f.AisActivo == true
                     && f.IdInfoAseNavigation.Iaturno == turno
                     && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-                    && f.CorteDis.Count==0)
+                    && f.CorteDis.Count==0 )
+                .AsNoTracking()
+                .ToListAsync();
+
+            var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
+
+            return Ok(corteDiscDTO);
+        }
+
+        //Obtener Asentamientos fuera de rango con filtros  TODO:DTO
+        [HttpGet("AsentamientoFueraRangoFiltros/{turno}/{fecha:datetime}/{idfiltrolinea:int}/{idClasiVar:int}/{idSeccion:int}/{idProducto:int}")]
+        public async Task<ActionResult<List<Asentum>>> GetAsentamientosFueraRango2(string turno, DateTime fecha, int idfiltrolinea, int idClasiVar, int idSeccion, int idProducto)
+        {
+            //retorna fuera de rango de un centro
+            var result = await _context.Asenta
+                .Include(r => r.IdRangoNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdUnidadNavigation)             
+                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdSeccionNavigation)              
+                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdProductoNavigation)
+                .Include(r => r.CorteDis)
+                .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                    && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                    && f.AisActivo == true
+                    && f.IdInfoAseNavigation.Iaturno == turno
+                    && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                    && f.IdRangoNavigation.IdProducto == idProducto
+                    && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                    && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
+                    && f.CorteDis.Count==0 )
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -71,32 +99,11 @@ namespace NeoAPI.Controllers.Asentamientos
             return Ok(result);
         }
 
-        //Obtener Cortes de discrepancias del día
-        [HttpGet("CortesDelDia/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
+        //Obtener Cortes de discrepancias del día de una linea sin filtros 
+        [HttpGet("CortesDelDiaLinea/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
         public async Task<ActionResult<List<CorteDiscDTO>>> GetCortesTotales(string turno, DateTime fecha, int idfiltrolinea)
         {
 
-            var corteDisc = await _context.CorteDis
-                .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-                    && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
-                    && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea)
-                 .Include(ca => ca.IdCategoriNavigation)
-                .Include(ca => ca.IdAsentaNavigation).ThenInclude(info => info.IdInfoAseNavigation)
-                .Include(ca => ca.IdAsentaNavigation)
-                    .ThenInclude(rango => rango.IdRangoNavigation)
-                    .ThenInclude(vari => vari.IdVariableNavigation)
-                    .ThenInclude(uni => uni.IdUnidadNavigation)
-                .AsNoTracking()
-                .ToListAsync();
-
-            var corteDiscDTO = _mapper.Map<List<CorteDiscDTO>>(corteDisc);
-            return Ok(corteDiscDTO);
-        }
-
-        //Obtener Cortes de discrepancias del día con dto CortesVista
-        [HttpGet("CortesDelDiaLineaPorTurno/{turno}/{fecha:datetime}/{idfiltrolinea:int}")]
-        public async Task<ActionResult<List<CortesVistaDTO>>> GetCortesTotales2(string turno, DateTime fecha, int idfiltrolinea)
-        {
 
             var corteDisc = await _context.CorteDis
             .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
@@ -119,6 +126,49 @@ namespace NeoAPI.Controllers.Asentamientos
                 c.IdAsentaNavigation.IdRangoNavigation.Robj,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariable,
                 c.IdAsentaNavigation.IdRangoNavigation.IdProducto,
+                c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pnombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation.Unombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.IdSeccion,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vnombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vdescri,
+
+            })
+             .AsNoTracking()
+             .ToListAsync();
+            return Ok(corteDisc);
+        }
+
+        //Obtener Cortes de discrepancias del día con dto CortesVista
+        [HttpGet("CortesDelDiaLineaFiltros/{turno}/{fecha:datetime}/{idfiltrolinea:int}/{idClasiVar:int}/{idSeccion:int}/{idProducto:int}")]
+        public async Task<ActionResult<List<CortesVistaDTO>>> GetCortesTotalesFiltros(string turno, DateTime fecha, int idfiltrolinea, int idClasiVar, int idSeccion, int idProducto)
+        {
+
+            var corteDisc = await _context.CorteDis
+            .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+             && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
+             && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+             && c.IdAsentaNavigation.IdRangoNavigation.IdProducto == idProducto
+             && c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+             && c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar)
+            .Select(c => new
+            {
+                c.IdCorteDis,
+                c.IdCategori,
+                c.IdAsenta,
+                c.CdaccCorr,
+                c.CdisListo,
+                c.IdCategoriNavigation.Cnombre,
+                c.IdAsentaNavigation.Avalor,
+                c.IdAsentaNavigation.IdRangoNavigation.IdRango,
+                c.IdAsentaNavigation.IdRangoNavigation.RlimMax,
+                c.IdAsentaNavigation.IdRangoNavigation.RlimMin,
+                c.IdAsentaNavigation.IdRangoNavigation.Rmax,
+                c.IdAsentaNavigation.IdRangoNavigation.Rmin,
+                c.IdAsentaNavigation.IdRangoNavigation.Robj,
+                c.IdAsentaNavigation.IdRangoNavigation.IdVariable,
+                c.IdAsentaNavigation.IdRangoNavigation.IdProducto,
+                c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pnombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation.Unombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.IdSeccion,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
@@ -169,7 +219,7 @@ namespace NeoAPI.Controllers.Asentamientos
                     else
                     {
                         // Mostrar un mensaje de error o hacer otra acci�n
-                        return BadRequest("C�digo ya registrado");
+                        return BadRequest("Código ya registrado");
                     }
                 }
                 catch (Exception ex)
@@ -271,14 +321,14 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
         //modifica una lista de objetos o inserta nuevos
-        [HttpPut("UpdateCorteLista")]
-        public async Task<ActionResult<string>> UpdateCorteLista(List<CorteDiscDTO> corte)
+        [HttpPut("UpdateCorteAsentamientoLista")]
+        public async Task<ActionResult<bool>> UpdateCorteLista(List<AsentumDTO> cortes)
         {
-            var entity = _mapper.Map<CorteDi>(corte);
+            var entity = _mapper.Map<List<Asentum>>(cortes);
             //_context.Entry(entity).State = EntityState.Modified;
             _context.UpdateRange(entity);// Update actualiza entidad y colecciones o inserta si no tiene id
             await _context.SaveChangesAsync();
-            return Ok("Registro exitoso");
+            return Ok(true);
         }
 
         //Modifica un objeto
