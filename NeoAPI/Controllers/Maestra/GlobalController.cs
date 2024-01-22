@@ -30,8 +30,8 @@ namespace NeoAPI.Controllers.Maestras
             return TimeZoneInfo.GetSystemTimeZones();
         }
 
-        [HttpGet("GetGrupo/{idPais:int}")]
-        public async Task<ActionResult<RotaCalidum>> GetPaises(int idPais)
+        [HttpGet("GetRotacion/{idPais:int}")]
+        public async Task<ActionResult<RotaCalidum>> GetRotacion(int idPais)
         {
             int hora = DateTime.Now.Hour;
             int turno = 0; 
@@ -58,7 +58,15 @@ namespace NeoAPI.Controllers.Maestras
             }else{
                 return BadRequest();
             }
-            return await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
+
+            try
+            {
+                return await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
+            }
+            catch
+            {
+                return NotFound();
+            }
         }
     }
 }
