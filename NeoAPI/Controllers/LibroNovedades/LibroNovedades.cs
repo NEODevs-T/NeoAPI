@@ -20,8 +20,6 @@ namespace NeoAPI.Controllers.LibroNovedades
             {
                 SinPerdidaDeTiempo = 19,
                 Operaciones = 1,
-                ManAutonomo = 2,
-                ManEspecializado = 3,
                 NoResuelto = 0
             }
         public LibroNoveController(NeoViejaContext context,IMapper mapper)
@@ -32,17 +30,17 @@ namespace NeoAPI.Controllers.LibroNovedades
 
         [HttpPost("AddLibroNovedades")]
         public async Task<ActionResult<bool>> AddLibroNovedadesPorCorte(List<LibroNoveDTO> novedades){
+            List<LibroNove> data;
             foreach (var item in novedades)
             {
                 item.LntiePerMi = -1;
                 item.IdTipoNove = (int) DatosNovedad.SinPerdidaDeTiempo;
                 item.IdAreaCar = (int) DatosNovedad.Operaciones;
                 item.LnisPizUni = false;
-                item.IdCtpm = (int) DatosNovedad.ManEspecializado;
                 item.LnisResu = (int) DatosNovedad.NoResuelto;
             }
 
-            var data = _mapper.Map<List<LibroNove>>(novedades);
+            data = _mapper.Map<List<LibroNove>>(novedades);
             _context.LibroNoves.AddRange(data);
             
             try{

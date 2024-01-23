@@ -1,0 +1,38 @@
+using System.Security.Cryptography.X509Certificates;
+using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
+using System.Text.Json;
+using AutoMapper;
+using NeoAPI.Models.NeoVieja;
+using NeoAPI.DTOs.LibroNovedades;
+
+
+namespace NeoAPI.Controllers.LibroNovedades
+{
+    [ApiController]
+    [Route("api/[controller]")]
+    public class TPMController : ControllerBase
+    {
+        private readonly NeoViejaContext _context;
+        private readonly IMapper _mapper;
+
+        public TPMController(NeoViejaContext context,IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
+        [HttpGet("GetClasificacionTPM")]
+        public async Task<ActionResult<List<ClasifiTpmDTO>>> GetClasificacionTPM(){
+            List<ClasifiTpm> listaClasiTPM;
+            try{
+                listaClasiTPM = await _context.ClasifiTpms.Where(c => c.Ctpmestado == true).ToListAsync();
+
+                return _mapper.Map<List<ClasifiTpmDTO>>(listaClasiTPM);
+            }catch(Exception e){
+                return BadRequest(e);
+            }
+        }
+    }
+
+}

@@ -45,6 +45,8 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<LibroNoveDTO,LibroNove>().ReverseMap();
 
+            CreateMap<ClasifiTpmDTO,ClasifiTpm>().ReverseMap();
+            
             //https://www.youtube.com/watch?v=pr_pemcmVAs
         }
     }
