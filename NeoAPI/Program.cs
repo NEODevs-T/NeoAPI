@@ -1,9 +1,9 @@
 using Microsoft.EntityFrameworkCore;
-using NeoAPI.Models;
 using System.Text.Json.Serialization;
+using NeoAPI.Models;
 using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
-using NeoAPI.ModelsDOCIng;
+using NeoAPI.Models.NeoVieja;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -17,6 +17,7 @@ builder.Services.AddControllers().AddJsonOptions(x =>x.JsonSerializerOptions.Ref
 builder.Services.AddDbContext<DbNeoIiContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<ViewsContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DOCIng")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<NeoViejaContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("NeoVieja")), ServiceLifetime.Transient);
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();
 
