@@ -80,6 +80,7 @@ namespace NeoAPI.Controllers.RangoControl
                                 .AsNoTracking()
                                 .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdSeccionNavigation)
                                 .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdUnidadNavigation)
+                                .OrderBy(r => r.Rorden)
                                 .ToListAsync();
             if(listaVariables.Count == 0){
                 return NotFound();
