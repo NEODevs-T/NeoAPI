@@ -132,6 +132,7 @@ namespace NeoAPI.Controllers.Asentamientos
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vnombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vdescri,
+                c.IdAsentaNavigation.IdInfoAseNavigation.IdInfoAse,
 
             })
              .AsNoTracking()
@@ -174,6 +175,7 @@ namespace NeoAPI.Controllers.Asentamientos
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vnombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vdescri,
+                c.IdAsentaNavigation.IdInfoAseNavigation.IdInfoAse,
 
             })
              .AsNoTracking()
