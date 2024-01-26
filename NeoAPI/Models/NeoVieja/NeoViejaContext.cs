@@ -22,6 +22,7 @@ public partial class NeoViejaContext : DbContext
     public virtual DbSet<LibroNove> LibroNoves { get; set; }
 
     public virtual DbSet<TiParTp> TiParTps { get; set; }
+    public virtual DbSet<EquipoEamViejo> EquipoEams { get; set; } = null!;
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
@@ -145,6 +146,30 @@ public partial class NeoViejaContext : DbContext
                 .IsUnicode(false)
                 .HasComment("nombre del centro")
                 .HasColumnName("TPNombre");
+        });
+        modelBuilder.Entity<EquipoEamViejo>(entity =>
+        {
+            entity.HasKey(e => e.IdEquipo);
+
+            entity.ToTable("EquipoEAM");
+
+            entity.Property(e => e.EcodEquiEam)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("ECodEquiEAM");
+
+            entity.Property(e => e.EnombreEam)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("ENombreEAM");
+
+            entity.Property(e => e.EdescriEam)
+             .IsUnicode(false)
+             .HasColumnName("EDescriEAM");
+
+            entity.Property(e => e.EestaEam).HasColumnName("EEstaEAM");
+
+        
         });
 
         OnModelCreatingPartial(modelBuilder);

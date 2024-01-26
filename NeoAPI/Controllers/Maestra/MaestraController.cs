@@ -6,6 +6,7 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models;
 using NeoAPI.ModelsViews;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using NeoAPI.Models.NeoVieja;
 
 
 namespace NeoAPI.Controllers.Maestras
@@ -20,12 +21,14 @@ namespace NeoAPI.Controllers.Maestras
         private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
         private readonly ViewsContext _views;
+        private readonly NeoViejaContext _neoVieja;
 
-        public MaestraController(DbNeoIiContext DbNeo, IMapper maper,ViewsContext views)
+        public MaestraController(DbNeoIiContext DbNeo, IMapper maper,ViewsContext views, NeoViejaContext neoVieja)
         {
             _context = DbNeo;
             _mapper = maper;
             _views = views;
+            _neoVieja = neoVieja;
         }
 
         [HttpGet("GetPaises")]
@@ -112,6 +115,16 @@ namespace NeoAPI.Controllers.Maestras
         {
             try{
                 return await this._context.Masters.Where(m => m.IdLinea == idLinea).Select(m => m.IdMaster).FirstOrDefaultAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+        
+        [HttpGet("GetEquiposEAMPorLinea/{idLinea:int}")]
+        public async Task<ActionResult<List<EquipoEamViejo>>> GetEquiposEAMPorLinea(int idLinea)
+        {
+            try{
+                return await this._neoVieja.EquipoEams.Where(e=>e.IdLinea==idLinea && e.EestaEam).AsNoTracking().ToListAsync();
             }catch{
                 return NotFound();
             }

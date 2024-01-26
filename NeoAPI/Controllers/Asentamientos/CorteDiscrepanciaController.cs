@@ -147,11 +147,11 @@ namespace NeoAPI.Controllers.Asentamientos
 
             var corteDisc = await _context.CorteDis
             .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-             && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
-             && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-             && c.IdAsentaNavigation.IdRangoNavigation.IdProducto == idProducto
-             && c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
-             && c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar)
+                && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
+                && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                && c.IdAsentaNavigation.IdRangoNavigation.IdProducto == idProducto
+                && c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                && c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar)
             .Select(c => new
             {
                 c.IdCorteDis,
