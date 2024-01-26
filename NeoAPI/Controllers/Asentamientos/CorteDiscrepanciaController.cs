@@ -36,16 +36,16 @@ namespace NeoAPI.Controllers.Asentamientos
             //retorna fuera de rango de un centro
             var result = await _context.Asenta
                 .Include(r => r.IdRangoNavigation)
-                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdUnidadNavigation)             
-                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdSeccionNavigation)              
-                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdProductoNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
                 .Include(r => r.CorteDis)
                 .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
                     && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
                     && f.AisActivo == true
                     && f.IdInfoAseNavigation.Iaturno == turno
                     && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-                    && f.CorteDis.Count==0 )
+                    && f.CorteDis.Count == 0)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -61,9 +61,9 @@ namespace NeoAPI.Controllers.Asentamientos
             //retorna fuera de rango de un centro
             var result = await _context.Asenta
                 .Include(r => r.IdRangoNavigation)
-                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdUnidadNavigation)             
-                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdVariableNavigation).ThenInclude(r=>r.IdSeccionNavigation)              
-                .Include(r => r.IdRangoNavigation).ThenInclude(r=>r.IdProductoNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
                 .Include(r => r.CorteDis)
                 .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
                     && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
@@ -73,7 +73,7 @@ namespace NeoAPI.Controllers.Asentamientos
                     && f.IdRangoNavigation.IdProducto == idProducto
                     && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
                     && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
-                    && f.CorteDis.Count==0 )
+                    && f.CorteDis.Count == 0)
                 .AsNoTracking()
                 .ToListAsync();
 
@@ -248,7 +248,7 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
         //add corte por asentamiento individual
-        
+
         [HttpPost("AddCorte")]
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(CorteDiscDTO cortedis)
@@ -284,7 +284,7 @@ namespace NeoAPI.Controllers.Asentamientos
         }
         //insertarcorte como lista validando si existe uno
         [HttpPost("AddListaCortes")]
-       
+
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(List<CorteDiscDTO> cortedis, string turno, DateTime fecha) //TODO agrgar id del master del la linea
         {
