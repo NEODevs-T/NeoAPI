@@ -14,7 +14,9 @@ public partial class CorteDi
     public bool CdisListo { get; set; }
 
     public int IdAsenta { get; set; }
-
+    public bool CdisLibro { get; set; }
+    public DateTime? CdfechAcci { get; set; } = null!;
+    public DateTime? CdfechList { get; set; } = null!;
     public virtual Asentum IdAsentaNavigation { get; set; } = null!;
 
     public virtual Categori IdCategoriNavigation { get; set; } = null!;

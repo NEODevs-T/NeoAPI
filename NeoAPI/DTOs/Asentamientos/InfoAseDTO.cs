@@ -20,6 +20,7 @@ public partial class InfoAseDTO
     public string? Iaobser { get; set; }
 
     public DateTime IafechCrea { get; set; }
+    public DateTime IafechBpcs { get; set; }
 
     public virtual ICollection<AsentumDTO> AsentaDTO { get; set; } = new List<AsentumDTO>();
 

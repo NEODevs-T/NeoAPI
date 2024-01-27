@@ -72,6 +72,8 @@ public partial class DbNeoIiContext : DbContext
 
             entity.Property(e => e.AisActivo).HasColumnName("AIsActivo");
             entity.Property(e => e.Avalor).HasColumnName("AValor");
+             
+            entity.Property(e => e.Aobserv).HasColumnName("AObserv");
 
             entity.HasOne(d => d.IdInfoAseNavigation).WithMany(p => p.Asenta)
                 .HasForeignKey(d => d.IdInfoAse)
@@ -194,6 +196,14 @@ public partial class DbNeoIiContext : DbContext
                 .HasColumnName("CDAccCorr");
             entity.Property(e => e.CdisListo).HasColumnName("CDIsListo");
 
+            entity.Property(e => e.CdisLibro).HasColumnName("CDIsLibro");
+            entity.Property(e => e.CdfechAcci)
+                .HasColumnType("datetime")
+                .HasColumnName("CDFechAcci");  
+            entity.Property(e => e.CdfechList)
+                .HasColumnType("datetime")
+                .HasColumnName("CDFechList");
+
             entity.HasOne(d => d.IdAsentaNavigation).WithMany(p => p.CorteDis)
                 .HasForeignKey(d => d.IdAsenta)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -315,6 +325,9 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.IafechCrea)
                 .HasColumnType("datetime")
                 .HasColumnName("IAFechCrea");
+            entity.Property(e => e.IafechCrea)
+             .HasColumnType("datetime")
+             .HasColumnName("IAFechBPCS");
             entity.Property(e => e.Iaficha)
                 .HasMaxLength(5)
                 .IsUnicode(false)

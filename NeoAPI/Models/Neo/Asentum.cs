@@ -14,6 +14,8 @@ public partial class Asentum
     public double Avalor { get; set; }
 
     public bool AisActivo { get; set; }
+    public string? Aobserv { get; set; }
+
 
     public virtual ICollection<CorteDi> CorteDis { get; set; } = new List<CorteDi>();
 
