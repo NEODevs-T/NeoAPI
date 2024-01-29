@@ -48,7 +48,7 @@ namespace NeoAPI.Controllers.Asentamientos
             return false;
         }
 
-        [HttpPost("AddAsentamientosDelDia")]
+        [HttpPost("AddAsentamientosDelDia/{idEmpresa:int}")]
         public async Task<ActionResult<bool>> AddAsentamientosDelDia(int idEmpresa,InformeConAsentamientosDTO asentamientos){
 
             //TODO: Pendiente cambio de horario segun pais
