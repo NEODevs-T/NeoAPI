@@ -62,6 +62,11 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<Unidad> Unidads { get; set; }
 
     public virtual DbSet<Variable> Variables { get; set; }
+
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=10.20.1.60\\DESARROLLO;Initial Catalog=DbNeoII;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrEncNeo;Password=L3C7U3A2023*");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Asentum>(entity =>
@@ -71,9 +76,10 @@ public partial class DbNeoIiContext : DbContext
             entity.ToTable("Asenta", "ase");
 
             entity.Property(e => e.AisActivo).HasColumnName("AIsActivo");
+            entity.Property(e => e.Aobserv)
+                .IsUnicode(false)
+                .HasColumnName("AObserv");
             entity.Property(e => e.Avalor).HasColumnName("AValor");
-             
-            entity.Property(e => e.Aobserv).HasColumnName("AObserv");
 
             entity.HasOne(d => d.IdInfoAseNavigation).WithMany(p => p.Asenta)
                 .HasForeignKey(d => d.IdInfoAse)
@@ -194,15 +200,14 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("CDAccCorr");
-            entity.Property(e => e.CdisListo).HasColumnName("CDIsListo");
-
-            entity.Property(e => e.CdisLibro).HasColumnName("CDIsLibro");
             entity.Property(e => e.CdfechAcci)
                 .HasColumnType("datetime")
-                .HasColumnName("CDFechAcci");  
+                .HasColumnName("CDFechAcci");
             entity.Property(e => e.CdfechList)
                 .HasColumnType("datetime")
                 .HasColumnName("CDFechList");
+            entity.Property(e => e.CdisLibro).HasColumnName("CDisLibro");
+            entity.Property(e => e.CdisListo).HasColumnName("CDIsListo");
 
             entity.HasOne(d => d.IdAsentaNavigation).WithMany(p => p.CorteDis)
                 .HasForeignKey(d => d.IdAsenta)
@@ -322,18 +327,18 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("InfoAse", "ase");
 
+            entity.Property(e => e.IafechBpcs)
+                .HasColumnType("datetime")
+                .HasColumnName("IAFechBPCS");
             entity.Property(e => e.IafechCrea)
                 .HasColumnType("datetime")
                 .HasColumnName("IAFechCrea");
-            entity.Property(e => e.IafechCrea)
-             .HasColumnType("datetime")
-             .HasColumnName("IAFechBPCS");
             entity.Property(e => e.Iaficha)
-                .HasMaxLength(5)
+                .HasMaxLength(6)
                 .IsUnicode(false)
                 .HasColumnName("IAFicha");
             entity.Property(e => e.IafichaCor)
-                .HasMaxLength(5)
+                .HasMaxLength(6)
                 .IsUnicode(false)
                 .HasColumnName("IAFichaCor");
             entity.Property(e => e.Iagrupo)
@@ -403,6 +408,8 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Master", "mae");
 
+            entity.HasIndex(e => e.IdLinea, "IX_IdLinea").IsUnique();
+
             entity.HasOne(d => d.IdCentroNavigation).WithMany(p => p.Masters)
                 .HasForeignKey(d => d.IdCentro)
                 .OnDelete(DeleteBehavior.ClientSetNull)
@@ -418,8 +425,8 @@ public partial class DbNeoIiContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Master_Empresa");
 
-            entity.HasOne(d => d.IdLineaNavigation).WithMany(p => p.Masters)
-                .HasForeignKey(d => d.IdLinea)
+            entity.HasOne(d => d.IdLineaNavigation).WithOne(p => p.Master)
+                .HasForeignKey<Master>(d => d.IdLinea)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Master_Linea");
 
@@ -448,6 +455,10 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Producto", "ase");
 
+            entity.Property(e => e.Pcodigo)
+                .HasMaxLength(9)
+                .IsUnicode(false)
+                .HasColumnName("PCodigo");
             entity.Property(e => e.Pdescri)
                 .HasMaxLength(300)
                 .IsUnicode(false)

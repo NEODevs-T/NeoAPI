@@ -6,6 +6,7 @@ using NeoAPI.Models;
 using NeoAPI.ModelsViews;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Maestra;
+using NeoAPI.Logic;
 
 namespace NeoAPI.Controllers.Asentamientos
 {
@@ -48,7 +49,7 @@ namespace NeoAPI.Controllers.Asentamientos
         }
 
         [HttpPost("AddAsentamientosDelDia")]
-        public async Task<ActionResult<bool>> AddAsentamientosDelDia(InformeConAsentamientosDTO asentamientos){
+        public async Task<ActionResult<bool>> AddAsentamientosDelDia(int idEmpresa,InformeConAsentamientosDTO asentamientos){
 
             //TODO: Pendiente cambio de horario segun pais
             //var info = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time"); 
@@ -57,12 +58,14 @@ namespace NeoAPI.Controllers.Asentamientos
 
             InfoAse informeDeAsentamientos = new InfoAse();
             InfoAseDTO informeDeAsentamientosDTO = asentamientos.InformaDeAsentamientosDTO ?? new InfoAseDTO();
+            IRotacionLogic rotacion = new RotacionLogic();
 
             informeDeAsentamientos.Iagrupo = informeDeAsentamientosDTO.Iagrupo;
             informeDeAsentamientos.Iaturno = informeDeAsentamientosDTO.Iaturno;
             informeDeAsentamientos.Iaficha = informeDeAsentamientosDTO.Iaficha;
             informeDeAsentamientos.Iaobser = informeDeAsentamientosDTO.Iaobser;
             informeDeAsentamientos.IafechCrea = DateTime.Now;
+            informeDeAsentamientos.IafechBpcs = rotacion.ObtenerFechaBPCS(idEmpresa);
 
             List<AsentumDTO> listaAsentamientosDTO = asentamientos.AsentamientosDTO ?? new List<AsentumDTO>();
             List<Asentum> listaAsentamientos = new List<Asentum>(listaAsentamientosDTO.Count);
@@ -72,6 +75,7 @@ namespace NeoAPI.Controllers.Asentamientos
                 listaAsentamientos[i].Avalor =  listaAsentamientosDTO[i].Avalor;
                 listaAsentamientos[i].AisActivo = listaAsentamientosDTO[i].AisActivo;
                 listaAsentamientos[i].IdRango = listaAsentamientosDTO[i].IdRango;
+                listaAsentamientos[i].Aobserv = listaAsentamientosDTO[i].Aobserv;
             }
 
             try{

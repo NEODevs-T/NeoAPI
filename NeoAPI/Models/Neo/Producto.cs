@@ -15,6 +15,8 @@ public partial class Producto
 
     public bool Pestado { get; set; }
 
+    public string Pcodigo { get; set; } = null!;
+
     public DateTime PfechaCrea { get; set; }
 
     public virtual TipoProd IdTipoProdNavigation { get; set; } = null!;

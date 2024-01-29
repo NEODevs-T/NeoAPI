@@ -4,6 +4,7 @@ using NeoAPI.Models;
 using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;
+using NeoAPI.Logic;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +21,8 @@ builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(buil
 builder.Services.AddDbContext<NeoViejaContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("NeoVieja")), ServiceLifetime.Transient);
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();
+
+
 
 // Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
