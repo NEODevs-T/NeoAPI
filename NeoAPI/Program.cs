@@ -5,6 +5,7 @@ using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;
 using NeoAPI.Logic;
+using NeoAPI.Extensions;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -32,7 +33,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
-
+app.useErrorHandlingMiddleware();
 app.MapControllers();
 
 app.Run();
