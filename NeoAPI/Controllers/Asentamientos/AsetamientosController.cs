@@ -7,6 +7,7 @@ using NeoAPI.ModelsViews;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Logic;
+using NeoAPI.Controllers.Maestras;
 
 namespace NeoAPI.Controllers.Asentamientos
 {
@@ -29,10 +30,10 @@ namespace NeoAPI.Controllers.Asentamientos
         public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] FiltrosRangoControlDTO filtros,[FromQuery] FiltroGTDTO filtroGT){
             InfoAse? oka;
             Asentum? primerAsenta;
+            
 
             oka = await this._context.InfoAses.Where(i => 
                                             i.Iaturno == filtroGT.turno &&
-                                            i.Iagrupo == filtroGT.grupo && 
                                             i.Asenta.Where(a => 
                                                             a.IdRangoNavigation.IdVariableNavigation.IdSeccion == filtros.seccion &&
                                                             a.IdRangoNavigation.IdVariableNavigation.IdTipoVar == filtros.tipo &&
@@ -50,11 +51,6 @@ namespace NeoAPI.Controllers.Asentamientos
 
         [HttpPost("AddAsentamientosDelDia/{idEmpresa:int}")]
         public async Task<ActionResult<bool>> AddAsentamientosDelDia(int idEmpresa,InformeConAsentamientosDTO asentamientos){
-
-            //TODO: Pendiente cambio de horario segun pais
-            //var info = TimeZoneInfo.FindSystemTimeZoneById("Venezuela Standard Time"); 
-            //DateTimeOffset localServerTime = DateTimeOffset.Now;
-            //informeDeAsentamientos.IafechCrea = TimeZoneInfo.ConvertTime(DateTime.Now, info)
 
             InfoAse informeDeAsentamientos = new InfoAse();
             InfoAseDTO informeDeAsentamientosDTO = asentamientos.InformaDeAsentamientosDTO ?? new InfoAseDTO();

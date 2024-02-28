@@ -7,6 +7,8 @@ using NeoAPI.Models;
 using NeoAPI.ModelsViews;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NeoAPI.ModelsDOCIng;
+using NeoAPI.Interface;
+using NeoAPI.Logic;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -33,25 +35,16 @@ namespace NeoAPI.Controllers.Maestras
 
         [HttpGet("GetConversionHorarios/{idPais:int}")]
         public ActionResult<DateTime>  GetConversionHorarios(int idPais){
-            DateTime date = DateTime.Now;
-            DateTime dateReal = new DateTime();
-
-            if(idPais == empresas.PAVECA){
-                dateReal = date;
-            }else if(idPais == empresas.CHEMPRO){
-                dateReal = date;
-            }else if(idPais == empresas.PANASA){
-                dateReal = date.AddHours(-1);
-            }else if(idPais == empresas.PAINSA){
-                dateReal = date.AddHours(-2);
-            }else{
-                return BadRequest();
+            IRotacionLogic rotacionLogic = new RotacionLogic();
+            DateTime? tiempo = rotacionLogic.ConversionHorarios(idPais);
+            if(tiempo != null){
+                return tiempo;
             }
-            return dateReal;
+            return BadRequest();
         }
 
         /*
-            //*Consideraciones de Carga de Infomacion:
+            //* Consideraciones de Carga de Infomacion:
                 1) Siempre la info se va a guardar en Horario Venezuela
                 2) La definicion del turno actual se va a realizar segun el horario del pais
                 3) La fecha de guardado de los asentamientos va a hacer siempre el dia de comienzo del turno
