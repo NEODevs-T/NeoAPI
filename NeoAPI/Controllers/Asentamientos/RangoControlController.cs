@@ -65,6 +65,7 @@ namespace NeoAPI.Controllers.RangoControl
         [HttpGet("GetRangoDeControl")]
         public async Task<ActionResult<List<Rango>>> GetRangoDeControl([FromQuery] FiltrosRangoControlDTO filtros)
         {
+            int VARIABLEMANUAL = 1;
             List<Rango>? listaVariables = null; 
             int producto = filtros.producto;
             int master = filtros.master;
@@ -76,6 +77,7 @@ namespace NeoAPI.Controllers.RangoControl
                                 x.IdMaster == master && 
                                 x.IdVariableNavigation.IdTipoVar == tipo && 
                                 x.IdVariableNavigation.IdSeccion == seccion && 
+                                x.IdVariableNavigation.IdClasiVar == VARIABLEMANUAL &&
                                 x.Ractivo == true)
                                 .AsNoTracking()
                                 .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdSeccionNavigation)
