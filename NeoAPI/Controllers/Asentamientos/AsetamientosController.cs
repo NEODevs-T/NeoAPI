@@ -4,10 +4,12 @@ using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using NeoAPI.Models;
 using NeoAPI.ModelsViews;
+using NeoAPI.ModelsDOCIng;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Logic;
 using NeoAPI.Controllers.Maestras;
+using NeoAPI.Interface;
 
 namespace NeoAPI.Controllers.Asentamientos
 {
@@ -26,21 +28,22 @@ namespace NeoAPI.Controllers.Asentamientos
         }
         
 
-        [HttpGet("GetIsAsentamientoHoy")]
-        public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] FiltrosRangoControlDTO filtros,[FromQuery] FiltroGTDTO filtroGT){
+        [HttpGet("GetIsAsentamientoHoy/{idPais:int}/{idCentro:int}")]
+        public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] FiltrosRangoControlDTO filtros, int idPais, int idCentro){
             InfoAse? oka;
             Asentum? primerAsenta;
-            
+            IRotacionLogic rotacionLogic = new RotacionLogic();
+            RotaCalidum rotacion = rotacionLogic.Rotacion(idPais,idCentro);
 
             oka = await this._context.InfoAses.Where(i => 
-                                            i.Iaturno == filtroGT.turno &&
+                                            i.Iaturno == rotacion.Rcturno.ToString() &&
                                             i.Asenta.Where(a => 
                                                             a.IdRangoNavigation.IdVariableNavigation.IdSeccion == filtros.seccion &&
                                                             a.IdRangoNavigation.IdVariableNavigation.IdTipoVar == filtros.tipo &&
                                                             a.IdRangoNavigation.IdMaster == filtros.master &&
                                                             a.IdRangoNavigation.IdProducto == filtros.producto
                                                         ).FirstOrDefault() != null &&
-                                            i.IafechCrea.Date == DateTime.Now.Date 
+                                            i.IafechCrea.Date.ToString("yyyyMMdd") == rotacion.Rcfecha.ToString()
                                             ).AsNoTracking().FirstOrDefaultAsync();
 
             if(oka != null){
@@ -49,19 +52,25 @@ namespace NeoAPI.Controllers.Asentamientos
             return false;
         }
 
-        [HttpPost("AddAsentamientosDelDia/{idEmpresa:int}")]
-        public async Task<ActionResult<bool>> AddAsentamientosDelDia(int idEmpresa,InformeConAsentamientosDTO asentamientos){
+        [HttpPost("AddAsentamientosDelDia/{idEmpresa:int}/{idPais:int}/{idCentro:int}")]
+        public async Task<ActionResult<bool>> AddAsentamientosDelDia(int idEmpresa,int idPais,int idCentro,InformeConAsentamientosDTO asentamientos){
 
             InfoAse informeDeAsentamientos = new InfoAse();
-            InfoAseDTO informeDeAsentamientosDTO = asentamientos.InformaDeAsentamientosDTO ?? new InfoAseDTO();
-            IRotacionLogic rotacion = new RotacionLogic();
+            InfoAseDTO informeDeAsentamientosDTO = asentamientos.InformaDeAsentamientosDTO;
+            IRotacionLogic rotacionLogic = new RotacionLogic();
+            RotaCalidum rotacion = rotacionLogic.Rotacion(idPais,idCentro);
+
+            int anio = Int32.Parse(rotacion.Rcfecha.ToString().Substring(0,4));
+            int mes = Int32.Parse(rotacion.Rcfecha.ToString().Substring(4,2));
+            int dia = Int32.Parse(rotacion.Rcfecha.ToString().Substring(6,2));
 
             informeDeAsentamientos.Iagrupo = informeDeAsentamientosDTO.Iagrupo;
             informeDeAsentamientos.Iaturno = informeDeAsentamientosDTO.Iaturno;
             informeDeAsentamientos.Iaficha = informeDeAsentamientosDTO.Iaficha;
             informeDeAsentamientos.Iaobser = informeDeAsentamientosDTO.Iaobser;
-            informeDeAsentamientos.IafechCrea = DateTime.Now;
-            informeDeAsentamientos.IafechBpcs = rotacion.ObtenerFechaBPCS(idEmpresa);
+            informeDeAsentamientos.IafechCrea = new DateTime(anio,mes,dia);
+            //TODO:FECHA BPSC ? informeDeAsentamientos.IafechBpcs = rotacion.ObtenerFechaBPCS(idEmpresa);
+            //TODO: Fecha de creacion real informeDeAsentamientos.IafechCreaReal = DateTime.now();
 
             List<AsentumDTO> listaAsentamientosDTO = asentamientos.AsentamientosDTO ?? new List<AsentumDTO>();
             List<Asentum> listaAsentamientos = new List<Asentum>(listaAsentamientosDTO.Count);
@@ -72,57 +81,18 @@ namespace NeoAPI.Controllers.Asentamientos
                 listaAsentamientos[i].AisActivo = listaAsentamientosDTO[i].AisActivo;
                 listaAsentamientos[i].IdRango = listaAsentamientosDTO[i].IdRango;
                 listaAsentamientos[i].Aobserv = listaAsentamientosDTO[i].Aobserv;
+                listaAsentamientos[i].IdInfoAseNavigation = informeDeAsentamientos;
             }
 
             try{
-                foreach (var item in listaAsentamientos)
-                {
-                    item.IdInfoAseNavigation = informeDeAsentamientos;
-                    _context.Asenta.Add(item);
-                }
+                
+                _context.Asenta.AddRange(listaAsentamientos);
                 return await _context.SaveChangesAsync() > 0;    
+            
             }catch(Exception e){
                 return BadRequest(e);
             }
         }
-
-        // [HttpPut("UpdateAsentamientosDelDia")]
-        // public async Task<ActionResult> UpdateAsentamientosDelDia(long idInforme,InformeConAsentamientosDTO asentamientos){
-        //     InfoAse? data;
-        //     bool correcto;
-
-        //     if (asentamientos.InformaDeAsentamientos == null || idInforme != asentamientos.InformaDeAsentamientos.IdInfoAse) 
-        //     {
-        //         return BadRequest();
-        //     }
-
-        //     data = await _context.InfoAses.Where(i => i.IdInfoAse == idInforme).AsNoTracking().FirstOrDefaultAsync();
-
-        //     if(data == null){
-        //         return NotFound();
-        //     }
-
-        //     foreach (AsentumDTO item in asentamientos.AsentamientosDTO ?? new List<AsentumDTO>())
-        //     {
-        //         //item.IdInfoAseNavigation = asentamientos.InformaDeAsentamientos;
-        //         var asenta = 
-        //         _context.Entry(item).State = EntityState.Modified;
-        //     }
-
-        //     try
-        //     {
-        //         correcto = await _context.SaveChangesAsync() > 0;
-
-        //         if(!correcto){
-        //             return  BadRequest();
-        //         }
-        //     }
-        //     catch (DbUpdateConcurrencyException)
-        //     {
-        //         return NotFound();
-        //     }
-        //     return NoContent();
-        // }
         
         [HttpGet("GetAsentamientosViews")]
         public async Task<ActionResult<List<ValoresDeAsentamientosV>>> GetAsentamientosViews([FromQuery] FiltroGTDTO filtro, [FromQuery] string Fecha){
