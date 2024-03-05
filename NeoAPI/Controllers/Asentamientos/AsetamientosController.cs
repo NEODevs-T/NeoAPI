@@ -28,12 +28,12 @@ namespace NeoAPI.Controllers.Asentamientos
         }
         
 
-        [HttpGet("GetIsAsentamientoHoy/{idPais:int}/{idCentro:int}")]
-        public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] FiltrosRangoControlDTO filtros, int idPais, int idCentro){
+        [HttpGet("GetIsAsentamientoHoy/{idEmpresa:int}/{idCentro:int}")]
+        public async Task<ActionResult<bool>> GetIsAsentamientoHoy([FromQuery] FiltrosRangoControlDTO filtros, int idEmpresa, int idCentro){
             InfoAse? oka;
             Asentum? primerAsenta;
             IRotacionLogic rotacionLogic = new RotacionLogic();
-            RotaCalidum rotacion = rotacionLogic.Rotacion(idPais,idCentro);
+            RotaCalidum rotacion = rotacionLogic.Rotacion(idEmpresa,idCentro);
 
             oka = await this._context.InfoAses.Where(i => 
                                             i.Iaturno == rotacion.Rcturno.ToString() &&
@@ -58,7 +58,7 @@ namespace NeoAPI.Controllers.Asentamientos
             InfoAse informeDeAsentamientos = new InfoAse();
             InfoAseDTO informeDeAsentamientosDTO = asentamientos.InformaDeAsentamientosDTO;
             IRotacionLogic rotacionLogic = new RotacionLogic();
-            RotaCalidum rotacion = rotacionLogic.Rotacion(idPais,idCentro);
+            RotaCalidum rotacion = rotacionLogic.Rotacion(idEmpresa,idCentro);
 
             int anio = Int32.Parse(rotacion.Rcfecha.ToString().Substring(0,4));
             int mes = Int32.Parse(rotacion.Rcfecha.ToString().Substring(4,2));
