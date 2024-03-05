@@ -9,6 +9,7 @@ namespace NeoAPI.Logic
     {
         public (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
         private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
+
         public DateTime ObtenerFechaBPCS(int idEmpresa)
         {
             DateTime fecha = DateTime.Now;
@@ -25,18 +26,18 @@ namespace NeoAPI.Logic
             }
             return fecha;
         }
-        public DateTime? ConversionHorarios(int idPais)
+        public DateTime? ConversionHorarios(int idEmpresa)
         {
             DateTime date = DateTime.Now;
             DateTime dateReal = new DateTime();
 
-            if(idPais == empresas.PAVECA){
+            if(idEmpresa == empresas.PAVECA){
                 dateReal = date;
-            }else if(idPais == empresas.CHEMPRO){
+            }else if(idEmpresa == empresas.CHEMPRO){
                 dateReal = date;
-            }else if(idPais == empresas.PANASA){
+            }else if(idEmpresa == empresas.PANASA){
                 dateReal = date.AddHours(-1);
-            }else if(idPais == empresas.PAINSA){
+            }else if(idEmpresa == empresas.PAINSA){
                 dateReal = date.AddHours(-2);
             }else{
                 return null;
@@ -44,15 +45,15 @@ namespace NeoAPI.Logic
             return dateReal;
         }
 
-        public RotaCalidum Rotacion(int idPais,int idCentro)
+        public RotaCalidum Rotacion(int idEmpresa,int idCentro)
         {
             
-            DateTime dateReal = this.ConversionHorarios(idPais) ?? new DateTime();
+            DateTime dateReal = this.ConversionHorarios(idEmpresa) ?? new DateTime();
             int hora = dateReal.Hour;
             int turno = 0;
             int fecha = 0;
 
-            if(idPais == this.empresas.PAVECA){
+            if(idEmpresa == this.empresas.PAVECA){
                 if(hora >= 6 && hora < 18){
                     turno = 1;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
@@ -64,7 +65,7 @@ namespace NeoAPI.Logic
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
                 }
 
-            }else if(idPais == this.empresas.CHEMPRO){
+            }else if(idEmpresa == this.empresas.CHEMPRO){
                 if(hora >= 6 && hora < 18){
                     turno = 1;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
@@ -76,7 +77,7 @@ namespace NeoAPI.Logic
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
                 }
 
-            }else if(idPais == this.empresas.PANASA){
+            }else if(idEmpresa == this.empresas.PANASA){
                 if(hora >= 6 && hora < 14){
                     turno = 1;
                     fecha  = int.Parse(dateReal.ToString("yyyyMMdd"));
@@ -92,7 +93,7 @@ namespace NeoAPI.Logic
                     }
                 }
 
-            }else if(idPais == this.empresas.PAINSA){
+            }else if(idEmpresa == this.empresas.PAINSA){
                 if(idCentro == this.centroPAINSA.K10){
 
                     if(hora >= 6 && hora < 13){
