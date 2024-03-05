@@ -19,7 +19,7 @@ public partial class InfoAse
 
     public DateTime IafechCrea { get; set; }
 
-    public DateTime IafechBpcs { get; set; }
+    public DateTime IafechReal { get; set; }
 
     public virtual ICollection<Asentum> Asenta { get; set; } = new List<Asentum>();
 

@@ -327,7 +327,7 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("InfoAse", "ase");
 
-            entity.Property(e => e.IafechBpcs)
+            entity.Property(e => e.IafechReal)
                 .HasColumnType("datetime")
                 .HasColumnName("IAFechBPCS");
             entity.Property(e => e.IafechCrea)

@@ -69,8 +69,7 @@ namespace NeoAPI.Controllers.Asentamientos
             informeDeAsentamientos.Iaficha = informeDeAsentamientosDTO.Iaficha;
             informeDeAsentamientos.Iaobser = informeDeAsentamientosDTO.Iaobser;
             informeDeAsentamientos.IafechCrea = new DateTime(anio,mes,dia);
-            //TODO:FECHA BPSC ? informeDeAsentamientos.IafechBpcs = rotacion.ObtenerFechaBPCS(idEmpresa);
-            //TODO: Fecha de creacion real informeDeAsentamientos.IafechCreaReal = DateTime.now();
+            informeDeAsentamientos.IafechReal = DateTime.Now;
 
             List<AsentumDTO> listaAsentamientosDTO = asentamientos.AsentamientosDTO ?? new List<AsentumDTO>();
             List<Asentum> listaAsentamientos = new List<Asentum>(listaAsentamientosDTO.Count);
