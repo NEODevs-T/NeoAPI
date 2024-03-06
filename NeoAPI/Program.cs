@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
-using NeoAPI.Models;
+using NeoAPI.Models.Neo;
 using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;

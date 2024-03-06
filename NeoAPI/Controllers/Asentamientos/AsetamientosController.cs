@@ -2,7 +2,7 @@ using System.Security.Cryptography.X509Certificates;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
-using NeoAPI.Models;
+using NeoAPI.Models.Neo;
 using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.DTOs.Asentamientos;
@@ -35,6 +35,12 @@ namespace NeoAPI.Controllers.Asentamientos
             IRotacionLogic rotacionLogic = new RotacionLogic();
             RotaCalidum rotacion = rotacionLogic.Rotacion(idEmpresa,idCentro);
 
+            int anio = Int32.Parse(rotacion.Rcfecha.ToString().Substring(0,4));
+            int mes = Int32.Parse(rotacion.Rcfecha.ToString().Substring(4,2));
+            int dia = Int32.Parse(rotacion.Rcfecha.ToString().Substring(6,2));
+
+            DateTime fecha = new DateTime(anio,mes,dia);
+
             oka = await this._context.InfoAses.Where(i => 
                                             i.Iaturno == rotacion.Rcturno.ToString() &&
                                             i.Asenta.Where(a => 
@@ -43,7 +49,7 @@ namespace NeoAPI.Controllers.Asentamientos
                                                             a.IdRangoNavigation.IdMaster == filtros.master &&
                                                             a.IdRangoNavigation.IdProducto == filtros.producto
                                                         ).FirstOrDefault() != null &&
-                                            i.IafechCrea.Date.ToString("yyyyMMdd") == rotacion.Rcfecha.ToString()
+                                            i.IafechCrea.Date == fecha
                                             ).AsNoTracking().FirstOrDefaultAsync();
 
             if(oka != null){

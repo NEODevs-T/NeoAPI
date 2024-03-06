@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using NeoAPI.DTOs.Maestra;
-using NeoAPI.Models;
+using NeoAPI.Models.Neo;
 using NeoAPI.ModelsViews;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NeoAPI.Models.NeoVieja;

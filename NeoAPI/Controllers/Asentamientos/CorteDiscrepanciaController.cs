@@ -1,7 +1,7 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NeoAPI.Models;
+using NeoAPI.Models.Neo;
 //using static System.Runtime.InteropServices.JavaScript.JSType;
 using NeoAPI.DTOs.Asentamientos;
 using AutoMapper;

@@ -1,7 +1,7 @@
 ﻿using AutoMapper;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.LibroNovedades;
-using NeoAPI.Models;
+using NeoAPI.Models.Neo;
 using NeoAPI.Models.NeoVieja;
 using System.Collections.Generic;
 

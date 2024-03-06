@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace NeoAPI.Models;
+namespace NeoAPI.Models.Neo;
 
 public partial class DbNeoIiContext : DbContext
 {
@@ -327,12 +327,12 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("InfoAse", "ase");
 
-            entity.Property(e => e.IafechReal)
-                .HasColumnType("datetime")
-                .HasColumnName("IAFechBPCS");
             entity.Property(e => e.IafechCrea)
                 .HasColumnType("datetime")
                 .HasColumnName("IAFechCrea");
+            entity.Property(e => e.IafechReal)
+                .HasColumnType("datetime")
+                .HasColumnName("IAFechReal");
             entity.Property(e => e.Iaficha)
                 .HasMaxLength(6)
                 .IsUnicode(false)

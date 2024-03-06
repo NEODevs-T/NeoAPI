@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models;
+namespace NeoAPI.Models.Neo;
 
 public partial class Linea
 {
