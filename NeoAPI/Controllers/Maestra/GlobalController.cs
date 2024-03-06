@@ -33,10 +33,10 @@ namespace NeoAPI.Controllers.Maestras
             return TimeZoneInfo.GetSystemTimeZones();
         }
 
-        [HttpGet("GetConversionHorarios/{idPais:int}")]
-        public ActionResult<DateTime>  GetConversionHorarios(int idPais){
+        [HttpGet("GetConversionHorarios/{idEmpresa:int}")]
+        public ActionResult<DateTime>  GetConversionHorarios(int idEmpresa){
             IRotacionLogic rotacionLogic = new RotacionLogic();
-            DateTime? tiempo = rotacionLogic.ConversionHorarios(idPais);
+            DateTime? tiempo = rotacionLogic.ConversionHorarios(idEmpresa);
             if(tiempo != null){
                 return tiempo;
             }
@@ -50,16 +50,16 @@ namespace NeoAPI.Controllers.Maestras
                 3) La fecha de guardado de los asentamientos va a hacer siempre el dia de comienzo del turno
         */
 
-        [HttpGet("GetRotacion/{idPais:int}/{idCentro:int}")]
-        public async Task<ActionResult<RotaCalidum>> GetRotacion(int idPais,int idCentro)
+        [HttpGet("GetRotacion/{idEmpresa:int}/{idCentro:int}")]
+        public async Task<ActionResult<RotaCalidum>> GetRotacion(int idEmpresa,int idCentro)
         {
-            DateTime dateReal = this.GetConversionHorarios(idPais).Value;
+            DateTime dateReal = this.GetConversionHorarios(idEmpresa).Value;
             int hora = dateReal.Hour;
             int turno = 0;
             int fecha = 0;
 
 
-            if(idPais == this.empresas.PAVECA){
+            if(idEmpresa == this.empresas.PAVECA){
                 if(hora >= 6 && hora < 18){
                     turno = 1;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
@@ -71,7 +71,7 @@ namespace NeoAPI.Controllers.Maestras
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
                 }
 
-            }else if(idPais == this.empresas.CHEMPRO){
+            }else if(idEmpresa == this.empresas.CHEMPRO){
                 if(hora >= 6 && hora < 18){
                     turno = 1;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
@@ -83,7 +83,7 @@ namespace NeoAPI.Controllers.Maestras
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
                 }
 
-            }else if(idPais == this.empresas.PANASA){
+            }else if(idEmpresa == this.empresas.PANASA){
                 if(hora >= 6 && hora < 14){
                     turno = 1;
                     fecha  = int.Parse(dateReal.ToString("yyyyMMdd"));
@@ -99,7 +99,7 @@ namespace NeoAPI.Controllers.Maestras
                     }
                 }
 
-            }else if(idPais == this.empresas.PAINSA){
+            }else if(idEmpresa == this.empresas.PAINSA){
                 if(idCentro == this.centroPAINSA.K10){
 
                     if(hora >= 6 && hora < 13){
@@ -144,7 +144,7 @@ namespace NeoAPI.Controllers.Maestras
 
             try
             {
-                if(idPais == empresas.PAVECA){
+                if(idEmpresa == empresas.PAVECA){
                     return await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
                 }else{
                     RotaCalidum rotaCalidum = new RotaCalidum();
