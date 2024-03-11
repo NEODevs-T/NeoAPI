@@ -9,6 +9,7 @@ namespace NeoAPI.DTOs.Asentamientos
         public string CdaccCorr { get; set; } = null!;
         public bool CdisListo { get; set; }
         public int IdAsenta { get; set; }
+        public string? Aobserv { get; set; }
         public bool CdisLibro { get; set; }
         public DateTime? CdfechAcci { get; set; } = null!;
         public DateTime? CdfechList { get; set; } = null!;
