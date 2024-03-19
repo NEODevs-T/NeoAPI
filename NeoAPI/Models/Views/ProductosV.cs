@@ -15,7 +15,7 @@ public partial class ProductosV
 
     public string TipoDeProducto { get; set; } = null!;
 
-    public string Producto { get; set; } = null!;
+    public string? Producto { get; set; } = null!;
 
     public string Codigo { get; set; } = null!;
 
