@@ -9,7 +9,7 @@ public partial class Producto
 
     public int IdTipoProd { get; set; }
 
-    public string Pnombre { get; set; } = null!;
+    public string? Pnombre { get; set; }
 
     public string? Pdescri { get; set; }
 

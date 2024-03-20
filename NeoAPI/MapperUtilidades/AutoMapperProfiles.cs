@@ -1,5 +1,6 @@
 ﻿using AutoMapper;
 using NeoAPI.DTOs.Asentamientos;
+using NeoAPI.DTOs.Bonificaciones;
 using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.Models.Neo;
 using NeoAPI.Models.NeoVieja;
@@ -46,6 +47,29 @@ namespace NeoAPI.AutoMapper
             CreateMap<LibroNoveDTO,LibroNove>().ReverseMap();
 
             CreateMap<ClasifiTpmDTO,ClasifiTpm>().ReverseMap();
+
+
+            CreateMap<Resuman,ResumenGeneralDTO>()
+                .ForMember(dest => dest.Nombre, act => act.MapFrom(src => src.IdPersonalNavigation.PeNombre))
+                .ForMember(dest => dest.Apellido, act => act.MapFrom(src => src.IdPersonalNavigation.PeApellido))
+                .ForMember(dest => dest.Ficha, act => act.MapFrom(src => src.IdPersonalNavigation.PeFicha))
+                .ForMember(dest => dest.Grupo, act => act.MapFrom(src => src.IdPersonalNavigation.PeGrupo))
+                .ForMember(dest => dest.Turno, act => act.MapFrom(src => src.Rturno))
+                .ForMember(dest => dest.Concepto, act => act.MapFrom(src => src.IdTipIncenNavigation.Tinombre))
+                .ForMember(dest => dest.Suplencia, act => act.MapFrom(src => src.IdTipSupleNavigation.Tscausa))
+                .ForMember(dest => dest.FichaSuplida, act => act.MapFrom(src => src.Rsuplido))
+                .ForMember(dest => dest.Pais, act => act.MapFrom(src => src.IdMontosNavigation.IdLineaNavigation.Master.IdPaisNavigation.Pnombre))
+                .ForMember(dest => dest.Empresa, act => act.MapFrom(src => src.IdMontosNavigation.IdLineaNavigation.Master.IdEmpresaNavigation.Enombre))
+                .ForMember(dest => dest.Centro, act => act.MapFrom(src => src.IdMontosNavigation.IdLineaNavigation.Master.IdCentroNavigation.Cnom))
+                .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdMontosNavigation.IdLineaNavigation.Lnom))
+                .ForMember(dest => dest.PuestoTrabajo, act => act.MapFrom(src => src.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre))
+                .ForMember(dest => dest.Monto, act => act.MapFrom(src => src.IdMontosNavigation.Mmonto))
+                .ForMember(dest => dest.Moneda, act => act.MapFrom(src => src.IdMontosNavigation.IdMonedaNavigation.Mtipo))
+                .ForMember(dest => dest.FechaResumen, act => act.MapFrom(src => src.Rfecha))
+                .ForMember(dest => dest.FechaPago, act => act.MapFrom(src => src.RfecPago))
+                .ForMember(dest => dest.FichaResumen, act => act.MapFrom(src => src.RuserVali))
+                .ForMember(dest => dest.FichaPago, act => act.MapFrom(src => src.RuserPago))
+                .ReverseMap();
             
             //https://www.youtube.com/watch?v=pr_pemcmVAs
         }
