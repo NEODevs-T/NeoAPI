@@ -20,4 +20,6 @@ public partial class Linea
     public virtual ICollection<EquipoEam> EquipoEams { get; set; } = new List<EquipoEam>();
 
     public virtual Master? Master { get; set; }
+
+    public virtual ICollection<Monto> Montos { get; set; } = new List<Monto>();
 }
