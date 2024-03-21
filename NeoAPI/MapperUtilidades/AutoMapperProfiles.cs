@@ -2,8 +2,10 @@
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Bonificaciones;
 using NeoAPI.DTOs.LibroNovedades;
+using NeoAPI.DTOs.BPSC;
 using NeoAPI.Models.Neo;
 using NeoAPI.Models.NeoVieja;
+using NeoAPI.Models.PolybaseBPSCVen;
 using System.Collections.Generic;
 
 namespace NeoAPI.AutoMapper
@@ -71,6 +73,11 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.FichaPago, act => act.MapFrom(src => src.RuserPago))
                 .ReverseMap();
             
+
+            CreateMap<Fso,OrdenFabricacionDTO>()
+                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
+                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
+                .ReverseMap();
             //https://www.youtube.com/watch?v=pr_pemcmVAs
         }
     }

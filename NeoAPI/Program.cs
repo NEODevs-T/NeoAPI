@@ -4,6 +4,7 @@ using NeoAPI.Models.Neo;
 using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;
+using NeoAPI.Models.PolybaseBPSCVen;
 using NeoAPI.Logic;
 using NeoAPI.Extensions;
 
@@ -20,6 +21,8 @@ builder.Services.AddDbContext<DbNeoIiContext>(options =>options.UseSqlServer(bui
 builder.Services.AddDbContext<ViewsContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DOCIng")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<NeoViejaContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("NeoVieja")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPSCVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Polybase")), ServiceLifetime.Transient);
+
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();
 

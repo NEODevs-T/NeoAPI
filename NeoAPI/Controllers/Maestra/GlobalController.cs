@@ -1,11 +1,10 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using NeoAPI.DTOs.Maestra;
-using NeoAPI.Models;
-using NeoAPI.ModelsViews;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using AutoMapper;
+using NeoAPI.DTOs.BPSC;
+using NeoAPI.Models.PolybaseBPSCVen;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
 using NeoAPI.Logic;
@@ -19,12 +18,16 @@ namespace NeoAPI.Controllers.Maestras
     public class GlobalController : ControllerBase
     {
         private readonly DOCIngContext _DOCIng;
+        private readonly PolybaseBPSCVenContext _PolybaseBPSCVen;
+        private readonly IMapper _mapper;
         private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas {get; set;} = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
         private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
 
-        public GlobalController(DOCIngContext DOCIng)
+        public GlobalController(DOCIngContext DOCIng,PolybaseBPSCVenContext PolybaseBPSCVen, IMapper mapper)
         {
             _DOCIng = DOCIng;
+            _PolybaseBPSCVen = PolybaseBPSCVen;
+            _mapper = mapper;
         }
 
         [HttpGet("GetIdHorarios")]
@@ -160,5 +163,16 @@ namespace NeoAPI.Controllers.Maestras
                 return NotFound();
             }
         }
+
+        [HttpGet("GetProductosActuales/{CentroTrabajo:int}")]
+        public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int CentroTrabajo)
+        {
+            const string OrdenesAbiertas = "5";
+            List<Fso> ordenesFabricacionList;
+            List<OrdenFabricacionDTO> ordenesFabricacionDTOList;
+            ordenesFabricacionList = await _PolybaseBPSCVen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
+            ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
+            return ordenesFabricacionDTOList;
+        } 
     }
 }
