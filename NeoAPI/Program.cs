@@ -4,7 +4,9 @@ using NeoAPI.Models.Neo;
 using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;
-using NeoAPI.Models.PolybaseBPSCVen;
+using NeoAPI.Models.PolybaseBPCSVen;
+using NeoAPI.Models.PolybaseBPCSCol;
+using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Logic;
 using NeoAPI.Extensions;
 
@@ -21,7 +23,9 @@ builder.Services.AddDbContext<DbNeoIiContext>(options =>options.UseSqlServer(bui
 builder.Services.AddDbContext<ViewsContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DOCIng")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<NeoViejaContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("NeoVieja")), ServiceLifetime.Transient);
-builder.Services.AddDbContext<PolybaseBPSCVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Polybase")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseVen")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCol")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
 
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();

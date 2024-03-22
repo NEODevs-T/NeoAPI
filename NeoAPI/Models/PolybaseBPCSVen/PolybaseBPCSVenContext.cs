@@ -2,15 +2,15 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace NeoAPI.Models.PolybaseBPSCVen;
+namespace NeoAPI.Models.PolybaseBPCSVen;
 
-public partial class PolybaseBPSCVenContext : DbContext
+public partial class PolybaseBPCSVenContext : DbContext
 {
-    public PolybaseBPSCVenContext()
+    public PolybaseBPCSVenContext()
     {
     }
 
-    public PolybaseBPSCVenContext(DbContextOptions<PolybaseBPSCVenContext> options)
+    public PolybaseBPCSVenContext(DbContextOptions<PolybaseBPCSVenContext> options)
         : base(options)
     {
     }

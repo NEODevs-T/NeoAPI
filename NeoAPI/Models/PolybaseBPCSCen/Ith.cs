@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.PolybaseBPSCVen;
+namespace NeoAPI.Models.PolybaseBPCSCen;
 
 public partial class Ith
 {

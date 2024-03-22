@@ -5,7 +5,9 @@ using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.BPSC;
 using NeoAPI.Models.Neo;
 using NeoAPI.Models.NeoVieja;
-using NeoAPI.Models.PolybaseBPSCVen;
+using NeoAPI.Models.PolybaseBPCSVen;
+using NeoAPI.Models.PolybaseBPCSCol;
+using NeoAPI.Models.PolybaseBPCSCen;
 using System.Collections.Generic;
 
 namespace NeoAPI.AutoMapper
@@ -74,7 +76,17 @@ namespace NeoAPI.AutoMapper
                 .ReverseMap();
             
 
-            CreateMap<Fso,OrdenFabricacionDTO>()
+            CreateMap<Models.PolybaseBPCSVen.Fso,OrdenFabricacionDTO>()
+                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
+                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
+                .ReverseMap();
+
+            CreateMap<Models.PolybaseBPCSCol.Fso,OrdenFabricacionDTO>()
+                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
+                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
+                .ReverseMap();
+
+            CreateMap<Models.PolybaseBPCSCen.Fso,OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();

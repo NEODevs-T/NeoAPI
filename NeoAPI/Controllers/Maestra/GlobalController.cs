@@ -4,10 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using AutoMapper;
 using NeoAPI.DTOs.BPSC;
-using NeoAPI.Models.PolybaseBPSCVen;
+using NeoAPI.Models.PolybaseBPCSCen;
+using NeoAPI.Models.PolybaseBPCSCol;
+using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
 using NeoAPI.Logic;
+using NeoAPI.Models.PolybaseBPCSVen;
+using Microsoft.Data.SqlClient;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -18,15 +22,19 @@ namespace NeoAPI.Controllers.Maestras
     public class GlobalController : ControllerBase
     {
         private readonly DOCIngContext _DOCIng;
-        private readonly PolybaseBPSCVenContext _PolybaseBPSCVen;
+        private readonly PolybaseBPCSVenContext _PolybaseBPCSVen;
+        private readonly PolybaseBPCSColContext _PolybaseBPCSVCol;
+        private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
         private readonly IMapper _mapper;
         private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas {get; set;} = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
         private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
 
-        public GlobalController(DOCIngContext DOCIng,PolybaseBPSCVenContext PolybaseBPSCVen, IMapper mapper)
+        public GlobalController(DOCIngContext DOCIng,PolybaseBPCSVenContext PolybaseBPCSVen,PolybaseBPCSColContext PolybaseBPCSVCol,PolybaseBPCSCenContext PolybaseBPCSVCen, IMapper mapper)
         {
             _DOCIng = DOCIng;
-            _PolybaseBPSCVen = PolybaseBPSCVen;
+            _PolybaseBPCSVen = PolybaseBPCSVen;
+            _PolybaseBPCSVCol = PolybaseBPCSVCol;
+            _PolybaseBPCSVCen = PolybaseBPCSVCen;
             _mapper = mapper;
         }
 
@@ -164,14 +172,29 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
-        [HttpGet("GetProductosActuales/{CentroTrabajo:int}")]
-        public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int CentroTrabajo)
+        [HttpGet("GetProductosActuales/{idEmpresa:int}/{CentroTrabajo:int}")]
+        public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int idEmpresa,int CentroTrabajo)
         {
             const string OrdenesAbiertas = "5";
-            List<Fso> ordenesFabricacionList;
-            List<OrdenFabricacionDTO> ordenesFabricacionDTOList;
-            ordenesFabricacionList = await _PolybaseBPSCVen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
-            ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
+            List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
+        
+
+            if(empresas.PAVECA == idEmpresa){
+                List<Models.PolybaseBPCSVen.Fso> ordenesFabricacionList = await _PolybaseBPCSVen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo && f.Sqfin < f.Sqreq).ToListAsync();
+                ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
+            }else if(empresas.PANASA == idEmpresa){
+                List<Models.PolybaseBPCSCol.Fso> ordenesFabricacionList = await _PolybaseBPCSVCol.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo && f.Sqfin < f.Sqreq).ToListAsync();
+                ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
+            }else if(empresas.PAINSA == idEmpresa){
+                List<Models.PolybaseBPCSCen.Fso> ordenesFabricacionList = await _PolybaseBPCSVCen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo && f.Sqfin < f.Sqreq).ToListAsync();
+                ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
+            }
+
+            ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto)
+            .Select(f => f.First()).ToList();
+
+            ordenesFabricacionDTOList.ForEach(x => x.CodProducto = x.CodProducto.Trim());
+
             return ordenesFabricacionDTOList;
         } 
     }
