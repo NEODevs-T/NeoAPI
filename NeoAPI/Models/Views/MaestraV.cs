@@ -15,6 +15,8 @@ public partial class MaestraV
 
     public string Linea { get; set; } = null!;
 
+    public string CentroTrabajo { get; set; } = null!;
+
     public int IdPais { get; set; }
 
     public int IdEmpresa { get; set; }

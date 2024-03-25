@@ -6,12 +6,13 @@ using AutoMapper;
 using NeoAPI.DTOs.BPSC;
 using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Models.PolybaseBPCSCol;
-using NeoAPI.Models.PolybaseBPCSCen;
+using NeoAPI.Models.PolybaseBPCSVen;
+using NeoAPI.ModelsViews;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
 using NeoAPI.Logic;
-using NeoAPI.Models.PolybaseBPCSVen;
 using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -25,17 +26,19 @@ namespace NeoAPI.Controllers.Maestras
         private readonly PolybaseBPCSVenContext _PolybaseBPCSVen;
         private readonly PolybaseBPCSColContext _PolybaseBPCSVCol;
         private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
+        private readonly ViewsContext _ViewsContext;
         private readonly IMapper _mapper;
         private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas {get; set;} = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
         private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
 
-        public GlobalController(DOCIngContext DOCIng,PolybaseBPCSVenContext PolybaseBPCSVen,PolybaseBPCSColContext PolybaseBPCSVCol,PolybaseBPCSCenContext PolybaseBPCSVCen, IMapper mapper)
+        public GlobalController(DOCIngContext DOCIng,PolybaseBPCSVenContext polybaseBPCSVen,PolybaseBPCSColContext polybaseBPCSVCol,PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper, ViewsContext viewContext)
         {
             _DOCIng = DOCIng;
-            _PolybaseBPCSVen = PolybaseBPCSVen;
-            _PolybaseBPCSVCol = PolybaseBPCSVCol;
-            _PolybaseBPCSVCen = PolybaseBPCSVCen;
+            _PolybaseBPCSVen = polybaseBPCSVen;
+            _PolybaseBPCSVCol = polybaseBPCSVCol;
+            _PolybaseBPCSVCen = polybaseBPCSVCen;
             _mapper = mapper;
+            _ViewsContext = viewContext;
         }
 
         [HttpGet("GetIdHorarios")]
@@ -172,12 +175,24 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
-        [HttpGet("GetProductosActuales/{idEmpresa:int}/{CentroTrabajo:int}")]
-        public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int idEmpresa,int CentroTrabajo)
+        [HttpGet("GetProductosActuales/{idLinea:int}")]
+        public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int idLinea)
         {
+            int idEmpresa;
+            int CentroTrabajo;
             const string OrdenesAbiertas = "5";
+            MaestraV? maestra;
             List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
-        
+
+            maestra = await _ViewsContext.MaestraVs.Where(m => m.IdLinea == idLinea).FirstOrDefaultAsync();
+
+            if (maestra == null)
+            {
+                return BadRequest();
+            }
+
+            idEmpresa = maestra.IdEmpresa;
+            CentroTrabajo = Int32.Parse(maestra.CentroTrabajo);
 
             if(empresas.PAVECA == idEmpresa){
                 List<Models.PolybaseBPCSVen.Fso> ordenesFabricacionList = await _PolybaseBPCSVen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo && f.Sqfin < f.Sqreq).ToListAsync();
