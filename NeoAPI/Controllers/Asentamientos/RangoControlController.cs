@@ -72,20 +72,35 @@ namespace NeoAPI.Controllers.RangoControl
             int tipo = filtros.tipo;
             int seccion = filtros.seccion;
 
-            listaVariables = await this._context.Rangos.Where(
-                                x => x.IdProducto == producto && 
-                                x.IdMaster == master && 
-                                x.IdVariableNavigation.IdTipoVar == tipo && 
-                                x.IdVariableNavigation.IdSeccion == seccion && 
-                                x.IdVariableNavigation.IdClasiVar == VARIABLEMANUAL &&
-                                x.Ractivo == true)
-                                .AsNoTracking()
-                                .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdSeccionNavigation)
-                                .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdUnidadNavigation)
-                                .OrderBy(r => r.Rorden)
-                                .ToListAsync();
+            if(seccion != 0){
+                    listaVariables = await this._context.Rangos.Where(
+                                    x => x.IdProducto == producto && 
+                                    x.IdMaster == master && 
+                                    x.IdVariableNavigation.IdTipoVar == tipo && 
+                                    x.IdVariableNavigation.IdSeccion == seccion && 
+                                    x.IdVariableNavigation.IdClasiVar == VARIABLEMANUAL &&
+                                    x.Ractivo == true)
+                                    .AsNoTracking()
+                                    .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdSeccionNavigation)
+                                    .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdUnidadNavigation)
+                                    .OrderBy(r => r.Rorden)
+                                    .ToListAsync();
+            }else{
+                    listaVariables = await this._context.Rangos.Where(
+                                    x => x.IdProducto == producto && 
+                                    x.IdMaster == master && 
+                                    x.IdVariableNavigation.IdTipoVar == tipo && 
+                                    x.IdVariableNavigation.IdClasiVar == VARIABLEMANUAL &&
+                                    x.Ractivo == true)
+                                    .AsNoTracking()
+                                    .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdSeccionNavigation)
+                                    .Include(r => r.IdVariableNavigation).ThenInclude(v => v.IdUnidadNavigation)
+                                    .OrderBy(r => r.Rorden)
+                                    .ToListAsync();
+            }
+
             if(listaVariables.Count == 0){
-                return NotFound();
+                    return NotFound();
             }
             return listaVariables;
         }
