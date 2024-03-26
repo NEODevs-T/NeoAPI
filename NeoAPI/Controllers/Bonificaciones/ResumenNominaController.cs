@@ -6,7 +6,7 @@ using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Bonificaciones;
 using NeoAPI.Models.Neo;
-using NeoAPI.ModelsViews;
+using NeoAPI.Models.Views;
 
 namespace NeoAPI.Controllers.Bonificaciones
 {

@@ -2,7 +2,7 @@
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
 
-namespace NeoAPI.ModelsViews;
+namespace NeoAPI.Models.Views;
 
 public partial class ViewsContext : DbContext
 {
@@ -164,6 +164,10 @@ public partial class ViewsContext : DbContext
             entity.Property(e => e.Centro)
                 .HasMaxLength(500)
                 .IsUnicode(false);
+            entity.Property(e => e.CentroDeTrabajo)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Centro de Trabajo");
             entity.Property(e => e.División)
                 .HasMaxLength(500)
                 .IsUnicode(false);
@@ -235,7 +239,7 @@ public partial class ViewsContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Producto)
-                .HasMaxLength(100)
+                .HasMaxLength(9)
                 .IsUnicode(false);
             entity.Property(e => e.Sección)
                 .HasMaxLength(100)

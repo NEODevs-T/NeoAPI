@@ -7,7 +7,7 @@ using NeoAPI.DTOs.BPSC;
 using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSVen;
-using NeoAPI.ModelsViews;
+using NeoAPI.Models.Views;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
 using NeoAPI.Logic;
@@ -192,16 +192,16 @@ namespace NeoAPI.Controllers.Maestras
             }
 
             idEmpresa = maestra.IdEmpresa;
-            CentroTrabajo = Int32.Parse(maestra.CentroTrabajo);
+            CentroTrabajo = Int32.Parse(maestra.CentroDeTrabajo);
 
             if(empresas.PAVECA == idEmpresa){
-                List<Models.PolybaseBPCSVen.Fso> ordenesFabricacionList = await _PolybaseBPCSVen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo && f.Sqfin < f.Sqreq).ToListAsync();
+                List<Models.PolybaseBPCSVen.Fso> ordenesFabricacionList = await _PolybaseBPCSVen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
                 ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
             }else if(empresas.PANASA == idEmpresa){
-                List<Models.PolybaseBPCSCol.Fso> ordenesFabricacionList = await _PolybaseBPCSVCol.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo && f.Sqfin < f.Sqreq).ToListAsync();
+                List<Models.PolybaseBPCSCol.Fso> ordenesFabricacionList = await _PolybaseBPCSVCol.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
                 ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
             }else if(empresas.PAINSA == idEmpresa){
-                List<Models.PolybaseBPCSCen.Fso> ordenesFabricacionList = await _PolybaseBPCSVCen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo && f.Sqfin < f.Sqreq).ToListAsync();
+                List<Models.PolybaseBPCSCen.Fso> ordenesFabricacionList = await _PolybaseBPCSVCen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
                 ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
             }
 

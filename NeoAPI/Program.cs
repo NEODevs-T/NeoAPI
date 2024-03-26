@@ -1,7 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using NeoAPI.Models.Neo;
-using NeoAPI.ModelsViews;
+using NeoAPI.Models.Views;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;
 using NeoAPI.Models.PolybaseBPCSVen;

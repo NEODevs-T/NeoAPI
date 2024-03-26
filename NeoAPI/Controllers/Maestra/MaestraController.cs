@@ -4,7 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
-using NeoAPI.ModelsViews;
+using NeoAPI.Models.Views;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NeoAPI.Models.NeoVieja;
 
