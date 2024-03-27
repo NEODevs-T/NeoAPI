@@ -2,7 +2,6 @@
 using System.Collections.Generic;
 
 namespace NeoAPI.Models.PolybaseBPCSVen;
-
 public partial class Iim
 {
     public string Iid { get; set; } = null!;

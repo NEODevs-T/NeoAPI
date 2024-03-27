@@ -183,6 +183,7 @@ namespace NeoAPI.Controllers.Maestras
             const string OrdenesAbiertas = "5";
             MaestraV? maestra;
             List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
+            OrdenFabricacionDTO ordenFabricacionDTO;
 
             maestra = await _ViewsContext.MaestraVs.Where(m => m.IdLinea == idLinea).FirstOrDefaultAsync();
 
@@ -194,21 +195,22 @@ namespace NeoAPI.Controllers.Maestras
             idEmpresa = maestra.IdEmpresa;
             CentroTrabajo = Int32.Parse(maestra.CentroDeTrabajo);
 
-            if(empresas.PAVECA == idEmpresa){
-                List<Models.PolybaseBPCSVen.Fso> ordenesFabricacionList = await _PolybaseBPCSVen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
-                ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
-            }else if(empresas.PANASA == idEmpresa){
-                List<Models.PolybaseBPCSCol.Fso> ordenesFabricacionList = await _PolybaseBPCSVCol.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
-                ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
-            }else if(empresas.PAINSA == idEmpresa){
-                List<Models.PolybaseBPCSCen.Fso> ordenesFabricacionList = await _PolybaseBPCSVCen.Fsos.Where(f => f.Sstat.Contains(OrdenesAbiertas) && f.Swrkc == CentroTrabajo).ToListAsync();
-                ordenesFabricacionDTOList = _mapper.Map<List<OrdenFabricacionDTO>>(ordenesFabricacionList);
+            var result = from Fso in _PolybaseBPCSVen.Fsos
+                        join Iim in _PolybaseBPCSVen.Iims
+                        on Fso.Sprod equals Iim.Iprod
+                        where Fso.Swrkc == CentroTrabajo && Fso.Sstat.Contains(OrdenesAbiertas)
+                        select new {Fso.Sprod,Fso.Sstat,Iim.Idesc};
+
+            foreach (var item in result)
+            {
+                ordenFabricacionDTO = new OrdenFabricacionDTO();
+                ordenFabricacionDTO.Status = item.Sstat;
+                ordenFabricacionDTO.DescProducto = item.Idesc.Trim();
+                ordenFabricacionDTO.CodProducto = item.Sprod.Trim();
+                ordenesFabricacionDTOList.Add(ordenFabricacionDTO);
             }
 
-            ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto)
-            .Select(f => f.First()).ToList();
-
-            ordenesFabricacionDTOList.ForEach(x => x.CodProducto = x.CodProducto.Trim());
+            ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
 
             return ordenesFabricacionDTOList;
         } 

@@ -13,6 +13,7 @@ public partial class PolybaseBPCSVenContext : DbContext
     public PolybaseBPCSVenContext(DbContextOptions<PolybaseBPCSVenContext> options)
         : base(options)
     {
+        Database.SetCommandTimeout(600);
     }
 
     public virtual DbSet<Fso> Fsos { get; set; }
