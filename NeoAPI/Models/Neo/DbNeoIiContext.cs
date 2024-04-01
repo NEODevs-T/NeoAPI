@@ -708,6 +708,8 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("SNombre");
+            entity.Property(e => e.IdGrupo)
+                .HasColumnName("IdGrupo");
         });
 
         modelBuilder.Entity<TipIncen>(entity =>
