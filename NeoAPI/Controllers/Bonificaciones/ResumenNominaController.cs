@@ -72,6 +72,8 @@ namespace NeoAPI.Controllers.Bonificaciones
             .Where(r => r.Rfecha >= fechaInicio.Date && r.Rfecha <= fechaFinal.Date && r.IdTipIncenNavigation.Tinombre == tipoi)
             .GroupBy(r => new
             {
+              r.IdMontosNavigation.IdLineaNavigation.Master.IdEmpresaNavigation.IdCompania,
+
                 r.IdPersonalNavigation.PeFicha,
                 r.IdPersonalNavigation.PeNombre,
                 r.IdPersonalNavigation.PeApellido,
@@ -83,6 +85,7 @@ namespace NeoAPI.Controllers.Bonificaciones
             })
             .Select(g => new
             {
+                IdCompany = g.Key.IdCompania,
                 Ficha = g.Key.PeFicha,
                 Nombre = g.Key.PeNombre,
                 Apellido = g.Key.PeApellido,               

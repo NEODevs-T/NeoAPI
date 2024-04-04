@@ -6,6 +6,10 @@ using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;
 using NeoAPI.Logic;
 using NeoAPI.Extensions;
+using IBM.EntityFrameworkCore;
+
+using Microsoft.Extensions.Configuration;
+using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -20,6 +24,10 @@ builder.Services.AddDbContext<DbNeoIiContext>(options =>options.UseSqlServer(bui
 builder.Services.AddDbContext<ViewsContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DOCIng")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<NeoViejaContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("NeoVieja")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<DbBPCSContext>(options =>options.UseDb2(builder.Configuration.GetConnectionString("AS400SPI"),p=>p.SetServerInfo(IBMDBServerType.AS400)), ServiceLifetime.Transient);
+
+
+
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();
 
