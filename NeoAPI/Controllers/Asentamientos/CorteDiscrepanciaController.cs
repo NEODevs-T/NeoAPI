@@ -58,28 +58,58 @@ namespace NeoAPI.Controllers.Asentamientos
         [HttpGet("AsentamientoFueraRangoFiltros/{turno}/{fecha:datetime}/{idfiltrolinea:int}/{idClasiVar:int}/{idSeccion:int}/{idProducto:int}")]
         public async Task<ActionResult<List<Asentum>>> GetAsentamientosFueraRango2(string turno, DateTime fecha, int idfiltrolinea, int idClasiVar, int idSeccion, int idProducto)
         {
-            //retorna fuera de rango de un centro
-            var result = await _context.Asenta
-                .Include(r => r.IdRangoNavigation)
-                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
-                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
-                .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
-                .Include(r => r.CorteDis)
-                .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
-                    && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-                    && f.AisActivo == true
-                    && f.IdInfoAseNavigation.Iaturno == turno
-                    && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-                    && f.IdRangoNavigation.IdProducto == idProducto
-                    && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
-                    && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
-                    && f.CorteDis.Count == 0)
-                .AsNoTracking()
-                .ToListAsync();
 
-            var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
+            //TODO: Mejorar consulta
 
-            return Ok(corteDiscDTO);
+            if (idSeccion == 0)
+            {
+                //retorna fuera de rango de un centro
+                var result = await _context.Asenta
+                   .Include(r => r.IdRangoNavigation)
+                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
+                   .Include(r => r.CorteDis)
+                   .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                       && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                       && f.AisActivo == true
+                       && f.IdInfoAseNavigation.Iaturno == turno
+                       && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                       && f.IdRangoNavigation.IdProducto == idProducto
+                       //&& f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                       && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
+                       && f.CorteDis.Count == 0)
+                   .AsNoTracking()
+                   .ToListAsync();
+                var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
+                return Ok(corteDiscDTO);
+            }
+            else
+            {
+                var result = await _context.Asenta
+                  .Include(r => r.IdRangoNavigation)
+                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
+                  .Include(r => r.CorteDis)
+                  .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                      && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                      && f.AisActivo == true
+                      && f.IdInfoAseNavigation.Iaturno == turno
+                      && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                      && f.IdRangoNavigation.IdProducto == idProducto
+                      && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                      && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
+                      && f.CorteDis.Count == 0)
+                  .AsNoTracking()
+                  .ToListAsync();
+                var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
+                return Ok(corteDiscDTO);
+            }
+
+
+
+
         }
 
 
@@ -131,6 +161,7 @@ namespace NeoAPI.Controllers.Asentamientos
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariable,
                 c.IdAsentaNavigation.IdRangoNavigation.IdProducto,
                 c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pnombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pcodigo,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation.Unombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.IdSeccion,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
@@ -148,8 +179,53 @@ namespace NeoAPI.Controllers.Asentamientos
         [HttpGet("CortesDelDiaLineaFiltros/{turno}/{fecha:datetime}/{idfiltrolinea:int}/{idClasiVar:int}/{idSeccion:int}/{idProducto:int}")]
         public async Task<ActionResult<List<CortesVistaDTO>>> GetCortesTotalesFiltros(string turno, DateTime fecha, int idfiltrolinea, int idClasiVar, int idSeccion, int idProducto)
         {
+            //TODO: Mjejorar consulta con seccion
+            if (idSeccion == 0)
+            {
+                var corteDisc = await _context.CorteDis
+                .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                    && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
+                    && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                    && c.IdAsentaNavigation.IdRangoNavigation.IdProducto == idProducto
+                    && c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar)
+                .Select(c => new
+                {
+                    c.IdCorteDis,
+                    c.IdCategori,
+                    c.IdAsenta,
+                    c.CdaccCorr,
+                    c.CdisListo,
+                    c.CdisLibro,
+                    c.CdfechAcci,
+                    c.CdfechList,
+                    c.IdCategoriNavigation.Cnombre,
+                    c.IdAsentaNavigation.Avalor,
+                    c.IdAsentaNavigation.Aobserv,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdRango,
+                    c.IdAsentaNavigation.IdRangoNavigation.RlimMax,
+                    c.IdAsentaNavigation.IdRangoNavigation.RlimMin,
+                    c.IdAsentaNavigation.IdRangoNavigation.Rmax,
+                    c.IdAsentaNavigation.IdRangoNavigation.Rmin,
+                    c.IdAsentaNavigation.IdRangoNavigation.Robj,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdVariable,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdProducto,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pnombre,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pcodigo,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation.Unombre,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.IdSeccion,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vnombre,
+                    c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.Vdescri,
+                    c.IdAsentaNavigation.IdInfoAseNavigation.IdInfoAse,
 
-            var corteDisc = await _context.CorteDis
+                })
+                 .AsNoTracking()
+                 .ToListAsync();
+                return Ok(corteDisc);
+            }
+            else
+            {
+                var corteDisc = await _context.CorteDis
             .Where(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
                 && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno
                 && c.IdAsentaNavigation.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
@@ -178,6 +254,7 @@ namespace NeoAPI.Controllers.Asentamientos
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariable,
                 c.IdAsentaNavigation.IdRangoNavigation.IdProducto,
                 c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pnombre,
+                c.IdAsentaNavigation.IdRangoNavigation.IdProductoNavigation.Pcodigo,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdUnidadNavigation.Unombre,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.IdSeccion,
                 c.IdAsentaNavigation.IdRangoNavigation.IdVariableNavigation.IdSeccionNavigation.Snombre,
@@ -188,7 +265,8 @@ namespace NeoAPI.Controllers.Asentamientos
             })
              .AsNoTracking()
              .ToListAsync();
-            return Ok(corteDisc);
+                return Ok(corteDisc);
+            }
         }
 
 
