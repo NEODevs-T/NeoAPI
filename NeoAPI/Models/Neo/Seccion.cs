@@ -15,5 +15,7 @@ public partial class Seccion
 
     public bool Sestado { get; set; }
 
+    public int IdGrupo { get; set; }
+
     public virtual ICollection<Variable> Variables { get; set; } = new List<Variable>();
 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using NeoAPI.Models.Neo;
-using NeoAPI.ModelsViews;
+using NeoAPI.Models.Views;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Maestra;

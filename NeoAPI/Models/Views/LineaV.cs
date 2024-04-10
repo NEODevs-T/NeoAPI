@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.ModelsViews;
+namespace NeoAPI.Models.Views;
 
 public partial class LineaV
 {

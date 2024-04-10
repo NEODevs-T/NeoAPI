@@ -1,9 +1,12 @@
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json.Serialization;
 using NeoAPI.Models.Neo;
-using NeoAPI.ModelsViews;
+using NeoAPI.Models.Views;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models.NeoVieja;
+using NeoAPI.Models.PolybaseBPCSVen;
+using NeoAPI.Models.PolybaseBPCSCol;
+using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Logic;
 using NeoAPI.Extensions;
 using IBM.EntityFrameworkCore;
@@ -24,6 +27,10 @@ builder.Services.AddDbContext<DbNeoIiContext>(options =>options.UseSqlServer(bui
 builder.Services.AddDbContext<ViewsContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DOCIng")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<NeoViejaContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("NeoVieja")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseVen")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCol")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
+
 builder.Services.AddDbContext<DbBPCSContext>(options =>options.UseDb2(builder.Configuration.GetConnectionString("AS400SPI"),p=>p.SetServerInfo(IBMDBServerType.AS400)), ServiceLifetime.Transient);
 
 

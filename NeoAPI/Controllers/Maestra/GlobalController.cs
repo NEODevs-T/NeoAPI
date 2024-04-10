@@ -1,14 +1,18 @@
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using AutoMapper;
-using NeoAPI.DTOs.Maestra;
-using NeoAPI.Models;
-using NeoAPI.ModelsViews;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using AutoMapper;
+using NeoAPI.DTOs.BPSC;
+using NeoAPI.Models.PolybaseBPCSCen;
+using NeoAPI.Models.PolybaseBPCSCol;
+using NeoAPI.Models.PolybaseBPCSVen;
+using NeoAPI.Models.Views;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
 using NeoAPI.Logic;
+using Microsoft.Data.SqlClient;
+using Microsoft.AspNetCore.Mvc.Rendering;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -19,12 +23,22 @@ namespace NeoAPI.Controllers.Maestras
     public class GlobalController : ControllerBase
     {
         private readonly DOCIngContext _DOCIng;
+        private readonly PolybaseBPCSVenContext _PolybaseBPCSVen;
+        private readonly PolybaseBPCSColContext _PolybaseBPCSVCol;
+        private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
+        private readonly ViewsContext _ViewsContext;
+        private readonly IMapper _mapper;
         private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas {get; set;} = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
         private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
 
-        public GlobalController(DOCIngContext DOCIng)
+        public GlobalController(DOCIngContext DOCIng,PolybaseBPCSVenContext polybaseBPCSVen,PolybaseBPCSColContext polybaseBPCSVCol,PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper, ViewsContext viewContext)
         {
             _DOCIng = DOCIng;
+            _PolybaseBPCSVen = polybaseBPCSVen;
+            _PolybaseBPCSVCol = polybaseBPCSVCol;
+            _PolybaseBPCSVCen = polybaseBPCSVCen;
+            _mapper = mapper;
+            _ViewsContext = viewContext;
         }
 
         [HttpGet("GetIdHorarios")]
@@ -160,5 +174,45 @@ namespace NeoAPI.Controllers.Maestras
                 return NotFound();
             }
         }
+
+        [HttpGet("GetProductosActuales/{idLinea:int}")]
+        public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int idLinea)
+        {
+            int idEmpresa;
+            int CentroTrabajo;
+            const string OrdenesAbiertas = "5";
+            MaestraV? maestra;
+            List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
+            OrdenFabricacionDTO ordenFabricacionDTO;
+
+            maestra = await _ViewsContext.MaestraVs.Where(m => m.IdLinea == idLinea).FirstOrDefaultAsync();
+
+            if (maestra == null)
+            {
+                return BadRequest();
+            }
+
+            idEmpresa = maestra.IdEmpresa;
+            CentroTrabajo = Int32.Parse(maestra.CentroDeTrabajo);
+
+            var result = from Fso in _PolybaseBPCSVen.Fsos
+                        join Iim in _PolybaseBPCSVen.Iims
+                        on Fso.Sprod equals Iim.Iprod
+                        where Fso.Swrkc == CentroTrabajo && Fso.Sstat.Contains(OrdenesAbiertas)
+                        select new {Fso.Sprod,Fso.Sstat,Iim.Idesc};
+
+            foreach (var item in result)
+            {
+                ordenFabricacionDTO = new OrdenFabricacionDTO();
+                ordenFabricacionDTO.Status = item.Sstat;
+                ordenFabricacionDTO.DescProducto = item.Idesc.Trim();
+                ordenFabricacionDTO.CodProducto = item.Sprod.Trim();
+                ordenesFabricacionDTOList.Add(ordenFabricacionDTO);
+            }
+
+            ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
+
+            return ordenesFabricacionDTOList;
+        } 
     }
 }

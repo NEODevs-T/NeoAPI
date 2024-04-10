@@ -1,7 +1,7 @@
 ﻿using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.ModelsViews;
+namespace NeoAPI.Models.Views;
 
 public partial class MaestraV
 {
@@ -14,6 +14,8 @@ public partial class MaestraV
     public string? División { get; set; }
 
     public string Linea { get; set; } = null!;
+
+    public string? CentroDeTrabajo { get; set; }
 
     public int IdPais { get; set; }
 
