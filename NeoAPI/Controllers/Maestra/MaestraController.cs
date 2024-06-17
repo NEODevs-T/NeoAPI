@@ -60,6 +60,16 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
+        [HttpGet("GetAllCentros/")]
+        public async Task<ActionResult<List<CentrosV>>> GetAllCentros()
+        {
+            try{
+                return await this._views.CentrosVs.Where(c => c.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
+
         [HttpGet("GetDivisiones/{idCentro:int}")]
         public async Task<ActionResult<List<DivisionesV>>> GetDivisiones(int idCentro)
         {
