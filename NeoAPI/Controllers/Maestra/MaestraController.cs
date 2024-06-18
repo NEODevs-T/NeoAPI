@@ -80,6 +80,15 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
+        [HttpGet("GetAllLineas")]
+        public async Task<ActionResult<List<LineaV>>> GetAllLineas()
+        {
+            try{
+                return await this._views.LineaVs.Where(l => l.Estado == true).ToListAsync();
+            }catch{
+                return NotFound();
+            }
+        }
 
         [HttpGet("GetLineas/{idDivision:int}")]
         public async Task<ActionResult<List<LineaV>>> GetLineas(int idDivision)
