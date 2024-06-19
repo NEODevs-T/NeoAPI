@@ -49,5 +49,19 @@ namespace NeoAPI.Controllers.LibroNovedades
                 return BadRequest(e);
             }
         }
+
+        [HttpPost("AddLibroNovedadesNormal")]
+        public async Task<ActionResult<bool>> AddLibroNovedadesNormal(List<LibroNoveDTO> novedades){
+            List<LibroNove> data;
+            
+            data = _mapper.Map<List<LibroNove>>(novedades);
+            _context.LibroNoves.AddRange(data);
+            
+            try{
+                return Ok(await _context.SaveChangesAsync() > 0);
+            }catch(Exception e){
+                return BadRequest(e);
+            }
+        }
     }
 }

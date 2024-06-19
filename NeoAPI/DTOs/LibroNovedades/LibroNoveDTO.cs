@@ -22,9 +22,6 @@ public class LibroNoveDTO
     public string Lngrupo { get; set; } = null!;
 
     public string Lnturno { get; set; } = null!;
-
-    public string IdMaquina { get; set; } = null!;
-
     public int IdTipoNove { get; set; }
 
     public int IdAreaCar { get; set; }
