@@ -29,6 +29,12 @@ public partial class Resuman
 
     public DateTime? RfecPago { get; set; }
 
+    public string? RaprNom { get; set; }
+
+    public bool? RaproJef { get; set; }
+
+    public bool? Rvalido { get; set; }
+
     public virtual Monto? IdMontosNavigation { get; set; }
 
     public virtual Personal IdPersonalNavigation { get; set; } = null!;

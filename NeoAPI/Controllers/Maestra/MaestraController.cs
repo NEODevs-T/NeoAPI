@@ -4,10 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
-using NeoAPI.Models.Views;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using NeoAPI.Models.NeoVieja;
-
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -20,14 +17,12 @@ namespace NeoAPI.Controllers.Maestras
 
         private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
-        private readonly ViewsContext _views;
-        private readonly NeoViejaContext _neoVieja;
+        private readonly DbNeoIiContext _neoVieja;
 
-        public MaestraController(DbNeoIiContext DbNeo, IMapper maper,ViewsContext views, NeoViejaContext neoVieja)
+        public MaestraController(DbNeoIiContext DbNeo, IMapper maper, DbNeoIiContext neoVieja)
         {
             _context = DbNeo;
             _mapper = maper;
-            _views = views;
             _neoVieja = neoVieja;
         }
 
@@ -44,7 +39,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<List<EmpresasV>>> GetEmpresas(int idPais)
         {
             try{
-                return await this._views.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
+                return await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
@@ -54,7 +49,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<List<CentrosV>>> GetCentros(int idEmpresa)
         {
             try{
-                return await this._views.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
+                return await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
@@ -64,7 +59,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<List<CentrosV>>> GetAllCentros()
         {
             try{
-                return await this._views.CentrosVs.Where(c => c.Estado == true).ToListAsync();
+                return await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
@@ -74,7 +69,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<List<DivisionesV>>> GetDivisiones(int idCentro)
         {
             try{
-                return await this._views.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
+                return await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
@@ -84,7 +79,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<List<LineaV>>> GetAllLineas()
         {
             try{
-                return await this._views.LineaVs.Where(l => l.Estado == true).ToListAsync();
+                return await this._context.LineaVs.Where(l => l.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
@@ -94,7 +89,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<List<LineaV>>> GetLineas(int idDivision)
         {
             try{
-                return await this._views.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
+                return await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
             }catch{
                 return NotFound();
             }
@@ -104,7 +99,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<LineaV>> GetLineaPorId(int idLineas)
         {
             try{
-                return await this._views.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
+                return await this._context.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
             }catch{
                 return NotFound();
             }
@@ -140,10 +135,10 @@ namespace NeoAPI.Controllers.Maestras
         }
         
         [HttpGet("GetEquiposEAMPorLinea/{idLinea:int}")]
-        public async Task<ActionResult<List<EquipoEamViejo>>> GetEquiposEAMPorLinea(int idLinea)
+        public async Task<ActionResult<List<EquipoEam>>> GetEquiposEAMPorLinea(int idLinea)
         {
             try{
-                return await this._neoVieja.EquipoEams.Where(e=>e.IdLinea==idLinea && e.EestaEam).AsNoTracking().ToListAsync();
+                return await this._context.EquipoEams.Where(e=> e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
             }catch{
                 return NotFound();
             }

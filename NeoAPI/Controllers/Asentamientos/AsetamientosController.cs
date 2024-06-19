@@ -3,7 +3,6 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using NeoAPI.Models.Neo;
-using NeoAPI.Models.Views;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Maestra;
@@ -19,12 +18,11 @@ namespace NeoAPI.Controllers.Asentamientos
     public class AsentamientosController : ControllerBase
     {
         private readonly DbNeoIiContext _context;
-        private readonly ViewsContext _views;
 
-        public AsentamientosController(DbNeoIiContext context,ViewsContext views)
+        public AsentamientosController(DbNeoIiContext context)
         {
             _context = context;
-            _views = views;
+            
         }
         
 
@@ -109,7 +107,7 @@ namespace NeoAPI.Controllers.Asentamientos
                                         i.IafechCrea.Date == DateTime.Parse(Fecha).Date
                                         ).AsNoTracking().FirstOrDefaultAsync();
             if(informe != null){
-                valores = await this._views.ValoresDeAsentamientosVs.Where(v => v.IdInfoAse == informe.IdInfoAse).AsNoTracking().ToListAsync();
+                valores = await this._context.ValoresDeAsentamientosVs.Where(v => v.IdInfoAse == informe.IdInfoAse).AsNoTracking().ToListAsync();
             }
 
             if(valores == null || informe == null){

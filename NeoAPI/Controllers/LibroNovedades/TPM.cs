@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using AutoMapper;
-using NeoAPI.Models.NeoVieja;
+using NeoAPI.Models.Neo;
 using NeoAPI.DTOs.LibroNovedades;
 
 
@@ -13,10 +13,10 @@ namespace NeoAPI.Controllers.LibroNovedades
     [Route("api/[controller]")]
     public class TPMController : ControllerBase
     {
-        private readonly NeoViejaContext _context;
+        private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
 
-        public TPMController(NeoViejaContext context,IMapper mapper)
+        public TPMController(DbNeoIiContext context,IMapper mapper)
         {
             _context = context;
             _mapper = mapper;

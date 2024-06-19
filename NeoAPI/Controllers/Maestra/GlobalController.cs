@@ -7,7 +7,7 @@ using NeoAPI.DTOs.BPSC;
 using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSVen;
-using NeoAPI.Models.Views;
+using NeoAPI.Models.Neo;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
 using NeoAPI.Logic;
@@ -26,19 +26,19 @@ namespace NeoAPI.Controllers.Maestras
         private readonly PolybaseBPCSVenContext _PolybaseBPCSVen;
         private readonly PolybaseBPCSColContext _PolybaseBPCSVCol;
         private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
-        private readonly ViewsContext _ViewsContext;
         private readonly IMapper _mapper;
+         private readonly DbNeoIiContext _context;
         private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas {get; set;} = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
         private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
 
-        public GlobalController(DOCIngContext DOCIng,PolybaseBPCSVenContext polybaseBPCSVen,PolybaseBPCSColContext polybaseBPCSVCol,PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper, ViewsContext viewContext)
+        public GlobalController(DOCIngContext DOCIng,PolybaseBPCSVenContext polybaseBPCSVen,PolybaseBPCSColContext polybaseBPCSVCol,PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper,DbNeoIiContext DbNeo)
         {
             _DOCIng = DOCIng;
             _PolybaseBPCSVen = polybaseBPCSVen;
             _PolybaseBPCSVCol = polybaseBPCSVCol;
             _PolybaseBPCSVCen = polybaseBPCSVCen;
             _mapper = mapper;
-            _ViewsContext = viewContext;
+            _context = DbNeo;
         }
 
         [HttpGet("GetIdHorarios")]
@@ -185,7 +185,7 @@ namespace NeoAPI.Controllers.Maestras
             List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
             OrdenFabricacionDTO ordenFabricacionDTO;
 
-            maestra = await _ViewsContext.MaestraVs.Where(m => m.IdLinea == idLinea).FirstOrDefaultAsync();
+            maestra = await _context.MaestraVs.Where(m => m.IdLinea == idLinea).FirstOrDefaultAsync();
 
             if (maestra == null)
             {

@@ -4,7 +4,6 @@ using NeoAPI.DTOs.Bonificaciones;
 using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.BPSC;
 using NeoAPI.Models.Neo;
-using NeoAPI.Models.NeoVieja;
 using NeoAPI.Models.PolybaseBPCSVen;
 using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSCen;

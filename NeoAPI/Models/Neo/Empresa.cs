@@ -13,7 +13,9 @@ public partial class Empresa
 
     public bool Eestado { get; set; }
 
-    public int? IdCompania { get; set; }
+    public int IdCompania { get; set; }
+
+    public DateTime Efecha { get; set; }
 
     public virtual ICollection<Master> Masters { get; set; } = new List<Master>();
 }

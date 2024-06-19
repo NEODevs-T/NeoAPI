@@ -11,5 +11,7 @@ public partial class Pai
 
     public bool Pestado { get; set; }
 
+    public DateTime Pfecha { get; set; }
+
     public virtual ICollection<Master> Masters { get; set; } = new List<Master>();
 }

@@ -3,7 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using System.Text.Json;
 using AutoMapper;
-using NeoAPI.Models.NeoVieja;
+using NeoAPI.Models.Neo;
 using NeoAPI.DTOs.LibroNovedades;
 
 
@@ -14,7 +14,7 @@ namespace NeoAPI.Controllers.LibroNovedades
 
     public class LibroNoveController : ControllerBase
     {
-        private readonly NeoViejaContext _context;
+        private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
         enum DatosNovedad
             {
@@ -22,7 +22,7 @@ namespace NeoAPI.Controllers.LibroNovedades
                 Operaciones = 1,
                 NoResuelto = 0
             }
-        public LibroNoveController(NeoViejaContext context,IMapper mapper)
+        public LibroNoveController(DbNeoIiContext context,IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
