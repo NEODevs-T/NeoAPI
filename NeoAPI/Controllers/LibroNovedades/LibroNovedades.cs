@@ -63,5 +63,16 @@ namespace NeoAPI.Controllers.LibroNovedades
                 return BadRequest(e);
             }
         }
+
+        [HttpGet("ObtenerNoveadadPorIdParada/{idParada}")]
+        public async Task<ActionResult<LibroNoveDTO>> ObtenerNoveadadPorIdParada(string idParada){
+            LibroNove novedad;
+            try{
+                novedad =  await this._context.LibroNoves.Where(x => x.IdParada == idParada).FirstOrDefaultAsync() ?? new LibroNove();
+                return _mapper.Map<LibroNoveDTO>(novedad);
+            }catch(Exception e){
+                return BadRequest(e);
+            }
+        }
     }
 }
