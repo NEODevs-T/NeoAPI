@@ -1030,10 +1030,8 @@ public partial class DbNeoIiContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LibroNove_ClasifiTPM");
 
-            entity.HasOne(d => d.IdLineaNavigation).WithMany(p => p.LibroNoves)
-                .HasPrincipalKey(p => p.IdLinea)
-                .HasForeignKey(d => d.IdLinea)
-                .OnDelete(DeleteBehavior.ClientSetNull)
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.LibroNoves)
+                .HasForeignKey(d => d.IdMaster)
                 .HasConstraintName("FK_LibroNove_Master");
 
             entity.HasOne(d => d.IdTipoNoveNavigation).WithMany(p => p.LibroNoves)

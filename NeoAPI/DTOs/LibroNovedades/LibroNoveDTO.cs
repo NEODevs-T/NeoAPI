@@ -13,7 +13,7 @@ public class LibroNoveDTO
 
     public string Lndiscrepa { get; set; } = null!;
 
-    public double LntiePerMi { get; set; }
+    public int LntiePerMi { get; set; }
 
     public string LnfichaRes { get; set; } = null!;
 

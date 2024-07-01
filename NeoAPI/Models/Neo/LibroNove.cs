@@ -37,13 +37,13 @@ public partial class LibroNove
 
     public int? LnisResu { get; set; }
 
-    public int? IdMaster { get; set; }
+    public int IdMaster { get; set; }
 
     public virtual AreaCarga IdAreaCarNavigation { get; set; } = null!;
 
     public virtual ClasifiTpm IdCtpmNavigation { get; set; } = null!;
 
-    public virtual Master IdLineaNavigation { get; set; } = null!;
+    public virtual Master IdMasterNavigation { get; set; } = null!;
 
     public virtual TiParTp IdTipoNoveNavigation { get; set; } = null!;
 }
