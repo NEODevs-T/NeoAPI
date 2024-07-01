@@ -13,5 +13,7 @@ public partial class Centro
 
     public bool Cestado { get; set; }
 
+    public DateTime Cfecha { get; set; }
+
     public virtual ICollection<Master> Masters { get; set; } = new List<Master>();
 }

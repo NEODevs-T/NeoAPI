@@ -15,6 +15,8 @@ public partial class Linea
 
     public string? LcenCos { get; set; }
 
+    public DateTime Lfecha { get; set; }
+
     public string? Lofic { get; set; }
 
     public virtual ICollection<EquipoEam> EquipoEams { get; set; } = new List<EquipoEam>();

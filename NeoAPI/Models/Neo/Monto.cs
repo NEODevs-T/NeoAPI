@@ -17,7 +17,7 @@ public partial class Monto
 
     public bool? Mesta { get; set; }
 
-    public DateTime MfecAct { get; set; }
+    public DateTime? MfecAct { get; set; }
 
     public string? Muser { get; set; }
 

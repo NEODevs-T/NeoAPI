@@ -27,5 +27,9 @@ public partial class Master
 
     public virtual Pai IdPaisNavigation { get; set; } = null!;
 
+    public virtual ICollection<LibroNove> LibroNoves { get; set; } = new List<LibroNove>();
+
+    public virtual ICollection<Nivel> Nivels { get; set; } = new List<Nivel>();
+
     public virtual ICollection<Rango> Rangos { get; set; } = new List<Rango>();
 }
