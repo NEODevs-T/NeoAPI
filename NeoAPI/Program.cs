@@ -9,7 +9,6 @@ using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Logic;
 using NeoAPI.Extensions;
-using IBM.EntityFrameworkCore;
 
 using Microsoft.Extensions.Configuration;
 using static Microsoft.EntityFrameworkCore.DbLoggerCategory.Database;
@@ -30,8 +29,6 @@ builder.Services.AddDbContext<NeoViejaContext>(options =>options.UseSqlServer(bu
 builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseVen")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCol")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<DbBPCSContext>(options =>options.UseDb2(builder.Configuration.GetConnectionString("AS400SPI"),p=>p.SetServerInfo(IBMDBServerType.AS400)), ServiceLifetime.Transient);
 
 
 
