@@ -72,6 +72,7 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.FechaPago, act => act.MapFrom(src => src.RfecPago))
                 .ForMember(dest => dest.FichaResumen, act => act.MapFrom(src => src.RuserVali))
                 .ForMember(dest => dest.FichaPago, act => act.MapFrom(src => src.RuserPago))
+                .ForMember(dest => dest.AprobacionJefe, act => act.MapFrom(src => src.RaproJef))
                 .ReverseMap();
             
 

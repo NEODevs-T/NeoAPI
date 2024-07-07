@@ -51,12 +51,12 @@ namespace NeoAPI.Controllers.Bonificaciones
                 FechaResumen = r.Rfecha,
                 FechaPago = r.RfecPago,
                 FichaResumen = r.RuserVali,
-                FichaPago = r.RuserPago
+                FichaPago = r.RuserPago,
+                AprobacionJefe = r.RaproJef
             })
              .AsNoTracking()
              .ToListAsync();
 
-            //var resumen = _mapper.Map<List<ResumenGeneralDTO>>(result);
 
             return Ok(result);
         }

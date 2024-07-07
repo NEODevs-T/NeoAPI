@@ -24,6 +24,7 @@
         public DateTime? FechaPago{ get; set; }
         public string? FichaResumen { get; set; }
         public string? FichaPago { get; set; }
+        public bool? AprobacionJefe { get; set; }
 
 
 
