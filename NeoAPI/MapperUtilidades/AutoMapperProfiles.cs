@@ -8,6 +8,7 @@ using NeoAPI.Models.PolybaseBPCSVen;
 using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSCen;
 using System.Collections.Generic;
+using NeoAPI.DTOs.ReunionDiaria;
 
 namespace NeoAPI.AutoMapper
 {
@@ -47,12 +48,19 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.CategoriaDTONavigation, opt => opt.MapFrom(src => src.IdCategoriNavigation))
                 .ForMember(dest => dest.AsentumDTONavigation, opt => opt.MapFrom(src => src.IdAsentaNavigation));
 
-            CreateMap<LibroNoveDTO,LibroNove>().ReverseMap();
+            CreateMap<LibroNoveDTO, LibroNove>().ReverseMap();
 
-            CreateMap<ClasifiTpmDTO,ClasifiTpm>().ReverseMap();
+            CreateMap<ClasifiTpmDTO, ClasifiTpm>().ReverseMap();
 
+            CreateMap<TiParTpDTO, TiParTp>().ReverseMap();
 
-            CreateMap<Resuman,ResumenGeneralDTO>()
+            CreateMap<CambStatDTO, CambStat>().ReverseMap();
+
+            CreateMap<CambFecDTO, CambFec>().ReverseMap();
+
+            CreateMap<ReuDiumDTO, ReuDium>().ReverseMap();
+
+            CreateMap<Resuman, ResumenGeneralDTO>()
                 .ForMember(dest => dest.Nombre, act => act.MapFrom(src => src.IdPersonalNavigation.PeNombre))
                 .ForMember(dest => dest.Apellido, act => act.MapFrom(src => src.IdPersonalNavigation.PeApellido))
                 .ForMember(dest => dest.Ficha, act => act.MapFrom(src => src.IdPersonalNavigation.PeFicha))
@@ -73,19 +81,19 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.FichaResumen, act => act.MapFrom(src => src.RuserVali))
                 .ForMember(dest => dest.FichaPago, act => act.MapFrom(src => src.RuserPago))
                 .ReverseMap();
-            
 
-            CreateMap<Models.PolybaseBPCSVen.Fso,OrdenFabricacionDTO>()
+
+            CreateMap<Models.PolybaseBPCSVen.Fso, OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
 
-            CreateMap<Models.PolybaseBPCSCol.Fso,OrdenFabricacionDTO>()
+            CreateMap<Models.PolybaseBPCSCol.Fso, OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
 
-            CreateMap<Models.PolybaseBPCSCen.Fso,OrdenFabricacionDTO>()
+            CreateMap<Models.PolybaseBPCSCen.Fso, OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
