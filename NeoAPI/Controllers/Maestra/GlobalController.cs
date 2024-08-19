@@ -27,7 +27,7 @@ namespace NeoAPI.Controllers.Maestras
         private readonly PolybaseBPCSColContext _PolybaseBPCSVCol;
         private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
         private readonly IMapper _mapper;
-         private readonly DbNeoIiContext _context;
+        private readonly DbNeoIiContext _context;
         private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas {get; set;} = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
         private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
 

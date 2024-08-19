@@ -27,99 +27,145 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetPaises")]
-        public async Task<ActionResult<List<Pai>>> GetPaises()
+        public async Task<ActionResult<List<PaiDTO>>> GetPaises()
         {
-            try{
-                return await this._context.Pais.Where(p => p.Pestado == true).ToListAsync();
-            }catch{
+            try
+            {
+                List<Pai> data = await this._context.Pais.Where(p => p.Pestado == true).ToListAsync();
+                return Ok(_mapper.Map<PaiDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
         [HttpGet("GetEmpresas/{idPais:int}")]
-        public async Task<ActionResult<List<EmpresasV>>> GetEmpresas(int idPais)
+        public async Task<ActionResult<List<EmpresasVDTO>>> GetEmpresas(int idPais)
         {
-            try{
-                return await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
-            }catch{
+            try
+            {
+                List<EmpresasV> data = await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
+                return Ok(_mapper.Map<EmpresasVDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
 
         [HttpGet("GetCentros/{idEmpresa:int}")]
-        public async Task<ActionResult<List<CentrosV>>> GetCentros(int idEmpresa)
+        public async Task<ActionResult<List<CentrosVDTO>>> GetCentros(int idEmpresa)
         {
-            try{
-                return await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
-            }catch{
+            try
+            {
+                List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
+                return Ok(_mapper.Map<EmpresasVDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
 
         [HttpGet("GetAllCentros/")]
-        public async Task<ActionResult<List<CentrosV>>> GetAllCentros()
+        public async Task<ActionResult<List<CentrosVDTO>>> GetAllCentros()
         {
-            try{
-                return await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
-            }catch{
+            try
+            {
+                List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
+                return Ok(_mapper.Map<EmpresasVDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
 
         [HttpGet("GetDivisiones/{idCentro:int}")]
-        public async Task<ActionResult<List<DivisionesV>>> GetDivisiones(int idCentro)
+        public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisiones(int idCentro)
         {
-            try{
-                return await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
-            }catch{
+            try
+            {
+                List<DivisionesV> data = await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
+                return Ok(_mapper.Map<DivisionesVDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
 
         [HttpGet("GetAllLineas")]
-        public async Task<ActionResult<List<LineaV>>> GetAllLineas()
+        public async Task<ActionResult<List<LineaVDTO>>> GetAllLineas()
         {
-            try{
-                return await this._context.LineaVs.Where(l => l.Estado == true).ToListAsync();
-            }catch{
+            try
+            {
+                List<LineaV> data = await this._context.LineaVs.Where(l => l.Estado == true).ToListAsync();
+                return Ok(_mapper.Map<LineaVDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
 
         [HttpGet("GetLineas/{idDivision:int}")]
-        public async Task<ActionResult<List<LineaV>>> GetLineas(int idDivision)
+        public async Task<ActionResult<List<LineaVDTO>>> GetLineas(int idDivision)
         {
-            try{
-                return await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
-            }catch{
+            try
+            {
+                List<LineaV> data = await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
+                return Ok(_mapper.Map<LineaVDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
 
         [HttpGet("GetLineaPorId/{idLineas:int}")]
-        public async Task<ActionResult<LineaV>> GetLineaPorId(int idLineas)
+        public async Task<ActionResult<LineaVDTO>> GetLineaPorId(int idLineas)
         {
-            try{
-                return await this._context.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
-            }catch{
+            try
+            {
+                LineaV data = await this._context.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
+                return Ok(_mapper.Map<LineaVDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }
 
         [HttpGet("GetMaestraPorFiltros")]
-        public async Task<ActionResult<List<Master>>> GetMaestraPorFiltros( [FromQuery] MaestraDTO maestra)
+        public async Task<ActionResult<List<MasterDTO>>> GetMaestraPorFiltros([FromQuery] MaestraDTO maestra)
         {
-            try{
-                if(maestra.idDivision != 0){
-                    return await this._context.Masters.Where(m => m.IdDivision == maestra.idDivision).Include(m => m.IdLineaNavigation).ToListAsync();
-                }else if(maestra.idCentro != 0){
-                    return await this._context.Masters.Where(m => m.IdCentro == maestra.idCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
-                }else if(maestra.idEmpresa != 0){
-                    return await this._context.Masters.Where(m => m.IdEmpresa == maestra.idEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
-                }else if(maestra.idPais != 0){
-                    return await this._context.Masters.Where(m => m.IdPais == maestra.idPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
+            try
+            {
+                if (maestra.idDivision != 0)
+                {
+                    List<Master> data = await this._context.Masters.Where(m => m.IdDivision == maestra.idDivision).Include(m => m.IdLineaNavigation).ToListAsync();
+                    return Ok(_mapper.Map<MasterDTO>(data));
+                }
+                else if (maestra.idCentro != 0)
+                {
+                    List<Master> data = await this._context.Masters.Where(m => m.IdCentro == maestra.idCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
+                    return Ok(_mapper.Map<MasterDTO>(data));
+                }
+                else if (maestra.idEmpresa != 0)
+                {
+                    List<Master> data = await this._context.Masters.Where(m => m.IdEmpresa == maestra.idEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
+                    return Ok(_mapper.Map<MasterDTO>(data));
+                }
+                else if (maestra.idPais != 0)
+                {
+                    List<Master> data = await this._context.Masters.Where(m => m.IdPais == maestra.idPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
+                    return Ok(_mapper.Map<MasterDTO>(data));
                 }
                 return BadRequest();
-            }catch{
+            }
+            catch
+            {
                 return NotFound();
             }
         }
@@ -127,19 +173,26 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetMaestraPorLinea/{idLinea:int}")]
         public async Task<ActionResult<int>> GetMaestraPorLinea(int idLinea)
         {
-            try{
+            try
+            {
                 return await this._context.Masters.Where(m => m.IdLinea == idLinea).Select(m => m.IdMaster).FirstOrDefaultAsync();
-            }catch{
+            }
+            catch
+            {
                 return NotFound();
             }
         }
-        
+
         [HttpGet("GetEquiposEAMPorLinea/{idLinea:int}")]
-        public async Task<ActionResult<List<EquipoEam>>> GetEquiposEAMPorLinea(int idLinea)
+        public async Task<ActionResult<List<EquipoEamDTO>>> GetEquiposEAMPorLinea(int idLinea)
         {
-            try{
-                return await this._context.EquipoEams.Where(e=> e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
-            }catch{
+            try
+            {
+                List<EquipoEam> data = await this._context.EquipoEams.Where(e => e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
+                return Ok(_mapper.Map<EquipoEamDTO>(data));
+            }
+            catch
+            {
                 return NotFound();
             }
         }

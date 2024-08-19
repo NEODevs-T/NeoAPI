@@ -9,6 +9,7 @@ using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSCen;
 using System.Collections.Generic;
 using NeoAPI.DTOs.ReunionDiaria;
+using NeoAPI.DTOs.Maestra;
 
 namespace NeoAPI.AutoMapper
 {
@@ -59,6 +60,20 @@ namespace NeoAPI.AutoMapper
             CreateMap<CambFecDTO, CambFec>().ReverseMap();
 
             CreateMap<ReuDiumDTO, ReuDium>().ReverseMap();
+
+            CreateMap<CentrosVDTO, CentrosV>().ReverseMap();
+
+            CreateMap<DivisionesVDTO, DivisionesV>().ReverseMap();
+
+            CreateMap<EmpresasVDTO, EmpresasV>().ReverseMap();
+
+            CreateMap<EquipoEamDTO, EquipoEam>().ReverseMap();
+
+            CreateMap<LineaVDTO, LineaV>().ReverseMap();
+
+            CreateMap<MasterDTO, Master>().ReverseMap();
+
+            CreateMap<PaiDTO, Pai>().ReverseMap();
 
             CreateMap<Resuman, ResumenGeneralDTO>()
                 .ForMember(dest => dest.Nombre, act => act.MapFrom(src => src.IdPersonalNavigation.PeNombre))
