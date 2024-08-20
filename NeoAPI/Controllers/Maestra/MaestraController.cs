@@ -59,6 +59,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
+                //TODO: cambiar mapeo
                 return Ok(_mapper.Map<EmpresasVDTO>(data));
             }
             catch
@@ -73,6 +74,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
+                //TODO: cambiar mapeo
                 return Ok(_mapper.Map<EmpresasVDTO>(data));
             }
             catch

@@ -65,6 +65,8 @@ namespace NeoAPI.Controllers.Maestras
         */
 
         [HttpGet("GetRotacion/{idEmpresa:int}/{idCentro:int}")]
+
+        //TODO: Crear un DTO
         public async Task<ActionResult<RotaCalidum>> GetRotacion(int idEmpresa,int idCentro)
         {
             DateTime dateReal = this.GetConversionHorarios(idEmpresa).Value;

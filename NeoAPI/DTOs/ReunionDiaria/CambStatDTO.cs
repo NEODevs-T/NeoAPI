@@ -6,6 +6,7 @@ namespace NeoAPI.DTOs.ReunionDiaria;
 
 public class CambStatDTO
 {
+    //TODO: cambiar atributos
     public int IdCambStat { get; set; }
 
     public string Tpcodigo { get; set; } = null!;
