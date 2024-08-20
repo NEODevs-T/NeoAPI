@@ -2,9 +2,10 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
-using NeoAPI.DTOs.Maestra;
+using DTOs.Maestra;
 using NeoAPI.Models.Neo;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using NeoAPI.DTOs.Maestra;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -59,8 +60,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
-                //TODO: cambiar mapeo
-                return Ok(_mapper.Map<EmpresasVDTO>(data));
+                return Ok(_mapper.Map<CentrosVDTO>(data));
             }
             catch
             {
@@ -74,8 +74,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
-                //TODO: cambiar mapeo
-                return Ok(_mapper.Map<EmpresasVDTO>(data));
+                return Ok(_mapper.Map<CentrosVDTO>(data));
             }
             catch
             {
@@ -144,24 +143,24 @@ namespace NeoAPI.Controllers.Maestras
         {
             try
             {
-                if (maestra.idDivision != 0)
+                if (maestra.IdDivision != 0)
                 {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdDivision == maestra.idDivision).Include(m => m.IdLineaNavigation).ToListAsync();
+                    List<Master> data = await this._context.Masters.Where(m => m.IdDivision == maestra.IdDivision).Include(m => m.IdLineaNavigation).ToListAsync();
                     return Ok(_mapper.Map<MasterDTO>(data));
                 }
-                else if (maestra.idCentro != 0)
+                else if (maestra.IdCentro != 0)
                 {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdCentro == maestra.idCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
+                    List<Master> data = await this._context.Masters.Where(m => m.IdCentro == maestra.IdCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
                     return Ok(_mapper.Map<MasterDTO>(data));
                 }
-                else if (maestra.idEmpresa != 0)
+                else if (maestra.IdEmpresa != 0)
                 {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdEmpresa == maestra.idEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
+                    List<Master> data = await this._context.Masters.Where(m => m.IdEmpresa == maestra.IdEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
                     return Ok(_mapper.Map<MasterDTO>(data));
                 }
-                else if (maestra.idPais != 0)
+                else if (maestra.IdPais != 0)
                 {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdPais == maestra.idPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
+                    List<Master> data = await this._context.Masters.Where(m => m.IdPais == maestra.IdPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
                     return Ok(_mapper.Map<MasterDTO>(data));
                 }
                 return BadRequest();

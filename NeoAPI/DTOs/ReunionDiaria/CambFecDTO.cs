@@ -5,12 +5,13 @@ namespace NeoAPI.DTOs.ReunionDiaria;
 
 public class CambFecDTO
 {
-    //TODO: cambiar atributos
     public int IdCambFec { get; set; }
 
-    public string Tpcodigo { get; set; } = null!;
+    public int IdReuDia { get; set; }
 
-    public string Tpnombre { get; set; } = null!;
+    public DateTime Cffec { get; set; }
 
-    public bool Tpestado { get; set; }
+    public DateTime CffecNew { get; set; }
+
+    public string Cfuser { get; set; } = null!;
 }

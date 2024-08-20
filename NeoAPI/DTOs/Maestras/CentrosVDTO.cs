@@ -1,13 +1,17 @@
 using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.DTOs.Maestra;
+namespace DTOs.Maestra;
 
 public class CentrosVDTO
 {
-    //TODO: cambiar atributos
-    public int idPais { get; set; } = 0;
-    public int idEmpresa { get; set; } = 0;
-    public int idCentro { get; set; } = 0;
-    public int idDivision { get; set; }
+    public int IdCentro { get; set; }
+
+    public string Cnom { get; set; } = null!;
+
+    public string? Cdetalle { get; set; }
+
+    public bool Cestado { get; set; }
+
+    public DateTime Cfecha { get; set; }
 }

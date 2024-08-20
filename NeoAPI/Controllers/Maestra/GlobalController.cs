@@ -13,6 +13,7 @@ using NeoAPI.Interface;
 using NeoAPI.Logic;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc.Rendering;
+using NeoAPI.DTOs.GlobalCo;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -28,10 +29,10 @@ namespace NeoAPI.Controllers.Maestras
         private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
         private readonly IMapper _mapper;
         private readonly DbNeoIiContext _context;
-        private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas {get; set;} = (PAVECA: 1,CHEMPRO: 2, PANASA: 3,PAINSA: 4);
-        private (int K10, int K129) centroPAINSA {get; set;} = (K10: 18,K129: 19);
+        private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas { get; set; } = (PAVECA: 1, CHEMPRO: 2, PANASA: 3, PAINSA: 4);
+        private (int K10, int K129) centroPAINSA { get; set; } = (K10: 18, K129: 19);
 
-        public GlobalController(DOCIngContext DOCIng,PolybaseBPCSVenContext polybaseBPCSVen,PolybaseBPCSColContext polybaseBPCSVCol,PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper,DbNeoIiContext DbNeo)
+        public GlobalController(DOCIngContext DOCIng, PolybaseBPCSVenContext polybaseBPCSVen, PolybaseBPCSColContext polybaseBPCSVCol, PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper, DbNeoIiContext DbNeo)
         {
             _DOCIng = DOCIng;
             _PolybaseBPCSVen = polybaseBPCSVen;
@@ -48,10 +49,12 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetConversionHorarios/{idEmpresa:int}")]
-        public ActionResult<DateTime>  GetConversionHorarios(int idEmpresa){
+        public ActionResult<DateTime> GetConversionHorarios(int idEmpresa)
+        {
             IRotacionLogic rotacionLogic = new RotacionLogic();
             DateTime? tiempo = rotacionLogic.ConversionHorarios(idEmpresa);
-            if(tiempo != null){
+            if (tiempo != null)
+            {
                 return tiempo;
             }
             return BadRequest();
@@ -66,109 +69,163 @@ namespace NeoAPI.Controllers.Maestras
 
         [HttpGet("GetRotacion/{idEmpresa:int}/{idCentro:int}")]
 
-        //TODO: Crear un DTO
-        public async Task<ActionResult<RotaCalidum>> GetRotacion(int idEmpresa,int idCentro)
+        public async Task<ActionResult<RotaCalidumDTO>> GetRotacion(int idEmpresa, int idCentro)
         {
+
             DateTime dateReal = this.GetConversionHorarios(idEmpresa).Value;
             int hora = dateReal.Hour;
             int turno = 0;
             int fecha = 0;
 
 
-            if(idEmpresa == this.empresas.PAVECA){
-                if(hora >= 6 && hora < 18){
+            if (idEmpresa == this.empresas.PAVECA)
+            {
+                if (hora >= 6 && hora < 18)
+                {
                     turno = 1;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                }else if(hora >= 0 && hora < 6){
+                }
+                else if (hora >= 0 && hora < 6)
+                {
                     turno = 2;
                     fecha = int.Parse(dateReal.AddDays(-1).ToString("yyyyMMdd"));
-                }else{
+                }
+                else
+                {
                     turno = 2;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
                 }
 
-            }else if(idEmpresa == this.empresas.CHEMPRO){
-                if(hora >= 6 && hora < 18){
+            }
+            else if (idEmpresa == this.empresas.CHEMPRO)
+            {
+                if (hora >= 6 && hora < 18)
+                {
                     turno = 1;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                }else if(hora >= 0 && hora < 6){
+                }
+                else if (hora >= 0 && hora < 6)
+                {
                     turno = 2;
                     fecha = int.Parse(dateReal.AddDays(-1).ToString("yyyyMMdd"));
-                }else{
+                }
+                else
+                {
                     turno = 2;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
                 }
 
-            }else if(idEmpresa == this.empresas.PANASA){
-                if(hora >= 6 && hora < 14){
+            }
+            else if (idEmpresa == this.empresas.PANASA)
+            {
+                if (hora >= 6 && hora < 14)
+                {
                     turno = 1;
-                    fecha  = int.Parse(dateReal.ToString("yyyyMMdd"));
-                }else if(hora >= 14 && hora < 22){
+                    fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
+                }
+                else if (hora >= 14 && hora < 22)
+                {
                     turno = 2;
                     fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                }else{
+                }
+                else
+                {
                     turno = 3;
-                    if(hora >= 22 && hora < 24){
+                    if (hora >= 22 && hora < 24)
+                    {
                         fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                    }else{
+                    }
+                    else
+                    {
                         fecha = int.Parse(dateReal.AddDays(-1).ToString("yyyyMMdd"));
                     }
                 }
 
-            }else if(idEmpresa == this.empresas.PAINSA){
-                if(idCentro == this.centroPAINSA.K10){
+            }
+            else if (idEmpresa == this.empresas.PAINSA)
+            {
+                if (idCentro == this.centroPAINSA.K10)
+                {
 
-                    if(hora >= 6 && hora < 13){
+                    if (hora >= 6 && hora < 13)
+                    {
                         turno = 1;
                         fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                    }else if(hora >= 13 && hora < 20){
+                    }
+                    else if (hora >= 13 && hora < 20)
+                    {
                         turno = 2;
                         fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                    }else{
+                    }
+                    else
+                    {
                         turno = 3;
-                        if(hora >= 20 && hora < 24){
+                        if (hora >= 20 && hora < 24)
+                        {
                             fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                        }else{
+                        }
+                        else
+                        {
                             fecha = int.Parse(dateReal.AddDays(-1).ToString("yyyyMMdd"));
                         }
                     }
 
-                }else if(idCentro == this.centroPAINSA.K129){
-                    
-                    if(hora >= 7 && hora < 15){
+                }
+                else if (idCentro == this.centroPAINSA.K129)
+                {
+
+                    if (hora >= 7 && hora < 15)
+                    {
                         turno = 1;
                         fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                    }else if(hora >= 15 && hora < 23){
+                    }
+                    else if (hora >= 15 && hora < 23)
+                    {
                         turno = 2;
                         fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                    }else{
+                    }
+                    else
+                    {
                         turno = 3;
-                        if(hora >= 23 && hora < 24){
+                        if (hora >= 23 && hora < 24)
+                        {
                             fecha = int.Parse(dateReal.ToString("yyyyMMdd"));
-                        }else{
+                        }
+                        else
+                        {
                             fecha = int.Parse(dateReal.AddDays(-1).ToString("yyyyMMdd"));
                         }
                     }
 
-                }else{
+                }
+                else
+                {
                     return BadRequest();
                 }
 
-            }else{
+            }
+            else
+            {
                 return BadRequest();
             }
 
             try
             {
-                if(idEmpresa == empresas.PAVECA){
-                    return await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
-                }else{
+                if (idEmpresa == empresas.PAVECA)
+                {
+                    var data = await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
+                    return Ok(_mapper.Map<RotaCalidumDTO>(data));
+
+
+                }
+                else
+                {
                     RotaCalidum rotaCalidum = new RotaCalidum();
                     rotaCalidum.RcidRotCal = 0;
                     rotaCalidum.Rcfecha = fecha;
                     rotaCalidum.Rcturno = turno;
                     rotaCalidum.Rcgrupo = "0";
-                    return rotaCalidum;
+                    return Ok(_mapper.Map<RotaCalidumDTO>(rotaCalidum));
                 }
             }
             catch
@@ -198,10 +255,10 @@ namespace NeoAPI.Controllers.Maestras
             CentroTrabajo = Int32.Parse(maestra.CentroDeTrabajo);
 
             var result = from Fso in _PolybaseBPCSVen.Fsos
-                        join Iim in _PolybaseBPCSVen.Iims
-                        on Fso.Sprod equals Iim.Iprod
-                        where Fso.Swrkc == CentroTrabajo && Fso.Sstat.Contains(OrdenesAbiertas)
-                        select new {Fso.Sprod,Fso.Sstat,Iim.Idesc};
+                         join Iim in _PolybaseBPCSVen.Iims
+                         on Fso.Sprod equals Iim.Iprod
+                         where Fso.Swrkc == CentroTrabajo && Fso.Sstat.Contains(OrdenesAbiertas)
+                         select new { Fso.Sprod, Fso.Sstat, Iim.Idesc };
 
             foreach (var item in result)
             {
@@ -215,6 +272,6 @@ namespace NeoAPI.Controllers.Maestras
             ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
 
             return ordenesFabricacionDTOList;
-        } 
+        }
     }
 }

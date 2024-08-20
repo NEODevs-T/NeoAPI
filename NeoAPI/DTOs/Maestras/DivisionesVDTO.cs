@@ -1,13 +1,15 @@
 using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.DTOs.Maestra;
+namespace DTOs.Maestra;
 
 public class DivisionesVDTO
 {
-    //TODO: cambiar atributos
-    public int idPais { get; set; } = 0;
-    public int idEmpresa { get; set; } = 0;
-    public int idCentro { get; set; } = 0;
-    public int idDivision { get; set; }
+    public int IdCentro { get; set; }
+
+    public int IdDivision { get; set; }
+
+    public string? Ndivision { get; set; }
+
+    public bool? Estado { get; set; }
 }

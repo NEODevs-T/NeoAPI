@@ -5,9 +5,11 @@ namespace NeoAPI.DTOs.Maestra;
 
 public class EmpresasVDTO
 {
-    //TODO: cambiar atributos
-    public int idPais { get; set; } = 0;
-    public int idEmpresa { get; set; } = 0;
-    public int idCentro { get; set; } = 0;
-    public int idDivision { get; set; }
+    public int IdPais { get; set; }
+
+    public int IdEmpresa { get; set; }
+
+    public string Empresa { get; set; } = null!;
+
+    public bool Estado { get; set; }
 }
