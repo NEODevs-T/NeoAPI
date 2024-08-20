@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace DTOs.Maestra;
+namespace NeoAPI.DTOs.Maestra;
 
 public class DivisionesVDTO
 {
