@@ -21,13 +21,13 @@ namespace NeoAPI.Controllers.LibroNovedades
             _context = context;
             _mapper = mapper;
         }
-        [HttpGet("ObtenerTipoParadaId/{IdGespline}")]
+        [HttpGet("GetObtenerTipoParadaId/{IdGespline}")]
         public async Task<ActionResult<TiParTpDTO>> ObtenerTipoParadaId(string IdGespline)
         {
             TiParTp data = await this._context.TiParTps.Where(t => t.Tpcodigo == IdGespline).FirstOrDefaultAsync() ?? new TiParTp();
             return Ok(_mapper.Map<TiParTpDTO>(data));
         }
-        [HttpGet("ObtenerTodosTiposNovedad")]
+        [HttpGet("GetObtenerTodosTiposNovedad")]
         public async Task<ActionResult<List<TiParTpDTO>>> ObtenerTodosTiposNovedad()
         {
             List<TiParTp> tiParTp = new List<TiParTp>();
