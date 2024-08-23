@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NeoAPI.Models.Neo;
 
 namespace NeoAPI.DTOs.LibroNovedades;
 
@@ -35,4 +36,7 @@ public class LibroNoveDTO
     public int IdCtpm { get; set; }
 
     public int? LnisResu { get; set; }
+
+    public virtual Master IdMasterNavigation { get; set; } = null!;
+
 }

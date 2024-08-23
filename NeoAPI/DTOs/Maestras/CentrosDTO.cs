@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NeoAPI.DTOs.Maestra;
 
-public class CentrosVDTO
+public class CentrosDTO
 {
     public int IdCentro { get; set; }
 
@@ -14,4 +14,5 @@ public class CentrosVDTO
     public bool Cestado { get; set; }
 
     public DateTime Cfecha { get; set; }
+
 }

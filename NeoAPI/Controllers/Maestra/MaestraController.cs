@@ -41,12 +41,12 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
         [HttpGet("GetEmpresas/{idPais:int}")]
-        public async Task<ActionResult<List<EmpresasVDTO>>> GetEmpresas(int idPais)
+        public async Task<ActionResult<List<EmpresasDTO>>> GetEmpresas(int idPais)
         {
             try
             {
                 List<EmpresasV> data = await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<EmpresasVDTO>(data));
+                return Ok(_mapper.Map<EmpresasDTO>(data));
             }
             catch
             {
@@ -55,12 +55,12 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetCentros/{idEmpresa:int}")]
-        public async Task<ActionResult<List<CentrosVDTO>>> GetCentros(int idEmpresa)
+        public async Task<ActionResult<List<CentrosDTO>>> GetCentros(int idEmpresa)
         {
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<CentrosVDTO>(data));
+                return Ok(_mapper.Map<CentrosDTO>(data));
             }
             catch
             {
@@ -69,12 +69,12 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetAllCentros/")]
-        public async Task<ActionResult<List<CentrosVDTO>>> GetAllCentros()
+        public async Task<ActionResult<List<CentrosDTO>>> GetAllCentros()
         {
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<CentrosVDTO>(data));
+                return Ok(_mapper.Map<CentrosDTO>(data));
             }
             catch
             {
@@ -83,12 +83,12 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetDivisiones/{idCentro:int}")]
-        public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisiones(int idCentro)
+        public async Task<ActionResult<List<DivisionesDTO>>> GetDivisiones(int idCentro)
         {
             try
             {
                 List<DivisionesV> data = await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<DivisionesVDTO>(data));
+                return Ok(_mapper.Map<DivisionesDTO>(data));
             }
             catch
             {
@@ -97,12 +97,12 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetAllLineas")]
-        public async Task<ActionResult<List<LineaVDTO>>> GetAllLineas()
+        public async Task<ActionResult<List<LineaDTO>>> GetAllLineas()
         {
             try
             {
                 List<LineaV> data = await this._context.LineaVs.Where(l => l.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<LineaVDTO>(data));
+                return Ok(_mapper.Map<LineaDTO>(data));
             }
             catch
             {
@@ -111,12 +111,12 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetLineas/{idDivision:int}")]
-        public async Task<ActionResult<List<LineaVDTO>>> GetLineas(int idDivision)
+        public async Task<ActionResult<List<LineaDTO>>> GetLineas(int idDivision)
         {
             try
             {
                 List<LineaV> data = await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<LineaVDTO>(data));
+                return Ok(_mapper.Map<LineaDTO>(data));
             }
             catch
             {
@@ -125,12 +125,12 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetLineaPorId/{idLineas:int}")]
-        public async Task<ActionResult<LineaVDTO>> GetLineaPorId(int idLineas)
+        public async Task<ActionResult<LineaDTO>> GetLineaPorId(int idLineas)
         {
             try
             {
                 LineaV data = await this._context.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
-                return Ok(_mapper.Map<LineaVDTO>(data));
+                return Ok(_mapper.Map<LineaDTO>(data));
             }
             catch
             {
