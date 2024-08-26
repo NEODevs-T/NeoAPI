@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using NeoAPI.Models.Neo;
 
 namespace NeoAPI.DTOs.LibroNovedades;
 
@@ -22,6 +23,7 @@ public class LibroNoveDTO
     public string Lngrupo { get; set; } = null!;
 
     public string Lnturno { get; set; } = null!;
+
     public int IdTipoNove { get; set; }
 
     public int IdAreaCar { get; set; }
@@ -35,4 +37,7 @@ public class LibroNoveDTO
     public int IdCtpm { get; set; }
 
     public int? LnisResu { get; set; }
+
+    public int IdMaster { get; set; }
+
 }

@@ -5,9 +5,17 @@ namespace NeoAPI.DTOs.Maestra;
 
 public class MasterDTO
 {
-    //TODO: cambiar atributos
-    public int idPais { get; set; } = 0;
-    public int idEmpresa { get; set; } = 0;
-    public int idCentro { get; set; } = 0;
-    public int idDivision { get; set; }
+    public int IdMaster { get; set; }
+
+    public int IdCentro { get; set; }
+
+    public int IdDivision { get; set; }
+
+    public int IdPais { get; set; }
+
+    public int IdEmpresa { get; set; }
+
+    public int IdLinea { get; set; }
+
+
 }

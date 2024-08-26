@@ -5,9 +5,12 @@ namespace NeoAPI.DTOs.Maestra;
 
 public class PaiDTO
 {
-    //TODO: cambiar atributos
-    public int idPais { get; set; } = 0;
-    public int idEmpresa { get; set; } = 0;
-    public int idCentro { get; set; } = 0;
-    public int idDivision { get; set; }
+    public int IdPais { get; set; }
+
+    public string Pnombre { get; set; } = null!;
+
+    public bool Pestado { get; set; }
+
+    public DateTime Pfecha { get; set; }
+
 }

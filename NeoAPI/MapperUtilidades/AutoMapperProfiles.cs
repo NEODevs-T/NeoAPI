@@ -61,15 +61,15 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<ReuDiumDTO, ReuDium>().ReverseMap();
 
-            CreateMap<CentrosVDTO, CentrosV>().ReverseMap();
+            CreateMap<CentrosDTO, CentrosV>().ReverseMap();
 
-            CreateMap<DivisionesVDTO, DivisionesV>().ReverseMap();
+            CreateMap<DivisionesDTO, DivisionesV>().ReverseMap();
 
-            CreateMap<EmpresasVDTO, EmpresasV>().ReverseMap();
+            CreateMap<EmpresasDTO, EmpresasV>().ReverseMap();
 
             CreateMap<EquipoEamDTO, EquipoEam>().ReverseMap();
 
-            CreateMap<LineaVDTO, LineaV>().ReverseMap();
+            CreateMap<LineaDTO, LineaV>().ReverseMap();
 
             CreateMap<MasterDTO, Master>().ReverseMap();
 

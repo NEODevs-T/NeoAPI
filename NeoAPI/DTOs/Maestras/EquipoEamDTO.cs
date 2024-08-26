@@ -5,9 +5,18 @@ namespace NeoAPI.DTOs.Maestra;
 
 public class EquipoEamDTO
 {
-    //TODO: cambiar atributos
-    public int idPais { get; set; } = 0;
-    public int idEmpresa { get; set; } = 0;
-    public int idCentro { get; set; } = 0;
-    public int idDivision { get; set; }
+    public int IdEquipo { get; set; }
+
+    public int IdLinea { get; set; }
+
+    public string EcodEquiEam { get; set; } = null!;
+
+    public string EnombreEam { get; set; } = null!;
+
+    public string? EdescriEam { get; set; }
+
+    public bool EestaEam { get; set; }
+
+    public DateTime Efecha { get; set; }
+
 }
