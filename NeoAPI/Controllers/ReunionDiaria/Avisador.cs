@@ -26,16 +26,15 @@ namespace NeoAPI.Controllers.Avisador
         [HttpPost("AddRegistros")]
         public async Task<ActionResult<bool>> AddRegistros((List<CambFecDTO> lista1, List<CambStatDTO> lista2) data)
         {
-            List<CambFec> lista1_1 = _mapper.Map<List<CambFec>>(data.lista1);
-            List<CambStat> lista2_2 = _mapper.Map<List<CambStat>>(data.lista2);
+            List<CambFec> _lista1 = _mapper.Map<List<CambFec>>(data.lista1);
+            List<CambStat> _lista2 = _mapper.Map<List<CambStat>>(data.lista2);
 
-            foreach (var item in lista1_1)
+            foreach (var item in _lista1)
             {
                 this._context.CambFecs.Add(item);
-
             }
 
-            foreach (var item in lista2_2)
+            foreach (var item in _lista2)
             {
                 this._context.CambStats.Add(item);
             }
