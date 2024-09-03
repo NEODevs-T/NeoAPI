@@ -15,6 +15,7 @@ namespace NeoAPI.AutoMapper
 {
     public class AutoMapperProfiles : Profile
     {
+
         public AutoMapperProfiles()
         {
 
@@ -112,6 +113,11 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
+
+
+            // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()
+            //     .ConvertUsing(src => src.Select(pai => _mapper.Map<PaiDTO>(pai)));
+
             //https://www.youtube.com/watch?v=pr_pemcmVAs
         }
     }

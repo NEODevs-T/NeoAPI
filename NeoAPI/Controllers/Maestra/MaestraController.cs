@@ -30,15 +30,10 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetPaises")]
         public async Task<ActionResult<List<PaiDTO>>> GetPaises()
         {
-            try
-            {
-                List<Pai> data = await this._context.Pais.Where(p => p.Pestado == true).ToListAsync();
-                return Ok(_mapper.Map<PaiDTO>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
+
+            List<Pai> data = await this._context.Pais.Where(p => p.Pestado == true).ToListAsync();
+            return Ok(_mapper.Map<List<PaiDTO>>(data));
+
         }
         [HttpGet("GetEmpresas/{idPais:int}")]
         public async Task<ActionResult<List<EmpresasDTO>>> GetEmpresas(int idPais)
@@ -46,7 +41,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<EmpresasV> data = await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<EmpresasDTO>(data));
+                return Ok(_mapper.Map<List<EmpresasDTO>>(data));
             }
             catch
             {
@@ -60,7 +55,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<CentrosDTO>(data));
+                return Ok(_mapper.Map<List<CentrosDTO>>(data));
             }
             catch
             {
@@ -74,7 +69,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<CentrosDTO>(data));
+                return Ok(_mapper.Map<List<CentrosDTO>>(data));
             }
             catch
             {
@@ -88,7 +83,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<DivisionesV> data = await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<DivisionesDTO>(data));
+                return Ok(_mapper.Map<List<DivisionesDTO>>(data));
             }
             catch
             {
@@ -102,7 +97,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<LineaV> data = await this._context.LineaVs.Where(l => l.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<LineaDTO>(data));
+                return Ok(_mapper.Map<List<LineaDTO>>(data));
             }
             catch
             {
@@ -116,7 +111,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<LineaV> data = await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<LineaDTO>(data));
+                return Ok(_mapper.Map<List<LineaDTO>>(data));
             }
             catch
             {
@@ -130,7 +125,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 LineaV data = await this._context.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
-                return Ok(_mapper.Map<LineaDTO>(data));
+                return Ok(_mapper.Map<List<LineaDTO>>(data));
             }
             catch
             {
@@ -139,29 +134,29 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetMaestraPorFiltros")]
-        public async Task<ActionResult<List<MasterDTO>>> GetMaestraPorFiltros([FromQuery] MaestraDTO maestra)
+        public async Task<ActionResult<List<MasterDTO>>> GetMaestraPorFiltros([FromQuery] MaestraV maestra)
         {
             try
             {
                 if (maestra.IdDivision != 0)
                 {
                     List<Master> data = await this._context.Masters.Where(m => m.IdDivision == maestra.IdDivision).Include(m => m.IdLineaNavigation).ToListAsync();
-                    return Ok(_mapper.Map<MasterDTO>(data));
+                    return Ok(_mapper.Map<List<MasterDTO>>(data));
                 }
                 else if (maestra.IdCentro != 0)
                 {
                     List<Master> data = await this._context.Masters.Where(m => m.IdCentro == maestra.IdCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
-                    return Ok(_mapper.Map<MasterDTO>(data));
+                    return Ok(_mapper.Map<List<MasterDTO>>(data));
                 }
                 else if (maestra.IdEmpresa != 0)
                 {
                     List<Master> data = await this._context.Masters.Where(m => m.IdEmpresa == maestra.IdEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
-                    return Ok(_mapper.Map<MasterDTO>(data));
+                    return Ok(_mapper.Map<List<MasterDTO>>(data));
                 }
                 else if (maestra.IdPais != 0)
                 {
                     List<Master> data = await this._context.Masters.Where(m => m.IdPais == maestra.IdPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
-                    return Ok(_mapper.Map<MasterDTO>(data));
+                    return Ok(_mapper.Map<List<MasterDTO>>(data));
                 }
                 return BadRequest();
             }
@@ -174,14 +169,9 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetMaestraPorLinea/{idLinea:int}")]
         public async Task<ActionResult<int>> GetMaestraPorLinea(int idLinea)
         {
-            try
-            {
-                return await this._context.Masters.Where(m => m.IdLinea == idLinea).Select(m => m.IdMaster).FirstOrDefaultAsync();
-            }
-            catch
-            {
-                return NotFound();
-            }
+
+            return await this._context.Masters.Where(m => m.IdLinea == idLinea).Select(m => m.IdMaster).FirstOrDefaultAsync();
+
         }
 
         [HttpGet("GetEquiposEAMPorLinea/{idLinea:int}")]
@@ -190,7 +180,7 @@ namespace NeoAPI.Controllers.Maestras
             try
             {
                 List<EquipoEam> data = await this._context.EquipoEams.Where(e => e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
-                return Ok(_mapper.Map<EquipoEamDTO>(data));
+                return Ok(_mapper.Map<List<EquipoEamDTO>>(data));
             }
             catch
             {
