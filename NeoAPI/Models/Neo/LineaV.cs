@@ -11,5 +11,7 @@ public partial class LineaV
 
     public string Linea { get; set; } = null!;
 
+    public string LcenCos { get; set; } = null!;
+
     public bool Estado { get; set; }
 }
