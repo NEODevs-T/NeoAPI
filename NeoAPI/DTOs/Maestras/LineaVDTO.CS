@@ -14,5 +14,7 @@ public partial class LineaVDTO
 
     public string LcenCos { get; set; } = null!;
 
+    public int IdMaster { get; set; }
+
     public bool Estado { get; set; }
 }

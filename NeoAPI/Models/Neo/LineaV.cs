@@ -13,5 +13,7 @@ public partial class LineaV
 
     public string LcenCos { get; set; } = null!;
 
+    public int IdMaster { get; set; }
+
     public bool Estado { get; set; }
 }
