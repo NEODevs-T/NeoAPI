@@ -68,6 +68,7 @@ namespace NeoAPI.Controllers.LibroNovedades
         public async Task<ActionResult<bool>> ActualizacionNovedad(int IdlibrNov, LibroNoveDTO data)
         {
             LibroNove? dataNove = await this._context.LibroNoves.Where(x => x.IdlibrNov == IdlibrNov).FirstOrDefaultAsync();
+            
 
             if (data != null && dataNove != null)
             {
