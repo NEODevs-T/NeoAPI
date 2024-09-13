@@ -26,16 +26,8 @@ namespace NeoAPI.Controllers.LibroNovedades
         public async Task<ActionResult<List<ClasifiTpmDTO>>> GetClasificacionTPM()
         {
             List<ClasifiTpm> listaClasiTPM;
-            try
-            {
-                listaClasiTPM = await _context.ClasifiTpms.Where(c => c.Ctpmestado == true).ToListAsync();
-
-                return _mapper.Map<List<ClasifiTpmDTO>>(listaClasiTPM);
-            }
-            catch (Exception e)
-            {
-                return BadRequest(e);
-            }
+            listaClasiTPM = await _context.ClasifiTpms.Where(c => c.Ctpmestado == true).ToListAsync();
+            return _mapper.Map<List<ClasifiTpmDTO>>(listaClasiTPM);
         }
 
     }
