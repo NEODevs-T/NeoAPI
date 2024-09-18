@@ -108,7 +108,6 @@ namespace NeoAPI.Controllers.LibroNovedades
             List<LibroNove> data = await this._context.LibroNoves.Where(l => l.IdLinea == idLinea).ToListAsync();
             return Ok(_mapper.Map<List<LibroNoveDTO>>(data));
         }
-
         [HttpPut("UpdateGrupoRegistros")]
         public async Task<ActionResult<bool>> UpdateRegistros(List<LibroNoveDTO> novedades)
         {

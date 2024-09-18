@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NeoAPI.DTOs.Maestra;
 
-public class DivisionesDTO
+public class DivisionDTO
 {
     public int IdDivision { get; set; }
 

@@ -18,4 +18,8 @@ public partial class Empresa
     public DateTime Efecha { get; set; }
 
     public virtual ICollection<Master> Masters { get; set; } = new List<Master>();
+
+    public virtual Empresa? IdEmpresaNavigation { get; set; }
+    public virtual ICollection<Division> Divisions { get; set; }
+    public virtual ICollection<Linea> Lineas { get; set; }
 }
