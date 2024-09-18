@@ -208,15 +208,10 @@ namespace NeoAPI.Controllers.Maestras
             {
                 return BadRequest();
             }
-
-            try
-            {
                 if (idEmpresa == empresas.PAVECA)
                 {
                     var data = await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
                     return Ok(_mapper.Map<RotaCalidumDTO>(data));
-
-
                 }
                 else
                 {
@@ -227,11 +222,6 @@ namespace NeoAPI.Controllers.Maestras
                     rotaCalidum.Rcgrupo = "0";
                     return Ok(_mapper.Map<RotaCalidumDTO>(rotaCalidum));
                 }
-            }
-            catch
-            {
-                return NotFound();
-            }
         }
 
         [HttpGet("GetProductosActuales/{idLinea:int}")]
