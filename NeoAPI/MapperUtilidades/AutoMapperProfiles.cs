@@ -10,6 +10,8 @@ using NeoAPI.Models.PolybaseBPCSCen;
 using System.Collections.Generic;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.DTOs.Maestra;
+using NeoAPI.DTOs.PNC;
+
 
 namespace NeoAPI.AutoMapper
 {
@@ -114,6 +116,7 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
 
+            CreateMap<TipoDTO, Tipo>().ReverseMap();
 
             // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()
             //     .ConvertUsing(src => src.Select(pai => _mapper.Map<PaiDTO>(pai)));
