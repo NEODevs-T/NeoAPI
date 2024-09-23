@@ -64,34 +64,76 @@ namespace NeoAPI.Controllers.LibroNovedades
             return Ok(_mapper.Map<LibroNoveDTO>(novedad));
         }
 
-        [HttpPut("UpdatenNovedad/{IdlibrNov:int}")]
+        // [HttpPut("UpdatenNovedad/{IdlibrNov:int}")]
+        // public async Task<ActionResult<bool>> ActualizacionNovedad(int IdlibrNov, LibroNoveDTO data)
+        // {
+        //     LibroNove? dataNove = await this._context.LibroNoves
+        //         .Where(x => x.IdlibrNov == IdlibrNov).FirstOrDefaultAsync();
+
+        //     if (data != null && dataNove != null)
+        //     {
+        //         dataNove.IdLinea = data.IdLinea;
+        //         dataNove.IdAreaCar = data.IdAreaCar;
+        //         dataNove.IdEquipo = data.IdEquipo;
+        //         dataNove.IdlibrNov = data.IdlibrNov;
+        //         dataNove.IdParada = data.IdParada;
+        //         dataNove.IdTipoNove = data.IdTipoNove;
+        //         dataNove.Lndiscrepa = data.Lndiscrepa;
+        //         dataNove.Lnfecha = data.Lnfecha;
+        //         dataNove.LnfichaRes = data.LnfichaRes;
+        //         dataNove.Lngrupo = data.Lngrupo;
+        //         dataNove.LnisPizUni = data.LnisPizUni;
+        //         dataNove.Lnobserv = data.Lnobserv;
+        //         dataNove.LntiePerMi = data.LntiePerMi;
+        //         dataNove.Lnturno = data.Lnturno;
+        //         dataNove.IdCtpm = data.IdCtpm;
+        //         dataNove.LnisResu = data.LnisResu;
+        //         dataNove.IdMaster = data.IdMaster;
+
+        //         return Ok(0 < await _context.SaveChangesAsync());
+        //     }
+        //     return BadRequest(false);
+
+        // }
+
+        [HttpPut("UpdateNovedad/{IdlibrNov:int}")]
         public async Task<ActionResult<bool>> ActualizacionNovedad(int IdlibrNov, LibroNoveDTO data)
         {
-            LibroNove? dataNove = await this._context.LibroNoves.Where(x => x.IdlibrNov == IdlibrNov).FirstOrDefaultAsync();
+            // Buscar la entidad en la base de datos
+            LibroNove? dataNove = await _context.LibroNoves.FirstOrDefaultAsync(x => x.IdlibrNov == IdlibrNov);
 
-            if (data != null && dataNove != null)
+            if (dataNove == null)
             {
+                return NotFound();
+            }
+
+            if (data != null)
+            {
+                // Asignar manualmente las propiedades del DTO a la entidad
                 dataNove.IdLinea = data.IdLinea;
                 dataNove.IdAreaCar = data.IdAreaCar;
                 dataNove.IdEquipo = data.IdEquipo;
-                dataNove.IdlibrNov = data.IdlibrNov;
-                dataNove.IdParada = data.IdParada;
                 dataNove.IdTipoNove = data.IdTipoNove;
                 dataNove.Lndiscrepa = data.Lndiscrepa;
                 dataNove.Lnfecha = data.Lnfecha;
                 dataNove.LnfichaRes = data.LnfichaRes;
                 dataNove.Lngrupo = data.Lngrupo;
+                dataNove.Lnturno = data.Lnturno;
+                dataNove.IdParada = data.IdParada;
                 dataNove.LnisPizUni = data.LnisPizUni;
                 dataNove.Lnobserv = data.Lnobserv;
                 dataNove.LntiePerMi = data.LntiePerMi;
-                dataNove.Lnturno = data.Lnturno;
                 dataNove.IdCtpm = data.IdCtpm;
                 dataNove.LnisResu = data.LnisResu;
                 dataNove.IdMaster = data.IdMaster;
-                return Ok(0 < await _context.SaveChangesAsync());
-            }
-            return BadRequest(false);
 
+                // Guardar los cambios
+                await _context.SaveChangesAsync();
+
+                return Ok(true);
+            }
+
+            return BadRequest(false);
         }
 
         [HttpGet("GetRegistroDeHoyPorLinea/{idLinea:int}")]
