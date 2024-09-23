@@ -1,0 +1,22 @@
+using System;
+using System.Collections.Generic;
+
+namespace NeoAPI.DTOs.PNC;
+
+
+public partial class causaDTO
+{
+    public int IdCausa { get; set; }
+
+    public int IdCausante { get; set; }
+
+    public string Cnombre { get; set; } = null!;
+
+    public string? Cdescri { get; set; }
+
+    public bool Cestado { get; set; }
+
+    public virtual CausanteDTO IdCausanteNavigation { get; set; } = null!;
+
+    public virtual ICollection<ProNoConDTO> ProNoCons { get; set; } = new List<ProNoConDTO>();
+}
