@@ -116,7 +116,19 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
 
+
+            //Producto No Conforme
+
+            CreateMap<IdentifDTO, Identifi>().ReverseMap();
             CreateMap<TipoDTO, Tipo>().ReverseMap();
+            CreateMap<DisDefiDTO, DispDefi>().ReverseMap();
+            CreateMap<CausanteDTO, Causante>().ReverseMap();
+            CreateMap<ProDispDTO, PropDisp>().ReverseMap();
+            CreateMap<UnidadeDTO, Unidad>().ReverseMap();
+
+
+
+
 
             // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()
             //     .ConvertUsing(src => src.Select(pai => _mapper.Map<PaiDTO>(pai)));
