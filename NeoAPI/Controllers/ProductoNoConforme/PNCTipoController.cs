@@ -168,4 +168,80 @@ namespace NeoAPI.Controllers.PNC
     }
 
 
-}   
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+     public class PNCCausa : ControllerBase
+    {
+
+        private readonly DbNeoIiContext _context;
+        private readonly IMapper _mapper;
+
+        public PNCCausa (DbNeoIiContext context, IMapper mapper)
+        {
+            _context = context;
+            _mapper = mapper;
+        }
+
+        [HttpGet("GetTodosLasCausas")]
+        public async Task<List<causaDTO>> ObtenerTodasLasCausas()
+        {
+            List<Causa> causaLista = await this._context.Causas.Where(p => p.Cestado == true).ToListAsync();
+            
+            return _mapper.Map<List<causaDTO>>(causaLista);
+        }
+
+        [HttpGet("GetTodosLasCausasPorCausante")]
+        public async Task<List<causaDTO>> ObtenerLasCausasPorCausante(int idCausante)
+        {
+            List<Causa> CausasPorCausanteLista = await this._context.Causas.Where(p => p.Cestado == true && p.IdCausante == idCausante).ToListAsync();
+           
+            return _mapper.Map<List<causaDTO>>(CausasPorCausanteLista);
+        }
+
+
+        [HttpPost("AddPropuestaDisposicion")]
+                public async Task<bool> AddPropuestaDisposicion(causaDTO registro)
+        {
+            var entidades = _mapper.Map<Causa>(registro);
+            
+            this._context.Causas.Add(entidades);
+            
+            return await _context.SaveChangesAsync() > 0;
+        }
+    
+    }
+
+
+    }
+
+
+
