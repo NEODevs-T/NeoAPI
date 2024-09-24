@@ -19,4 +19,6 @@ public class EquipoEamDTO
 
     public DateTime Efecha { get; set; }
 
+    // public Linea Linea { get; set; } 
+
 }

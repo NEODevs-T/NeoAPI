@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.Neo;
+namespace NeoAPI.DTOs.Maestra;
 
-public partial class EquipoEam
+public class EquipoEamDTO2
 {
     public int IdEquipo { get; set; }
 
@@ -19,6 +19,7 @@ public partial class EquipoEam
 
     public DateTime Efecha { get; set; }
 
-    public virtual Linea IdLineaNavigation { get; set; } = null!;
+    // public virtual Linea IdLineaNavigation { get; set; } = null!;
+
 
 }

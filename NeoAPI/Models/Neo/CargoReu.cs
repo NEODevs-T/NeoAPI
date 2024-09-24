@@ -5,6 +5,7 @@ namespace NeoAPI.Models.Neo;
 
 public partial class CargoReu
 {
+
     public int IdCargoR { get; set; }
 
     public string Crnombre { get; set; } = null!;
@@ -16,6 +17,8 @@ public partial class CargoReu
     public string? Crarea { get; set; }
 
     public int? Crbloque { get; set; }
+
+    public virtual Master? IdMasterNavigation { get; set; } = null!;
 
     public virtual ICollection<AsistenReu> AsistenReus { get; set; } = new List<AsistenReu>();
 }

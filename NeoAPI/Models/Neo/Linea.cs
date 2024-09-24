@@ -24,4 +24,5 @@ public partial class Linea
     public virtual Master? Master { get; set; }
 
     public virtual ICollection<Monto> Montos { get; set; } = new List<Monto>();
+
 }
