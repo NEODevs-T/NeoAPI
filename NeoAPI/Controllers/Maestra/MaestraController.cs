@@ -54,29 +54,16 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetEmpresas/{idPais:int}")]
         public async Task<ActionResult<List<EmpresasVDTO>>> GetEmpresas(int idPais)
         {
-            try
-            {
-                List<EmpresasV> data = await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<List<EmpresasVDTO>>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
+            List<EmpresasV> data = await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
+            return Ok(_mapper.Map<List<EmpresasVDTO>>(data));
+        
         }
 
         [HttpGet("GetCentros/{idEmpresa:int}")]
         public async Task<ActionResult<List<CentrosVDTO>>> GetCentros(int idEmpresa)
         {
-            try
-            {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
                 return Ok(_mapper.Map<List<CentrosVDTO>>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
         }
 
         [HttpGet("GetCentrosJT/{cent}")]
@@ -114,43 +101,22 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetAllCentros/")]
         public async Task<ActionResult<List<CentrosVDTO>>> GetAllCentros()
         {
-            try
-            {
                 List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
                 return Ok(_mapper.Map<List<CentrosVDTO>>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
         }
 
         [HttpGet("GetDivisiones/{idCentro:int}")]
         public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisiones(int idCentro)
         {
-            try
-            {
-                List<DivisionesV> data = await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<List<DivisionesVDTO>>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
+            List<DivisionesV> data = await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
+            return Ok(_mapper.Map<List<DivisionesVDTO>>(data));
         }
 
         [HttpGet("GetAllLineas")]
         public async Task<ActionResult<List<LineaVDTO>>> GetAllLineas()
         {
-            try
-            {
-                List<LineaV> data = await this._context.LineaVs.Where(l => l.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<List<LineaVDTO>>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
+            List<LineaV> data = await this._context.LineaVs.Where(l => l.Estado == true).ToListAsync();
+            return Ok(_mapper.Map<List<LineaVDTO>>(data));
         }
 
         //      javier metodo
@@ -211,29 +177,15 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetLineas/{idDivision:int}")]
         public async Task<ActionResult<List<LineaVDTO>>> GetLineas(int idDivision)
         {
-            try
-            {
-                List<LineaV> data = await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<List<LineaVDTO>>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
+            List<LineaV> data = await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
+            return Ok(_mapper.Map<List<LineaVDTO>>(data));
         }
 
         [HttpGet("GetLineaPorId/{idLineas:int}")]
         public async Task<ActionResult<LineaVDTO>> GetLineaPorId(int idLineas)
         {
-            try
-            {
-                LineaV data = await this._context.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
-                return Ok(_mapper.Map<LineaVDTO>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
+            LineaV data = await this._context.LineaVs.Where(l => l.IdLinea == idLineas).FirstOrDefaultAsync() ?? new LineaV();
+            return Ok(_mapper.Map<LineaVDTO>(data));
         }
 
         //TODO: Revisar implentacion
@@ -326,8 +278,6 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetMaestraPorFiltros")]
         public async Task<ActionResult<List<MasterDTO>>> GetMaestraPorFiltros([FromQuery] MaestraV maestra)
         {
-            try
-            {
                 if (maestra.IdDivision != 0)
                 {
                     List<Master> data = await this._context.Masters.Where(m => m.IdDivision == maestra.IdDivision).Include(m => m.IdLineaNavigation).ToListAsync();
@@ -349,11 +299,6 @@ namespace NeoAPI.Controllers.Maestras
                     return Ok(_mapper.Map<List<MasterDTO>>(data));
                 }
                 return BadRequest();
-            }
-            catch
-            {
-                return NotFound();
-            }
         }
 
         [HttpGet("GetMaestraPorLinea/{idLinea:int}")]
@@ -367,15 +312,8 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetEquiposEAMPorLinea/{idLinea:int}")]
         public async Task<ActionResult<List<EquipoEamDTO>>> GetEquiposEAMPorLinea(int idLinea)
         {
-            try
-            {
-                List<EquipoEam> data = await this._context.EquipoEams.Where(e => e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
-                return Ok(_mapper.Map<List<EquipoEamDTO>>(data));
-            }
-            catch
-            {
-                return NotFound();
-            }
+            List<EquipoEam> data = await this._context.EquipoEams.Where(e => e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
+            return Ok(_mapper.Map<List<EquipoEamDTO>>(data));
         }
     }
 }
