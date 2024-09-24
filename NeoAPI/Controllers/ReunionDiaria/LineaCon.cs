@@ -41,32 +41,6 @@ public class LineasController : ControllerBase
     public static List<EquipoEam> equipos = new List<EquipoEam>();
 
 
-
-    // [HttpGet("GetBdDiv{cent}")]
-    // public async Task<ActionResult<List<LineaDTO>>> GetBdDiv(string cent)
-    // {
-    //     List<Master> data = new List<Master> { };
-
-    //     if (cent == "All")
-    //     {
-    //         data = await _context.Masters
-    //        .Include(x => x.IdLineaNavigation)
-    //        .ToListAsync();
-    //     }
-
-    //     else
-    //     {
-    //         int _cent = Int32.Parse(cent);
-    //         data = await _context.Masters
-    //        .Where(x => x.IdCentro == _cent)
-    //        .Include(x => x.IdLineaNavigation)
-    //        .ToListAsync();
-    //     }
-
-
-    //     return Ok(_mapper.Map<List<LineaDTO>>(data));
-    // }
-
     //TODO: Areglos proporcionados por chat gpt
 
     [HttpGet("GetBdDiv{cent}")]
@@ -108,55 +82,54 @@ public class LineasController : ControllerBase
     }
 
     //TODO: nueva implementacion
- [HttpGet("Equipos/{cent}")]
-        public async Task<ActionResult<List<EquipoEam>>> EquiposEAM(string cent)
+    [HttpGet("GetEquipos/{cent}")]
+    public async Task<ActionResult<List<EquipoEam>>> EquiposEAM(string cent)
+    {
+        string cen = "";
+        int idempresa = 0;
+        if (cent.Length > 3)
         {
-            string cen = "";
-            int idempresa = 0;
-            if (cent.Length > 3)
-            {
-                cen = cent.Substring(0, 3);
-                idempresa = int.Parse(cent.Substring(3));
-            }
-
-            if (cen == "All")
-            {
-                var result = await _context.EquipoEams
-                 .Include(x => x.IdLineaNavigation)
-                 .Where(x => x.EestaEam == true & x.IdLineaNavigation.Master.IdEmpresaNavigation.IdEmpresa == idempresa)
-                 .Select(p => new
-                 {
-                     p.EcodEquiEam,
-                     p.EnombreEam,
-                     p.IdLineaNavigation
-                 })
-                 .AsNoTracking()
-                  .ToListAsync();
-
-                return Ok(result);
-            }
-            else
-            {
-
-
-                var result = await _context.EquipoEams
-                 .Include(x => x.IdLineaNavigation)
-                 //.Where(x => x.IdLineaNavigation.IdDivisionNavigation.IdCentroNavigation.Cnom == cent && x.EestaEam == true)
-                 .Where(x => x.IdLineaNavigation.Master.IdCentro == int.Parse(cent) && x.EestaEam == true)
-                 .Select(p => new
-                 {
-                     p.EcodEquiEam,
-                     p.EnombreEam,
-                     p.IdLineaNavigation
-                 })
-                 .AsNoTracking()
-                  .ToListAsync();
-
-                return Ok(result);
-            }
-
-
+            cen = cent.Substring(0, 3);
+            idempresa = int.Parse(cent.Substring(3));
         }
+
+        if (cen == "All")
+        {
+            var result = await _context.EquipoEams
+             .Include(x => x.IdLineaNavigation)
+             .Where(x => x.EestaEam == true & x.IdLineaNavigation.Master.IdEmpresaNavigation.IdEmpresa == idempresa)
+             .Select(p =>  new EquipoEamDTO
+             {
+                 EcodEquiEam = p.EcodEquiEam,
+                 EnombreEam = p.EnombreEam,
+             })
+             .AsNoTracking()
+              .ToListAsync();
+
+            return Ok(result);
+        }
+        else
+        {
+
+
+            var result = await _context.EquipoEams
+             .Include(x => x.IdLineaNavigation)
+             //.Where(x => x.IdLineaNavigation.IdDivisionNavigation.IdCentroNavigation.Cnom == cent && x.EestaEam == true)
+             .Where(x => x.IdLineaNavigation.Master.IdCentro == int.Parse(cent) && x.EestaEam == true)
+             .Select(p => new EquipoEamDTO
+             {
+                 EcodEquiEam = p.EcodEquiEam,
+                 EnombreEam = p.EnombreEam,
+                // linea = p.IdLineaNavigation
+             })
+             .AsNoTracking()
+              .ToListAsync();
+
+            return Ok(result);
+        }
+
+
+    }
 
     // [HttpGet("Division/{centro}/{div}")]
     // public async Task<ActionResult<List<DivisionDTO>>> GetDivLin(string centro, string div)

@@ -102,6 +102,9 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdMasterNavigation.IdLineaNavigation.Lnom))
                 .ForMember(dest => dest.AreaCarga, act => act.MapFrom(src => src.IdAreaCarNavigation.Acnombre));
 
+            CreateMap<EquipoEam, EquipoEamDTO>()
+                .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdLineaNavigation));
+
             CreateMap<Models.PolybaseBPCSVen.Fso, OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
