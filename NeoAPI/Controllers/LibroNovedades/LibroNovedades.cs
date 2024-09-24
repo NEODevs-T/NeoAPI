@@ -99,8 +99,13 @@ namespace NeoAPI.Controllers.LibroNovedades
         [HttpPut("UpdateNovedad/{IdlibrNov:int}")]
         public async Task<ActionResult<bool>> ActualizacionNovedad(int IdlibrNov, LibroNoveDTO data)
         {
+<<<<<<< HEAD
             // Buscar la entidad en la base de datos
             LibroNove? dataNove = await _context.LibroNoves.FirstOrDefaultAsync(x => x.IdlibrNov == IdlibrNov);
+=======
+            LibroNove? dataNove = await this._context.LibroNoves.Where(x => x.IdlibrNov == IdlibrNov).FirstOrDefaultAsync();
+            
+>>>>>>> 319313c72ce329ff4b62dbafc26ee87ebfed686f
 
             if (dataNove == null)
             {
@@ -149,7 +154,6 @@ namespace NeoAPI.Controllers.LibroNovedades
             List<LibroNove> data = await this._context.LibroNoves.Where(l => l.IdLinea == idLinea).ToListAsync();
             return Ok(_mapper.Map<List<LibroNoveDTO>>(data));
         }
-
         [HttpPut("UpdateGrupoRegistros")]
         public async Task<ActionResult<bool>> UpdateRegistros(List<LibroNoveDTO> novedades)
         {

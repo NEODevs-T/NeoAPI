@@ -101,24 +101,6 @@ namespace NeoAPI.AutoMapper
             CreateMap<LibroNove, LibroNoveDTO>()
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdMasterNavigation.IdLineaNavigation.Lnom))
                 .ForMember(dest => dest.AreaCarga, act => act.MapFrom(src => src.IdAreaCarNavigation.Acnombre));
-                // .ReverseMap();
-
-
-            // CreateMap<LibroNoveDTO, LibroNove>()
-            //     .ForMember(dest => dest.IdMasterNavigation.IdCentroNavigation.Cnom, act => act.MapFrom(src => src.Centro))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdDivisionNavigation.Dnombre, act => act.MapFrom(src => src.Division))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdEmpresaNavigation.Enombre, act => act.MapFrom(src => src.Empresa))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdLineaNavigation.Lnom, act => act.MapFrom(src => src.Linea))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdPaisNavigation.Pnombre, act => act.MapFrom(src => src.Pais))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdCentro, act => act.MapFrom(src => src.IdCentro))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdDivision, act => act.MapFrom(src => src.IdDivision))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdEmpresa, act => act.MapFrom(src => src.IdEmpresa))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdLinea, act => act.MapFrom(src => src.IdLinea))
-            //     .ForMember(dest => dest.IdMasterNavigation.IdPais, act => act.MapFrom(src => src.IdPais))
-            //     .ForMember(dest => dest.IdAreaCarNavigation.Acnombre, act => act.MapFrom(src => src.AreaCarga))
-            //     .ForMember(dest => dest.IdAreaCar, act => act.MapFrom(src => src.IdAreaCar))
-            //     .ForMember(dest => dest.IdMaster, act => act.MapFrom(src => src.IdMaster))
-            //     .ReverseMap();
 
             CreateMap<Models.PolybaseBPCSVen.Fso, OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
