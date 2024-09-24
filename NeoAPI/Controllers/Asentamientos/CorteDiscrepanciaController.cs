@@ -293,43 +293,27 @@ namespace NeoAPI.Controllers.Asentamientos
         {
             if (categori.IdCategori == 0)
             {
-                try
+                bool existe = _context.Categoris.Any(c => c.Ccodigo == categori.Ccodigo);
+                // Si no existe el codigo, insertar la nueva categor�a
+                if (!existe)
                 {
-                    bool existe = _context.Categoris.Any(c => c.Ccodigo == categori.Ccodigo);
-                    // Si no existe el codigo, insertar la nueva categor�a
-                    if (!existe)
-                    {
-                        var entity = _mapper.Map<Categori>(categori);
-                        _context.Categoris.Add(entity);
-                        await _context.SaveChangesAsync();
-                        return Ok("Registro exitoso");
-                    }
-                    else
-                    {
-                        // Mostrar un mensaje de error o hacer otra acci�n
-                        return BadRequest("Código ya registrado");
-                    }
+                    var entity = _mapper.Map<Categori>(categori);
+                    _context.Categoris.Add(entity);
+                    await _context.SaveChangesAsync();
+                    return Ok("Registro exitoso");
                 }
-                catch (Exception ex)
+                else
                 {
-                    return BadRequest("Error, intente nuevamente" + ex.Message);
+                    // Mostrar un mensaje de error o hacer otra acci�n
+                    return BadRequest("Código ya registrado");
                 }
             }
             else
             {
-                try
-                {
-                    var entity = _mapper.Map<Categori>(categori);
-                    _context.Entry(categori).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
-                    return Ok("Registro exitoso");
-
-                }
-                catch
-                {
-                    return BadRequest("Error, intente nuevamente");
-
-                }
+                var entity = _mapper.Map<Categori>(categori);
+                _context.Entry(categori).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return Ok("Registro exitoso");
             }
         }
 
@@ -339,8 +323,6 @@ namespace NeoAPI.Controllers.Asentamientos
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(CorteDiscDTO cortedis)
         {
-            try
-            {
                 var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsenta == cortedis.IdAsenta);
                 if (corte == null)
                 {
@@ -362,11 +344,6 @@ namespace NeoAPI.Controllers.Asentamientos
                     return BadRequest(new { message = "Carte ya realizado" });
                 }
                 return Ok("Registro exitoso");
-            }
-            catch (Exception ex)
-            {
-                return Problem("Error, intente nuevamente" + ex.Message);
-            }
         }
         //insertarcorte como lista validando si existe uno
         [HttpPost("AddListaCortes")]
@@ -374,9 +351,6 @@ namespace NeoAPI.Controllers.Asentamientos
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(List<CorteDiscDTO> cortedis, string turno, DateTime fecha) //TODO agrgar id del master del la linea
         {
-            try
-            {
-
                 var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno); // Si no existe el codigo, insertar la nueva categor�a
                 if (corte == null)
                 {
@@ -389,11 +363,6 @@ namespace NeoAPI.Controllers.Asentamientos
                     return BadRequest(new { message = "Carte ya realizado" });
                 }
                 return Ok("Registro exitoso");
-            }
-            catch (Exception ex)
-            {
-                return Problem("Error, intente nuevamente" + ex.Message);
-            }
         }
 
         //PUTS
