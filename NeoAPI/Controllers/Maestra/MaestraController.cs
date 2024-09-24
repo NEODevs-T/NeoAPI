@@ -120,8 +120,8 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         //      javier metodo
-        [HttpGet("GetEquipos/{cent}")]
-        public async Task<ActionResult<List<EquipoDTO>>> EquiposEAM(string idCentro)
+        [HttpGet("GetEquipos/{idCentro}")]
+        public async Task<ActionResult<List<EquipoEamDTO>>> EquiposEAM(string idCentro)
         {
             List<EquipoEam> listaEquipo = new List<EquipoEam>();
 
@@ -133,7 +133,7 @@ namespace NeoAPI.Controllers.Maestras
                     .AsNoTracking()
                     .ToListAsync();
 
-                return Ok(listaEquipo);
+                return Ok(_mapper.Map<List<EquipoEamDTO>>(listaEquipo));
             }
             else
             {
@@ -152,8 +152,7 @@ namespace NeoAPI.Controllers.Maestras
                 {
                     listaEquipo.AddRange(item.IdLineaNavigation.EquipoEams);
                 }
-
-                return Ok(_mapper.Map<List<EquipoDTO>>(listaEquipo));
+                return Ok(_mapper.Map<List<EquipoEamDTO>>(listaEquipo));
             }
         }
 

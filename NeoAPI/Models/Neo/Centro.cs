@@ -17,3 +17,4 @@ public partial class Centro
 
     public virtual ICollection<Master> Masters { get; set; } = new List<Master>();
 }
+ 

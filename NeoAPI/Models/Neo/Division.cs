@@ -5,6 +5,7 @@ namespace NeoAPI.Models.Neo;
 
 public partial class Division
 {
+
     public int IdDivision { get; set; }
 
     public string Dnombre { get; set; } = null!;
@@ -16,4 +17,9 @@ public partial class Division
     public DateTime Dfecha { get; set; }
 
     public virtual ICollection<Master> Masters { get; set; } = new List<Master>();
+
+
+    public virtual Master? IdMasterNavigation { get; set; } = null!;
+    
+
 }
