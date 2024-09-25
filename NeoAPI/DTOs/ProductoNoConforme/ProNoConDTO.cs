@@ -42,19 +42,5 @@ public partial class ProNoConDTO
 
     public int IdCausa { get; set; }
 
-    public virtual Pnccausa IdCausaNavigation { get; set; } = null!;
 
-    public virtual PncdisDefi IdDisDefiNavigation { get; set; } = null!;
-
-    public virtual Pncestado IdEstadoNavigation { get; set; } = null!;
-
-    public virtual Pncidentif? IdIdentifNavigation { get; set; }
-
-    //public virtual Linea IdLugaEvenNavigation { get; set; } = null!;
-
-    public virtual PncproDisp IdProDispNavigation { get; set; } = null!;
-
-    public virtual Pnctipo IdTipoNavigation { get; set; } = null!;
-
-    public virtual Pncunidad IdUnidadNavigation { get; set; } = null!;
 }
