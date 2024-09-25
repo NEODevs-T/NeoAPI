@@ -128,17 +128,6 @@ public class LineasController : ControllerBase
         }
     }
 
-    [HttpGet("GetDivision/{centro}/{div}")]
-    public async Task<ActionResult<List<DivisionesVDTO>>> GetDivLin(string centro, string div)
-    {
-        List<DivisionesV> divisions = new List<DivisionesV>();
-        divisions = await _context.DivisionesVs
-            .Include(x => x.IdCentro)
-            .ToListAsync();
-
-        return Ok(_mapper.Map<List<DivisionesVDTO>>(divisions));
-    }
-
     [HttpGet("GetAsistencia/{centro}/{empresa}")]
     public async Task<ActionResult<List<AsistenReuDTO>>> GetAsistencia(string centro, string empresa)
     {
@@ -150,8 +139,6 @@ public class LineasController : ControllerBase
 
         return Ok(_mapper.Map<List<AsistenReuDTO>>(cargoreus));
     }
-
-
 
 
     // [HttpGet("Ksf")]
