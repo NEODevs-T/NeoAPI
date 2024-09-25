@@ -17,7 +17,7 @@ public partial class InfoAse
 
     public string? Iaobser { get; set; }
 
-    public DateTime IafechCrea { get; set; }
+    public DateTime? IafechCrea { get; set; }
 
     public DateTime IafechReal { get; set; }
 

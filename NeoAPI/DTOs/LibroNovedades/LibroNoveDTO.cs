@@ -40,9 +40,10 @@ public class LibroNoveDTO
 
     public int IdMaster { get; set; }
 
-    public virtual Master? IdMasterNavigation { get; set; } = null;
+    public string? Linea { get; set; } = null!;
 
-    public virtual AreaCarga? IdAreaCarNavigation { get; set; } = null;
+    public string? AreaCarga { get; set; } = null!;
+
     public void Deconstruct(out int idLinea, out string idEquipo, out DateTime lnfecha, out bool lnisPizUni)
     {
         idLinea = this.IdLinea;

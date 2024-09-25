@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using NeoAPI.Models.Neo;
 
 namespace NeoAPI.DTOs.Maestra;
 
@@ -19,6 +20,6 @@ public class EquipoEamDTO
 
     public DateTime Efecha { get; set; }
 
-    // public Linea Linea { get; set; } 
+    public LineaDTO Linea { get; set; }
 
 }
