@@ -34,7 +34,6 @@ public class LineasController : ControllerBase
     public static List<Ksf> ksfs = new List<Ksf>();
     public static List<RespoReu> resporeu = new List<RespoReu>();
     public static List<ReuDium> reunionditabla = new List<ReuDium>();
-    public static List<Division> divisions = new List<Division>();
     public static List<AsistenReu> asistenreus = new List<AsistenReu>();
     public static List<CargoReu> cargoreus = new List<CargoReu>();
     public static List<StatsAsisDto> StatsAsis = new List<StatsAsisDto>();
@@ -98,7 +97,7 @@ public class LineasController : ControllerBase
             var result = await _context.EquipoEams
              .Include(x => x.IdLineaNavigation)
              .Where(x => x.EestaEam == true & x.IdLineaNavigation.Master.IdEmpresaNavigation.IdEmpresa == idempresa)
-             .Select(p =>  new EquipoEamDTO
+             .Select(p => new EquipoEamDTO
              {
                  EcodEquiEam = p.EcodEquiEam,
                  EnombreEam = p.EnombreEam,
@@ -120,39 +119,37 @@ public class LineasController : ControllerBase
              {
                  EcodEquiEam = p.EcodEquiEam,
                  EnombreEam = p.EnombreEam,
-                // linea = p.IdLineaNavigation
+                 // linea = p.IdLineaNavigation
              })
              .AsNoTracking()
               .ToListAsync();
 
             return Ok(result);
         }
-
-
     }
 
-    // [HttpGet("Division/{centro}/{div}")]
-    // public async Task<ActionResult<List<DivisionDTO>>> GetDivLin(string centro, string div)
-    // {
+    [HttpGet("GetDivision/{centro}/{div}")]
+    public async Task<ActionResult<List<DivisionesVDTO>>> GetDivLin(string centro, string div)
+    {
+        List<DivisionesV> divisions = new List<DivisionesV>();
+        divisions = await _context.DivisionesVs
+            .Include(x => x.IdCentro)
+            .ToListAsync();
 
-    //     divisions = await _context.Divisions
-    //         .Include(x => x.IdMasterNavigation.IdCentroNavigation)
-    //         .ToListAsync();
+        return Ok(_mapper.Map<List<DivisionesVDTO>>(divisions));
+    }
 
-    //     return Ok(linea);
-    // }
+    [HttpGet("GetAsistencia/{centro}/{empresa}")]
+    public async Task<ActionResult<List<AsistenReuDTO>>> GetAsistencia(string centro, string empresa)
+    {
 
-    // [HttpGet("Asistencia/{centro}/{empresa}")]
-    // public async Task<ActionResult<List<AsistenReu>>> GetAsistencia(string centro, string empresa)
-    // {
+        cargoreus = await _context.CargoReus
+            .Where(a => a.Crarea == centro & a.Crempresa == empresa & a.Cresta == true)
+            .OrderByDescending(a => a.Crnombre)
+            .ToListAsync();
 
-    //     cargoreus = await _context.CargoReus
-    //         .Where(a => a.Crarea == centro & a.Crempresa == empresa & a.Cresta == true)
-    //         .OrderByDescending(a => a.Crnombre)
-    //         .ToListAsync();
-
-    //     return Ok(cargoreus);
-    // }
+        return Ok(_mapper.Map<List<AsistenReuDTO>>(cargoreus));
+    }
 
 
 
