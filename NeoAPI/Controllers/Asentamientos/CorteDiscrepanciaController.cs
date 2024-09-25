@@ -323,27 +323,27 @@ namespace NeoAPI.Controllers.Asentamientos
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(CorteDiscDTO cortedis)
         {
-                var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsenta == cortedis.IdAsenta);
-                if (corte == null)
-                {
-                    var entity = _mapper.Map<CorteDi>(cortedis);
-                    _context.CorteDis.Add(entity);
+            var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsenta == cortedis.IdAsenta);
+            if (corte == null)
+            {
+                var entity = _mapper.Map<CorteDi>(cortedis);
+                _context.CorteDis.Add(entity);
 
-                    //// Actualizar AsentumDTO
-                    //var asentum = await _context.Asenta.FirstOrDefaultAsync(a => a.IdAsenta == cortedis.IdAsenta);
-                    //if (asentum != null)
-                    //{
-                    //    _mapper.Map(cortedis.AsentumDTONavigation, asentum);
-                    //    _context.Entry(asentum).State = EntityState.Modified;
-                    //}
+                //// Actualizar AsentumDTO
+                //var asentum = await _context.Asenta.FirstOrDefaultAsync(a => a.IdAsenta == cortedis.IdAsenta);
+                //if (asentum != null)
+                //{
+                //    _mapper.Map(cortedis.AsentumDTONavigation, asentum);
+                //    _context.Entry(asentum).State = EntityState.Modified;
+                //}
 
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    return BadRequest(new { message = "Carte ya realizado" });
-                }
-                return Ok("Registro exitoso");
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return BadRequest(new { message = "Carte ya realizado" });
+            }
+            return Ok("Registro exitoso");
         }
         //insertarcorte como lista validando si existe uno
         [HttpPost("AddListaCortes")]
@@ -351,18 +351,18 @@ namespace NeoAPI.Controllers.Asentamientos
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(List<CorteDiscDTO> cortedis, string turno, DateTime fecha) //TODO agrgar id del master del la linea
         {
-                var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno); // Si no existe el codigo, insertar la nueva categor�a
-                if (corte == null)
-                {
-                    var lista = _mapper.Map<List<CorteDi>>(cortedis);
-                    _context.CorteDis.AddRange(lista);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    return BadRequest(new { message = "Carte ya realizado" });
-                }
-                return Ok("Registro exitoso");
+            var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno); // Si no existe el codigo, insertar la nueva categor�a
+            if (corte == null)
+            {
+                var lista = _mapper.Map<List<CorteDi>>(cortedis);
+                _context.CorteDis.AddRange(lista);
+                await _context.SaveChangesAsync();
+            }
+            else
+            {
+                return BadRequest(new { message = "Carte ya realizado" });
+            }
+            return Ok("Registro exitoso");
         }
 
         //PUTS

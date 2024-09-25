@@ -56,14 +56,14 @@ namespace NeoAPI.Controllers.Maestras
         {
             List<EmpresasV> data = await this._context.EmpresasVs.Where(e => e.IdPais == idPais && e.Estado == true).ToListAsync();
             return Ok(_mapper.Map<List<EmpresasVDTO>>(data));
-        
+
         }
 
         [HttpGet("GetCentros/{idEmpresa:int}")]
         public async Task<ActionResult<List<CentrosVDTO>>> GetCentros(int idEmpresa)
         {
-                List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<List<CentrosVDTO>>(data));
+            List<CentrosV> data = await this._context.CentrosVs.Where(c => c.IdEmpresa == idEmpresa && c.Estado == true).ToListAsync();
+            return Ok(_mapper.Map<List<CentrosVDTO>>(data));
         }
 
         [HttpGet("GetCentrosJT/{cent}")]
@@ -101,8 +101,8 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetAllCentros/")]
         public async Task<ActionResult<List<CentrosVDTO>>> GetAllCentros()
         {
-                List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
-                return Ok(_mapper.Map<List<CentrosVDTO>>(data));
+            List<CentrosV> data = await this._context.CentrosVs.Where(c => c.Estado == true).ToListAsync();
+            return Ok(_mapper.Map<List<CentrosVDTO>>(data));
         }
 
         [HttpGet("GetDivisiones/{idCentro:int}")]
@@ -278,27 +278,27 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetMaestraPorFiltros")]
         public async Task<ActionResult<List<MasterDTO>>> GetMaestraPorFiltros([FromQuery] MaestraV maestra)
         {
-                if (maestra.IdDivision != 0)
-                {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdDivision == maestra.IdDivision).Include(m => m.IdLineaNavigation).ToListAsync();
-                    return Ok(_mapper.Map<List<MasterDTO>>(data));
-                }
-                else if (maestra.IdCentro != 0)
-                {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdCentro == maestra.IdCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
-                    return Ok(_mapper.Map<List<MasterDTO>>(data));
-                }
-                else if (maestra.IdEmpresa != 0)
-                {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdEmpresa == maestra.IdEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
-                    return Ok(_mapper.Map<List<MasterDTO>>(data));
-                }
-                else if (maestra.IdPais != 0)
-                {
-                    List<Master> data = await this._context.Masters.Where(m => m.IdPais == maestra.IdPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
-                    return Ok(_mapper.Map<List<MasterDTO>>(data));
-                }
-                return BadRequest();
+            if (maestra.IdDivision != 0)
+            {
+                List<Master> data = await this._context.Masters.Where(m => m.IdDivision == maestra.IdDivision).Include(m => m.IdLineaNavigation).ToListAsync();
+                return Ok(_mapper.Map<List<MasterDTO>>(data));
+            }
+            else if (maestra.IdCentro != 0)
+            {
+                List<Master> data = await this._context.Masters.Where(m => m.IdCentro == maestra.IdCentro).Include(m => m.IdDivisionNavigation).ToListAsync();
+                return Ok(_mapper.Map<List<MasterDTO>>(data));
+            }
+            else if (maestra.IdEmpresa != 0)
+            {
+                List<Master> data = await this._context.Masters.Where(m => m.IdEmpresa == maestra.IdEmpresa).Include(m => m.IdCentroNavigation).ToListAsync();
+                return Ok(_mapper.Map<List<MasterDTO>>(data));
+            }
+            else if (maestra.IdPais != 0)
+            {
+                List<Master> data = await this._context.Masters.Where(m => m.IdPais == maestra.IdPais).Include(m => m.IdEmpresaNavigation).ToListAsync();
+                return Ok(_mapper.Map<List<MasterDTO>>(data));
+            }
+            return BadRequest();
         }
 
         [HttpGet("GetMaestraPorLinea/{idLinea:int}")]
