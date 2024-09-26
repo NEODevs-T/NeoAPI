@@ -12,7 +12,7 @@ namespace NeoAPI.Controllers.PNC
     [ApiController]
     [Route("api/[controller]")]
 
-  public class PNCIdentificacionController : ControllerBase
+    public class PNCIdentificacionController : ControllerBase
     {
 
         private readonly DbNeoIiContext _cotext;
@@ -261,27 +261,6 @@ namespace NeoAPI.Controllers.PNC
 }
 
 
-        //public async Task<ProNoConDTO?> ObtenerProductoNoConforme(int idRegistro){
-          //  List<ProNoCon> ProNoConLista = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idRegistro).Include(p => p.IdCausaNavigation).ThenInclude(c => c.IdCausanteNavigation).FirstOrDefaultAsync();
-            //return _mapper.Map<List<ProNoConDTO>>(ProNoConLista);
-        //}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
         [HttpGet("GetProductoNoConformeConTodaLaData")]
         public async Task<ProNoConDTO?> ObtenerProductoNoConformeConTodaLaData(int idRegistro){
@@ -289,13 +268,13 @@ namespace NeoAPI.Controllers.PNC
             .Include(p => p.IdIdentifNavigation).Include(p => p.IdProDispNavigation).Include(p => p.IdTipoNavigation)
             .Include(p => p.IdCausaNavigation).ThenInclude(c => c.IdCausanteNavigation).FirstOrDefaultAsync();
             
-            return reg;
+            if (reg == null)
+            {
+                return null;
+            }
+            return _mapper.Map<ProNoConDTO>(reg);
         }
     }
-
-
-
-
 
     public class PNCCausa : ControllerBase
     {
