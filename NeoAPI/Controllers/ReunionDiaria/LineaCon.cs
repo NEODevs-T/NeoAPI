@@ -152,20 +152,18 @@ public class LineasController : ControllerBase
         return Ok(_mapper.Map<List<KsfDTO>>(ksfs));
     }
 
+    [HttpGet("Responsables")]
+    public async Task<ActionResult<List<RespoReuDTO>>> GetRespon()
+    {
 
 
-    // [HttpGet("Responsables")]
-    // public async Task<ActionResult<List<Linea>>> GetRespon()
-    // {
+        resporeu = await _context.RespoReus
+            .Where(a => a.Rresta == true)
+            .ToListAsync();
 
 
-    //     resporeu = await _context.RespoReus
-    //         .Where(a => a.Rresta == true)
-    //         .ToListAsync();
-
-
-    //     return Ok(resporeu);
-    // }
+        return Ok(_mapper.Map<List<RespoReuDTO>>(resporeu));
+    }
 
     // //Obtener asistencia en porcentaje
     // [HttpGet("StatsAsis/{cent}/{empresa}/{f1}/{f2}")]

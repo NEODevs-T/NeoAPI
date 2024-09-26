@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 
 namespace NeoAPI.DTOs.ReunionDiaria;
+
 public class EquipoDTO
 {
     public int IdEquipo { get; set; }
