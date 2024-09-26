@@ -178,19 +178,18 @@ public class LineasController : ControllerBase
     //     DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
 
 
-
     //     if (cent == "All")
     //     {
     //         var result = await _context.AsistenReus
-    //        .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
-    //        .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //        .Select(a => new
-    //        {
-    //            a.Key,
-    //            Asistencias = a.Sum(b => b.ArAsistente)
-    //        })
-    //        .ToListAsync();
+    //         .Include(x => x.AridCargoRNavigation)
+    //         .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
+    //         .GroupBy(x => x.AridCargoRNavigation.Crnombre)
+    //         .Select(a => new
+    //         {
+    //             a.Key,
+    //             Asistencias = a.Sum(b => b.ArAsistente)
+    //         })
+    //         .ToListAsync();
 
     //         return Ok(result);
     //     }
@@ -199,14 +198,14 @@ public class LineasController : ControllerBase
     //     {
     //         var result = await _context.AsistenReus
     //         .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.AridCargoRNavigation.Crempresa == empresa)
-    //        .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //        .Select(a => new
-    //        {
-    //            Cargo = a.Key,
-    //            Asistencias = a.Sum(b => b.ArAsistente)
-    //        })
-    //        .ToListAsync();
+    //         .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.AridCargoRNavigation.Crempresa == empresa)
+    //         .GroupBy(x => x.AridCargoRNavigation.Crnombre)
+    //         .Select(a => new
+    //         {
+    //             Cargo = a.Key,
+    //             Asistencias = a.Sum(b => b.ArAsistente)
+    //         })
+    //         .ToListAsync();
 
     //         return Ok(result);
     //     }

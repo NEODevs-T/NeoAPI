@@ -15,7 +15,7 @@ public partial class EquipoEam
 
     public string? EdescriEam { get; set; }
 
-    public bool EestaEam { get; set; }
+    public bool? EestaEam { get; set; }
 
     public DateTime Efecha { get; set; }
 
