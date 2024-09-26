@@ -65,44 +65,44 @@ namespace NeoAPI.Controllers.Asentamientos
             {
                 //retorna fuera de rango de un centro
                 var result = await _context.Asenta
-                   .Include(r => r.IdRangoNavigation)
-                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
-                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
-                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
-                   .Include(r => r.CorteDis)
-                   .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
-                       && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-                       && f.AisActivo == true
-                       && f.IdInfoAseNavigation.Iaturno == turno
-                       && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-                       && f.IdRangoNavigation.IdProducto == idProducto
-                       //&& f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
-                       && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
-                       && f.CorteDis.Count == 0)
-                   .AsNoTracking()
-                   .ToListAsync();
+                    .Include(r => r.IdRangoNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
+                    .Include(r => r.CorteDis)
+                    .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                        && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                        && f.AisActivo == true
+                        && f.IdInfoAseNavigation.Iaturno == turno
+                        && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                        && f.IdRangoNavigation.IdProducto == idProducto
+                        //&& f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                        && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
+                        && f.CorteDis.Count == 0)
+                    .AsNoTracking()
+                    .ToListAsync();
                 var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
                 return Ok(corteDiscDTO);
             }
             else
             {
                 var result = await _context.Asenta
-                  .Include(r => r.IdRangoNavigation)
-                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
-                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
-                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
-                  .Include(r => r.CorteDis)
-                  .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
-                      && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-                      && f.AisActivo == true
-                      && f.IdInfoAseNavigation.Iaturno == turno
-                      && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-                      && f.IdRangoNavigation.IdProducto == idProducto
-                      && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
-                      && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
-                      && f.CorteDis.Count == 0)
-                  .AsNoTracking()
-                  .ToListAsync();
+                    .Include(r => r.IdRangoNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
+                    .Include(r => r.CorteDis)
+                    .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                        && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                        && f.AisActivo == true
+                        && f.IdInfoAseNavigation.Iaturno == turno
+                        && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                        && f.IdRangoNavigation.IdProducto == idProducto
+                        && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                        && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
+                        && f.CorteDis.Count == 0)
+                    .AsNoTracking()
+                    .ToListAsync();
                 var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
                 return Ok(corteDiscDTO);
             }

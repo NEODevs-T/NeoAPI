@@ -165,54 +165,56 @@ public class LineasController : ControllerBase
         return Ok(_mapper.Map<List<RespoReuDTO>>(resporeu));
     }
 
-    // //Obtener asistencia en porcentaje
-    // [HttpGet("StatsAsis/{cent}/{empresa}/{f1}/{f2}")]
-    // public async Task<ActionResult<List<StatsAsisDto>>> GetStatsAsis(string cent, string empresa, string f1, string f2)
-    // {
+    //Obtener asistencia en porcentaje
+    [HttpGet("StatsAsis/{cent}/{empresa}/{Fecha_inicio}/{Fecha_Final}")]
+    public async Task<ActionResult<List<AsistenReuDTO>>> GetStatsAsis(string cent, string empresa, string Fecha_inicio, string Fecha_Final)
+    {
 
-    //     string[] fecha1 = f1.Split('-');
-    //     string[] fecha2 = f2.Split('-');
+        string[] fecha1 = Fecha_inicio.Split('-');
+        string[] fecha2 = Fecha_Final.Split('-');
 
-    //     //año, mes dia
-    //     DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
-    //     DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
-
-
-    //     if (cent == "All")
-    //     {
-    //         var result = await _context.AsistenReus
-    //         .Include(x => x.AridCargoRNavigation)
-    //         .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
-    //         .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //         .Select(a => new
-    //         {
-    //             a.Key,
-    //             Asistencias = a.Sum(b => b.ArAsistente)
-    //         })
-    //         .ToListAsync();
-
-    //         return Ok(result);
-    //     }
-
-    //     else
-    //     {
-    //         var result = await _context.AsistenReus
-    //         .Include(x => x.AridCargoRNavigation)
-    //         .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.AridCargoRNavigation.Crempresa == empresa)
-    //         .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //         .Select(a => new
-    //         {
-    //             Cargo = a.Key,
-    //             Asistencias = a.Sum(b => b.ArAsistente)
-    //         })
-    //         .ToListAsync();
-
-    //         return Ok(result);
-    //     }
+        //año, mes dia
+        DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
+        DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
 
 
-    //     return Ok();
-    // }
+        if (cent == "All")
+        {
+            var result = await _context.AsistenReus
+            .Include(x => x.IdCargoRNavigation)
+            .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
+            .GroupBy(x => x.IdCargoRNavigation.Crnombre)
+            .ToListAsync();
+
+            var carStDTO = result.Select(a => new CarStDTO
+            {
+                Cargo = a.Key,
+                Asistencias = a.Sum(b => b.ArAsistente)
+            });
+
+            return Ok(carStDTO);
+        }
+
+        else
+        {
+            var result = await _context.AsistenReus
+            .Include(x => x.IdCargoRNavigation)
+            .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
+            .GroupBy(x => x.IdCargoRNavigation.Crnombre)
+            .ToListAsync();
+
+            var carStDTO = result.Select(a => new CarStDTO
+            {
+                Cargo = a.Key,
+                Asistencias = a.Sum(b => b.ArAsistente)
+            });
+
+
+            return Ok(carStDTO);
+        }
+
+
+    }
 
     // //Obtener asistencia por dia
     // [HttpGet("ListaAsis/{cent}/{empresa}/{f1}/{f2}")]
