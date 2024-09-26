@@ -9,31 +9,9 @@ using NeoAPI.DTOs.PNC;
 
 namespace NeoAPI.Controllers.PNC
 {
+
     [ApiController]
     [Route("api/[controller]")]
-
-    public class PNCIdentificacionController : ControllerBase
-    {
-
-        private readonly DbNeoIiContext _cotext;
-
-        private readonly IMapper _mapper;
-
-        public PNCIdentificacionController(DbNeoIiContext context, IMapper mapper)
-        {
-            _cotext = context;
-            _mapper = mapper;
-        }
-        [HttpGet("GetTodosLosIdentifi")]
-        public async Task<List<IdentifDTO>> ObtenerTodosLosIdentifi()
-        {
-            List<Identifi> identifsLista = await this._cotext.Identifis.Where(i => i.Iestado == true).ToListAsync();
-
-            return _mapper.Map<List<IdentifDTO>>(identifsLista);
-        }
-    }
-
-
 
     public class PNCTipoController : ControllerBase
     {
@@ -58,53 +36,6 @@ namespace NeoAPI.Controllers.PNC
     
 
 
-
-    public class PNCDisposicionDefinitivaController : ControllerBase
-    {
-
-        private readonly DbNeoIiContext _cotext;
-        private readonly IMapper _mapper;
-
-
-        public PNCDisposicionDefinitivaController(DbNeoIiContext context, IMapper mapper)
-        {
-            _cotext = context;
-            _mapper = mapper;
-        }
-
-        [HttpGet("GetTodosLasDisposicionDefinitiva")]
-        public async Task<List<DisDefiDTO>> ObtenerTodosLasDisposicionDefinitiva()
-        {
-            List<DispDefi> disdefisLista = await this._cotext.DispDefis.Where(d => d.Ddestado == true).ToListAsync();
-
-            return _mapper.Map<List<DisDefiDTO>>(disdefisLista);
-        }
-    }
-
-
-
-    public class PNCCausanteController : ControllerBase
-    {
-
-        private readonly DbNeoIiContext _cotext;
-        private readonly IMapper _mapper;
-
-        public PNCCausanteController(DbNeoIiContext context, IMapper mapper)
-        {
-            _cotext = context;
-
-            _mapper = mapper;
-        }
-
-        [HttpGet("GetTodosLosCausantes")]
-        public async Task<List<CausanteDTO>> ObtenerTodosLosCausantes()
-        {
-            List<Causante> causantelista = await this._cotext.Causantes.Where(c => c.Cestado == true).ToListAsync();
-
-            return _mapper.Map<List<CausanteDTO>>(causantelista);
-        }
-
-    }
 
 
 
