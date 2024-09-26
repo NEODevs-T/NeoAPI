@@ -51,7 +51,7 @@ public class LineasController : ControllerBase
         {
             data = await _context.Masters
                .Include(x => x.IdLineaNavigation) // Incluye la tabla Linea
-               .ToListAsync();
+                .ToListAsync();
         }
         else
         {
@@ -141,16 +141,16 @@ public class LineasController : ControllerBase
     }
 
 
-    // [HttpGet("Ksf")]
-    // public async Task<ActionResult<List<Linea>>> GetKsf()
-    // {
+    [HttpGet("Ksf")]
+    public async Task<ActionResult<List<KsfDTO>>> GetKsf()
+    {
 
-    //     ksfs = await _context.Ksfs
-    //         .Where(a => a.KsfEsta == true)
-    //         .ToListAsync();
+        ksfs = await _context.Ksfs
+            .Where(a => a.KsfEsta == true)
+            .ToListAsync();
 
-    //     return Ok(ksfs);
-    // }
+        return Ok(_mapper.Map<List<KsfDTO>>(ksfs));
+    }
 
 
 
