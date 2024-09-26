@@ -216,44 +216,42 @@ public class LineasController : ControllerBase
 
     }
 
-    // //Obtener asistencia por dia
-    // [HttpGet("ListaAsis/{cent}/{empresa}/{f1}/{f2}")]
-    // public async Task<ActionResult<List<AsistenReu>>> GetListaAsis(string cent, string empresa, string f1, string f2)
-    // {
+    //Obtener asistencia por dia
+    [HttpGet("ListaAsis/{cent}/{empresa}/{f1}/{f2}")]
+    public async Task<ActionResult<List<AsistenReuDTO>>> GetListaAsis(string cent, string empresa, string f1, string f2)
+    {
 
-    //     string[] fecha1 = f1.Split('-');
-    //     string[] fecha2 = f2.Split('-');
+        string[] fecha1 = f1.Split('-');
+        string[] fecha2 = f2.Split('-');
 
-    //     //año, mes dia
-    //     DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
-    //     DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
-
-
-
-    //     if (cent == "All")
-    //     {
-    //         var result = await _context.AsistenReus
-    //        .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
-    //        .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //        .ToListAsync();
-
-    //         return Ok(result);
-    //     }
-
-    //     else
-    //     {
-    //         var result = await _context.AsistenReus
-    //        .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.AridCargoRNavigation.Crempresa == empresa)
-    //        .ToListAsync();
-
-    //         return Ok(result);
-    //     }
+        //año, mes dia
+        DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
+        DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
 
 
-    //     return Ok();
-    // }
+
+        if (cent == "All")
+        {
+            var result = await _context.AsistenReus
+           .Include(x => x.IdCargoRNavigation)
+           .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
+           .GroupBy(x => x.IdCargoRNavigation.Crnombre)
+           .ToListAsync();
+
+            return Ok(_mapper.Map<List<AsistenReuDTO>>(result));
+        }
+
+        else
+        {
+            var result = await _context.AsistenReus
+           .Include(x => x.IdCargoRNavigation)
+           .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
+           .ToListAsync();
+
+            return Ok(_mapper.Map<List<AsistenReuDTO>>(result));
+        }
+
+    }
 
     // [HttpGet("EquiposLinea/{Centro}")]
     // public async Task<ActionResult<List<Empresa>>> EquiposLineaEAM(string Centro)
