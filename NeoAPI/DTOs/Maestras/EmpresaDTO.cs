@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NeoAPI.DTOs.Maestra;
 
-public class EmpresasDTO
+public class EmpresaDTO
 {
     public int IdEmpresa { get; set; }
 
