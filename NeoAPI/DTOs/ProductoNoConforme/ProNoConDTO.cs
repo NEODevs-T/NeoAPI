@@ -36,7 +36,7 @@ public partial class ProNoConDTO
 
     public int IdLugaEven { get; set; }
 
-    public DateTime Pncfecha { get; set; }
+    public DateOnly Pncfecha { get; set; }
 
     public string? PncordFabr { get; set; }
 

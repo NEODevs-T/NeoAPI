@@ -14,13 +14,13 @@ namespace NeoAPI.Controllers.PNC
     [Route("api/[controller]")]
 
 
-public class PNCCausa : ControllerBase
+public class PNCCausaController : ControllerBase
     {
 
         private readonly DbNeoIiContext _cotext;
         private readonly IMapper _mapper;
 
-        public PNCCausa (DbNeoIiContext context, IMapper mapper)
+        public PNCCausaController (DbNeoIiContext context, IMapper mapper)
         {
             _cotext = context;
             _mapper = mapper;
@@ -55,4 +55,5 @@ public class PNCCausa : ControllerBase
     }
 
 
-    }
+}
+

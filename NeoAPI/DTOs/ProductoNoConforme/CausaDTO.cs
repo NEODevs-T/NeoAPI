@@ -15,8 +15,4 @@ public partial class causaDTO
     public string? Cdescri { get; set; }
 
     public bool Cestado { get; set; }
-
-    public virtual CausanteDTO IdCausanteNavigation { get; set; } = null!;
-
-    public virtual ICollection<ProNoConDTO> ProNoCons { get; set; } = new List<ProNoConDTO>();
 }
