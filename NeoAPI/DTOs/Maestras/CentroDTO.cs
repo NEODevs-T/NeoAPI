@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NeoAPI.DTOs.Maestra;
 
-public class CentrosDTO
+public class CentroDTO
 {
     public int IdCentro { get; set; }
 

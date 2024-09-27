@@ -1,10 +1,9 @@
 using System;
 using System.Collections.Generic;
-using NeoAPI.Models.Neo;
 
 namespace NeoAPI.DTOs.Maestra;
 
-public class EquipoEamDTO
+public class EquipoEamDTO2
 {
     public int IdEquipo { get; set; }
 
@@ -20,6 +19,7 @@ public class EquipoEamDTO
 
     public DateTime Efecha { get; set; }
 
-    public LineaDTO Linea { get; set; }
+    // public virtual Linea IdLineaNavigation { get; set; } = null!;
+
 
 }
