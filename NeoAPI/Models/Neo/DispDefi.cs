@@ -12,4 +12,6 @@ public partial class DispDefi
     public string? Dddescri { get; set; }
 
     public bool Ddestado { get; set; }
+
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

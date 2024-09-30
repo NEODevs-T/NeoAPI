@@ -12,4 +12,6 @@ public partial class Tipo
     public string? Tdescri { get; set; }
 
     public bool Testado { get; set; }
+
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

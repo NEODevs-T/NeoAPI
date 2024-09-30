@@ -31,13 +31,13 @@ namespace NeoAPI.Controllers.PNC
         [HttpPost("AddProductoNoConforme")]
         public async Task<bool> AddProductoNoConforme(ProNoConDTO registro)
         {
-            var entidados = _mapper.Map<ProNoCon>(registro);
-            this._cotext.ProNoCons.Add(entidados);
+            var entidad1 = _mapper.Map<ProNoCon>(registro);
+            this._cotext.ProNoCons.Add(entidad1);
             return await _cotext.SaveChangesAsync() > 0;
         }
 
 
-   
+    
         [HttpPut("PutActualizarProductoNoConforme")]
 public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO registro)
 {
@@ -50,7 +50,7 @@ public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO
         data.IdLugaEven = registro.IdLugaEven;
         data.IdProDisp = registro.IdProDisp;
         data.IdTipo = registro.IdTipo;
-        data.IdCaUnidad = registro.IdUnidad;
+        data.IdCaUnidad = registro.IdCaUnidad;
         data.Pnccantida = registro.Pnccantida;
         data.Pnccargador = registro.Pnccargador;
         data.PnccauLibe = registro.PnccauLibe;
@@ -65,70 +65,6 @@ public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO
     }
     return false;
 }
-
-
-
-
-
-//         public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO registro)
-// {
-//     ProNoCon? data = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idProNoCon).FirstOrDefaultAsync();
-//     var nuevo = _mapper.Map<ProNoConDTO>(data);
-//     var Nuevo2 = 
-//     if (data != null)
-//     {
-//         data.IdDisDefi = registro.IdDisDefi;
-//         data.IdEstado = registro.IdEstado;
-//         data.IdIdentif = registro.IdIdentif;
-//         data.IdLugaEven = registro.IdLugaEven;
-//         data.IdProDisp = registro.IdProDisp;
-//         data.IdTipo = registro.IdTipo;
-//         data.IdCaUnidad = registro.IdUnidad;
-//         data.Pnccantida = registro.Pnccantida;
-//         data.Pnccargador = registro.Pnccargador;
-//         data.PnccauLibe = registro.PnccauLibe;
-//         data.PncordFabr = registro.PncordFabr;
-//         data.PnccodProd = registro.PnccodProd;
-//         data.PncdesProd = registro.PncdesProd;
-//         nuevo.Pncfecha = DateOnly.FromDateTime(registro.Pncfecha);
-//         data.IdCausa = registro.IdCausa;
-//         data.PncindLibe = registro.PncindLibe;
-//         data.Pnclote = registro.Pnclote;
-//         return 0 < await _cotext.SaveChangesAsync();
-//     }
-//     return false;
-// }
-
-        // public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO registro){
-        //     ProNoCon? data = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idProNoCon).FirstOrDefaultAsync();
-        //     if(data != null){
-                        
-                        
-
-        //         data.IdDisDefi = registro.IdDisDefi;
-        //         data.IdEstado = registro.IdEstado;
-        //         data.IdIdentif = registro.IdIdentif;
-        //         data.IdLugaEven = registro.IdLugaEven;
-        //         data.IdProDisp = registro.IdProDisp;
-        //         data.IdTipo = registro.IdTipo;
-        //         data.IdCaUnidad = registro.IdUnidad;
-        //         data.Pnccantida = registro.Pnccantida;
-        //         data.Pnccargador = registro.Pnccargador;
-        //         data.PnccauLibe = registro.PnccauLibe;
-        //         data.PncordFabr = registro.PncordFabr;
-        //         data.PnccodProd = registro.PnccodProd;
-        //         data.PncdesProd = registro.PncdesProd;
-        //         data.Pncfecha = registro.Pncfecha;
-        //         data.IdCausa = registro.IdCausa;
-        //         data.PncindLibe = registro.PncindLibe;
-        //         data.Pnclote = registro.Pnclote;
-        //         return 0 < await _cotext.SaveChangesAsync();
-        //     }
-        //     return false;
-        // }
-
-
-
 
 
         [HttpGet("GetProductoNoConformePorFecha")]
@@ -169,7 +105,6 @@ public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO
 
     return _mapper.Map<ProNoConDTO>(proNoCon);
 }
-
 
 
         [HttpGet("GetProductoNoConformeConTodaLaData")]

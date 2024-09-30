@@ -28,7 +28,7 @@ public partial class ProNoConDTO
 
     public int IdEstado { get; set; }
 
-    public int IdUnidad { get; set; }
+    public int IdCaUnidad { get; set; }
 
     public int? IdIdentif { get; set; }
 

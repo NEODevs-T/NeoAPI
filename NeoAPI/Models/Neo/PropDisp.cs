@@ -12,4 +12,6 @@ public partial class PropDisp
     public string? Pddescri { get; set; }
 
     public bool Pdestado { get; set; }
+
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }
