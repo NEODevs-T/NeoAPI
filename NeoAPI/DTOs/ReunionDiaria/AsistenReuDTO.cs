@@ -19,4 +19,5 @@ public partial class AsistenReuDTO
 
     public string? ArObser { get; set; }
 
+    public CargoReuDTO? Cargo {get; set; }
 }
