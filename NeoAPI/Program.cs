@@ -7,6 +7,7 @@ using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Logic;
 using NeoAPI.Extensions;
+using NeoAPI.Models.SPI;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -22,6 +23,7 @@ builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(buil
 builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseVen")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCol")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<DbSPIContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("SPI")), ServiceLifetime.Transient);
 
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();

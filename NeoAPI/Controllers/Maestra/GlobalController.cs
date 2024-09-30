@@ -8,12 +8,14 @@ using NeoAPI.Models.PolybaseBPCSCen;
 using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSVen;
 using NeoAPI.Models.Neo;
+using NeoAPI.Models.SPI;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
 using NeoAPI.Logic;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NeoAPI.DTOs.GlobalCo;
+using Microsoft.Identity.Client;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -29,10 +31,12 @@ namespace NeoAPI.Controllers.Maestras
         private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
         private readonly IMapper _mapper;
         private readonly DbNeoIiContext _context;
+        private readonly DbSPIContext _SPI;
+
         private (int PAVECA, int CHEMPRO, int PANASA, int PAINSA) empresas { get; set; } = (PAVECA: 1, CHEMPRO: 2, PANASA: 3, PAINSA: 4);
         private (int K10, int K129) centroPAINSA { get; set; } = (K10: 18, K129: 19);
 
-        public GlobalController(DOCIngContext DOCIng, PolybaseBPCSVenContext polybaseBPCSVen, PolybaseBPCSColContext polybaseBPCSVCol, PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper, DbNeoIiContext DbNeo)
+        public GlobalController(DOCIngContext DOCIng, PolybaseBPCSVenContext polybaseBPCSVen, PolybaseBPCSColContext polybaseBPCSVCol, PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper, DbNeoIiContext DbNeo,DbSPIContext SPI)
         {
             _DOCIng = DOCIng;
             _PolybaseBPCSVen = polybaseBPCSVen;
@@ -40,6 +44,7 @@ namespace NeoAPI.Controllers.Maestras
             _PolybaseBPCSVCen = polybaseBPCSVCen;
             _mapper = mapper;
             _context = DbNeo;
+            _SPI = SPI;
         }
 
         [HttpGet("GetIdHorarios")]
@@ -262,6 +267,34 @@ namespace NeoAPI.Controllers.Maestras
             ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
 
             return ordenesFabricacionDTOList;
+        }
+
+        [HttpGet("GetPersonalPorFicha/{ficha}")]
+
+        public async Task<ActionResult<PersonalDTO>> GetPersonalPorFicha(string ficha)
+        {
+            PersonalDTO? persona = new PersonalDTO();
+
+            var result = from Mt in _SPI.MaestroTrabajadors 
+                        join Dep in _SPI.Departamentos on Mt.Dptfic equals Dep.Coddpt
+                        join Car in _SPI.Cargos on Mt.Cgofic equals Car.Codcgo
+                        join Com in _SPI.Compañias on Mt.Ciafic equals Com.Codcia
+                        where Car.Ciacgo == Mt.Ciafic && Mt.Codfic.Contains(ficha)
+                        select new { Mt.Nomfi1, Mt.Nomfi2, Mt.Apefi1,Mt.Apefi2,Dep.Desdpt,Car.Descgo,Com.Nomci2 };
+
+            foreach (var item in result)
+            {
+                persona.primerNombre = item.Nomfi1;
+                persona.segundoNombre = item.Nomfi2;
+                persona.primerApellido = item.Apefi1;
+                persona.segundoApellido = item.Apefi2;
+                persona.departamento = item.Desdpt;
+                persona.cargo = item.Descgo;
+                persona.compania = item.Nomci2;
+                break;
+            }
+
+            return Ok(persona);
         }
     }
 }
