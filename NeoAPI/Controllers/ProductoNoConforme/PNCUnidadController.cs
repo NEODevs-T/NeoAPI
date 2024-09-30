@@ -13,24 +13,27 @@ namespace NeoAPI.Controllers.PNC
     [ApiController]
     [Route("api/[controller]")]
 
-    public class PNCTipoController : ControllerBase
+
+public class PNCUnidadController : ControllerBase 
     {
+
         private readonly DbNeoIiContext _cotext;
+
         private readonly IMapper _mapper;
 
-        public PNCTipoController(DbNeoIiContext context, IMapper mapper)
+        public PNCUnidadController (DbNeoIiContext context, IMapper mapper)
         {
             _cotext = context;
-            _mapper = mapper;
+            _mapper = mapper;       
         }
 
-        [HttpGet("GetTodosLosTipos")]
-        public async Task<List<TipoDTO>> ObtenerTodosLosTipos()
+        [HttpGet("GetTodosLasUnidades")]
+        public async Task<List<UnidadeDTO>> ObtenerTodosLasUnidades()
         {
-            List<Tipo> tipoLista = await this._cotext.Tipos.Where(t => t.Testado == true).ToListAsync();
+            List<Unidad> UnidadLista =  await this._cotext.Unidads.Where(u => u.Uestado == true).ToListAsync();
 
-            return _mapper.Map<List<TipoDTO>>(tipoLista);
+            return _mapper.Map<List<UnidadeDTO>>(UnidadLista);
         }
-
     }
+
 }

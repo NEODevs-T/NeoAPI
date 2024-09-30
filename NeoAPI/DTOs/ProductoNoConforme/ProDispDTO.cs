@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.Neo;
+namespace NeoAPI.DTOs.PNC;
 
-public partial class PropDisp
+public class ProDispDTO
 {
     public int IdProDisp { get; set; }
 
@@ -13,5 +13,4 @@ public partial class PropDisp
 
     public bool Pdestado { get; set; }
 
-    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

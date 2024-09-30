@@ -1448,9 +1448,9 @@ public partial class DbNeoIiContext : DbContext
 
         modelBuilder.Entity<ProNoCon>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ProNoCon", "pnc");
+            entity.HasKey(e => e.IdProNoCon);
+
+            entity.ToTable("ProNoCon", "pnc");
 
             entity.Property(e => e.IdProNoCon).HasColumnName("idProNoCon");
             entity.Property(e => e.Pnccantida).HasColumnName("PNCCantida");
@@ -1482,36 +1482,36 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("PNCOrdFabr");
 
-            entity.HasOne(d => d.IdCaUnidadNavigation).WithMany()
+            entity.HasOne(d => d.IdCaUnidadNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCaUnidad)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_Unidad");
 
-            entity.HasOne(d => d.IdCausaNavigation).WithMany()
+            entity.HasOne(d => d.IdCausaNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCausa)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_Causa");
 
-            entity.HasOne(d => d.IdDisDefiNavigation).WithMany()
+            entity.HasOne(d => d.IdDisDefiNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdDisDefi)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_DispDefi");
 
-            entity.HasOne(d => d.IdEstadoNavigation).WithMany()
+            entity.HasOne(d => d.IdEstadoNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdEstado)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_Estado");
 
-            entity.HasOne(d => d.IdIdentifNavigation).WithMany()
+            entity.HasOne(d => d.IdIdentifNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdIdentif)
                 .HasConstraintName("FK_ProNoCon_Identifi");
 
-            entity.HasOne(d => d.IdProDispNavigation).WithMany()
+            entity.HasOne(d => d.IdProDispNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdProDisp)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_PropDisp");
 
-            entity.HasOne(d => d.IdTipoNavigation).WithMany()
+            entity.HasOne(d => d.IdTipoNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdTipo)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_Tipo");

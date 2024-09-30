@@ -16,7 +16,7 @@ namespace NeoAPI.Controllers.LibroNovedades
         private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
 
-        public TipoParadaController(DbNeoIiContext context, IMapper mapper)
+        public TipoParadaController(DbNeoIiContext context, IMapper mapper) 
         {
             _context = context;
             _mapper = mapper;

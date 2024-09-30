@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.Neo;
+namespace NeoAPI.DTOs.PNC;
 
-public partial class DispDefi
+
+public class DisDefiDTO
 {
     public int IdDisDefi { get; set; }
 
@@ -13,5 +14,4 @@ public partial class DispDefi
 
     public bool Ddestado { get; set; }
 
-    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }
