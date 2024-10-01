@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.Neo;
+namespace NeoAPI.DTOs.PNC;
 
-public partial class Identifi
+public  class IdentifDTO
 {
     public int IdIdentif { get; set; }
 
@@ -13,5 +13,4 @@ public partial class Identifi
 
     public bool Iestado { get; set; }
 
-    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

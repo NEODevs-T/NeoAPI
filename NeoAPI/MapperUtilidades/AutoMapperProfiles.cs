@@ -10,6 +10,8 @@ using NeoAPI.Models.PolybaseBPCSCen;
 using System.Collections.Generic;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.DTOs.Maestra;
+using NeoAPI.DTOs.PNC;
+
 
 namespace NeoAPI.AutoMapper
 {
@@ -136,6 +138,20 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
+
+
+            //Producto No Conforme //
+
+            CreateMap<IdentifDTO, Identifi>().ReverseMap();
+            CreateMap<TipoDTO, Tipo>().ReverseMap();
+            CreateMap<DisDefiDTO, DispDefi>().ReverseMap();
+            CreateMap<CausanteDTO, Causante>().ReverseMap();
+            CreateMap<ProDispDTO, PropDisp>().ReverseMap();
+            CreateMap<UnidadeDTO, Unidad>().ReverseMap();
+            CreateMap<causaDTO, Causa>().ReverseMap();
+            CreateMap<ProNoConDTO, ProNoCon>().ReverseMap();
+
+
 
 
             // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()

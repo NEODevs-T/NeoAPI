@@ -1,9 +1,10 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.Neo;
+namespace NeoAPI.DTOs.PNC;
 
-public partial class Causa
+
+public partial class causaDTO
 {
     public int IdCausa { get; set; }
 
@@ -14,8 +15,4 @@ public partial class Causa
     public string? Cdescri { get; set; }
 
     public bool Cestado { get; set; }
-
-    public virtual Causante IdCausanteNavigation { get; set; } = null!;
-
-    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

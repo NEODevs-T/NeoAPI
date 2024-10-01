@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.Neo;
+namespace NeoAPI.DTOs.PNC;
 
-public partial class Tipo
+public class TipoDTO
 {
     public int IdTipo { get; set; }
 
@@ -12,6 +12,4 @@ public partial class Tipo
     public string? Tdescri { get; set; }
 
     public bool Testado { get; set; }
-
-    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }
