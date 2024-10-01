@@ -74,6 +74,8 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<MasterDTO, Master>().ReverseMap();
 
+            CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
+
             CreateMap<PaiDTO, Pai>().ReverseMap();
 
             CreateMap<CargoReuDTO, CargoReu>().ReverseMap();
@@ -83,6 +85,7 @@ namespace NeoAPI.AutoMapper
             CreateMap<RespoReuDTO, RespoReu>().ReverseMap();
 
             CreateMap<AsistenReuDTO, AsistenReu>().ReverseMap();
+
 
             CreateMap<Resuman, ResumenGeneralDTO>()
                 .ForMember(dest => dest.Nombre, act => act.MapFrom(src => src.IdPersonalNavigation.PeNombre))

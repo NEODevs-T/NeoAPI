@@ -7,6 +7,7 @@ using NeoAPI.Models.Neo;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
+using Microsoft.Data.SqlClient;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -158,14 +159,14 @@ namespace NeoAPI.Controllers.Maestras
 
         //TODO: Sujeta a revision
         [HttpGet("GetEquiposPorLinea/{linea}")]
-        public async Task<ActionResult<List<EquipoEam>>> EquiposEAMxLinea(string linea)
+        public async Task<ActionResult<List<EquipoEamDTO>>> EquiposEAMxLinea(string linea)
         {
 
             int idlinea = int.Parse(linea);
 
 
 
-            var result = await _context.Masters
+            var result = await _context.EquipoEams
                 .Where(x => x.IdLineaNavigation.IdLinea == idlinea)
                 .AsNoTracking()
                 .ToListAsync();
@@ -206,11 +207,14 @@ namespace NeoAPI.Controllers.Maestras
                     {
                         EquipoEam e = new EquipoEam();
 
+
                         e.IdLinea = equipo.IdLinea;
                         e.EcodEquiEam = equipo.EcodEquiEam;
                         e.EdescriEam = equipo.EdescriEam;
                         e.EestaEam = equipo.EestaEam;
                         e.EnombreEam = equipo.EnombreEam;
+                        e.Efecha = equipo.Efecha;
+
 
                         _context.EquipoEams.Add(e);
                         await _context.SaveChangesAsync();
@@ -228,6 +232,7 @@ namespace NeoAPI.Controllers.Maestras
                     return BadRequest("Error, intente nuevamente");
                 }
             }
+
             else
             {
                 try
@@ -240,7 +245,7 @@ namespace NeoAPI.Controllers.Maestras
                     _eq.EestaEam = equipo.EestaEam;
                     _eq.EnombreEam = equipo.EnombreEam;
 
-                    return await UpdateEquipo(_eq);
+                    return Ok(await UpdateEquipo(_eq));
                     //return Ok("");
 
                 }
