@@ -1,30 +1,133 @@
-﻿using AutoMapper;
-using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http;
-using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Models.Neo;
 
-namespace ReunionDia.Controllers
+namespace NeoAPI.Controllers.GetCentroDiv;
+
+public class OptencionDeDiv : ControllerBase
 {
-    [ApiController]
-    [Route("api/[controller]")]
+    public Master? centrodiscrepancia { get; set; } = new Master();
+    private readonly DbNeoIiContext _neocontext;
 
-    public class LibroNoveController : ControllerBase
+    public OptencionDeDiv(DbNeoIiContext DbNeo)
     {
-        private readonly DbNeoIiContext _context;
-        private readonly IMapper _mapper;
-        enum DatosNovedad
+        _neocontext = DbNeo;
+    }
+
+
+    // public async Task<CentroDivisionDTO> GetCentroDivi(string centro, string division, int tipo)
+    // {
+    //     CentroDivisionDTO CD = new CentroDivisionDTO();
+
+    //     if (tipo == 0)
+    //     {
+    //         centrodiscrepancia = await _neocontext.Masters
+    //             .Include(c => c.IdCentroNavigation)
+    //             .Where(d => d.IdDivision == int.Parse(division))
+    //             .AsNoTracking()
+    //             .FirstOrDefaultAsync();
+
+    //         if (centrodiscrepancia != null)
+    //         {
+    //             CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+    //             CD.IdDivision = centrodiscrepancia.IdDivision;
+    //             CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+    //             CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
+    //         }
+    //     }
+    //     else if (tipo == 1)
+    //     {
+    //         centrodiscrepancia = await _neocontext.Masters
+    //             .Include(c => c.IdCentroNavigation)
+    //             .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
+    //             .AsNoTracking()
+    //             .FirstOrDefaultAsync();
+
+    //         if (centrodiscrepancia != null)
+    //         {
+    //             CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+    //             CD.IdDivision = centrodiscrepancia.IdDivision;
+    //             CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+    //             CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
+    //         }
+    //     }
+
+    //     return CD;
+    // }
+    public async Task<CentroDivisionDTO> GetCentroDivi(string centro, string division, int tipo)
+    {
+        CentroDivisionDTO CD = new CentroDivisionDTO();
+
+
+        if (tipo == 0)
         {
-            SinPerdidaDeTiempo = 19,
-            Operaciones = 1,
-            NoResuelto = 0
+            int divisionInt;
+            if (!int.TryParse(division, out divisionInt))
+            {
+                throw new FormatException("El valor de 'division' no es un número válido.");
+            }
+
+            centrodiscrepancia = await _neocontext.Masters
+                .Include(c => c.IdCentroNavigation)
+                .Include(d => d.IdDivisionNavigation)  // Asegúrate de incluir también IdDivisionNavigation
+                .Where(d => d.IdDivision == divisionInt)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (centrodiscrepancia == null)
+            {
+                throw new NullReferenceException("No se encontró ninguna coincidencia para el centro o división proporcionados.");
+            }
+
+            // Verificar que las propiedades de navegación no sean nulas
+            if (centrodiscrepancia.IdCentroNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdCentroNavigation' es nula.");
+            }
+            if (centrodiscrepancia.IdDivisionNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdDivisionNavigation' es nula.");
+            }
+
+            CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+            CD.IdDivision = centrodiscrepancia.IdDivision;
+            CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+            CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
         }
-        public LibroNoveController(DbNeoIiContext context, IMapper mapper)
+        else if (tipo == 1)
         {
-            _context = context;
-            _mapper = mapper;
+            centrodiscrepancia = await _neocontext.Masters
+                .Include(c => c.IdCentroNavigation)
+                .Include(d => d.IdDivisionNavigation)  // Asegúrate de incluir también IdDivisionNavigation
+                .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (centrodiscrepancia == null)
+            {
+                throw new NullReferenceException("No se encontró ninguna coincidencia para el centro o división proporcionados.");
+            }
+
+            // Verificar que las propiedades de navegación no sean nulas
+            if (centrodiscrepancia.IdCentroNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdCentroNavigation' es nula.");
+            }
+            if (centrodiscrepancia.IdDivisionNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdDivisionNavigation' es nula.");
+            }
+
+            CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+            CD.IdDivision = centrodiscrepancia.IdDivision;
+            CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+            CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
         }
 
+
+        return CD;
     }
+
+
 }
