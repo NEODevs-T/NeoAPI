@@ -18,7 +18,7 @@ using NeoAPI.Controllers.GetCentroDiv;
 namespace ReunionWeb.ServicesController;
 [Route("api/[controller]")]
 [ApiController]
-public class DbReunionServiceController: ControllerBase
+public class DbReunionServiceController : ControllerBase
 {
 
     public List<Centro> centros { get; set; } = new List<Centro> { };
@@ -53,46 +53,14 @@ public class DbReunionServiceController: ControllerBase
 
 
 
-    // [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}")]
-    // public async Task<ActionResult<List<ReuDiumDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
-    // {
-    //     OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
-    //     //Consultar nombre del centro y division  para insertarlos
-    //     CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-    //     centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-
-
-    //     string centro = centrodiv.Cnom;
-    //     string div = centrodiv.Dnombre;
-
-    //     reudiatablas = new List<ReuDium>();
-
-    //     reudiatablas = await _neocontext.ReuDia
-    //     .Where(a => a.Rdodt.Contains(ODT) && (a.Rdcentro == centrodiv.Cnom && a.Rddiv == centrodiv.Dnombre))
-    //     .Include(b => b.IdksfNavigation)
-    //     .Include(b => b.IdResReuNavigation)
-    //     .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
-    //     .OrderByDescending(b => b.RdfecReu)
-    //     .ToListAsync();
-
-    //     return Ok(_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
-    // }
-
     [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}")]
-public async Task<ActionResult<List<ReuDiumDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
-{
-    try
+    public async Task<ActionResult<List<ReuDiumDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
     {
         OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
-
-        // Consultar nombre del centro y división para insertarlos
+        //Consultar nombre del centro y division  para insertarlos
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
-        if (centrodiv == null)
-        {
-            return BadRequest("Centro o división no encontrados.");
-        }
 
         string centro = centrodiv.Cnom;
         string div = centrodiv.Dnombre;
@@ -100,349 +68,320 @@ public async Task<ActionResult<List<ReuDiumDTO>>> GetByODT(string ODT, string id
         reudiatablas = new List<ReuDium>();
 
         reudiatablas = await _neocontext.ReuDia
-            .Where(a => a.Rdodt.Contains(ODT) && (a.Rdcentro == centrodiv.Cnom && a.Rddiv == centrodiv.Dnombre))
-            .Include(b => b.IdksfNavigation)
-            .Include(b => b.IdResReuNavigation)
-            .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
-            .OrderByDescending(b => b.RdfecReu)
-            .ToListAsync();
-
-        if (reudiatablas == null || !reudiatablas.Any())
-        {
-            return NotFound("No se encontraron datos con los parámetros proporcionados.");
-        }
+        .Where(a => a.Rdodt.Contains(ODT) && (a.Rdcentro == centrodiv.Cnom && a.Rddiv == centrodiv.Dnombre))
+        .Include(b => b.IdksfNavigation)
+        .Include(b => b.IdResReuNavigation)
+        .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
+        .OrderByDescending(b => b.RdfecReu)
+        .ToListAsync();
 
         return Ok(_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
     }
-    catch (FormatException ex)
+
+//TODO: cuidado al escanear
+    [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
+    public async Task<ActionResult<List<ReuDiumDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
     {
-        // Error al convertir formatos de datos
-        return BadRequest($"Error en el formato de datos: {ex.Message}");
+
+
+        OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
+        //Consultar nombre del centro y division  para insertarlos
+        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
+        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+
+        string centro = centrodiv.Cnom;
+        string div = centrodiv.Dnombre;
+
+        reudiatablas = new List<ReuDium>();
+
+
+        // Es Reunión
+        if (tipo == "1")
+        {
+
+            if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+            {
+
+                reudiatablas = await _neocontext.ReuDia
+                //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2)))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
+                .OrderByDescending(b => b.RdfecReu)
+                .ToListAsync();
+            }
+            else
+            {
+
+                reudiatablas = await _neocontext.ReuDia
+                //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1 && a.RdfecReu <= f2)))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
+                .OrderByDescending(b => b.RdfecReu)
+                .ToListAsync();
+            }
+        }
+
+        //tipo 0 Pendientes para fecha reunion
+        else if (tipo == "0")
+        {
+
+
+            if (estado == "Total Pendiente")
+            {
+                reudiatablas = await _neocontext.ReuDia
+               //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecReu)
+                .ToListAsync();
+            }
+
+            else if (estado == "Todo")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecReu)
+                .Take(500)
+                .ToListAsync();
+            }
+
+            else if (estado == "Pendiente-Responsable")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecReu)
+                .Take(350)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else if (estado == "Vencidos")
+            {
+
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecReu)
+                .Take(350)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else
+            {
+                reudiatablas = await _neocontext.ReuDia
+              //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+              //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecReu)
+                .Take(350)
+                .ToListAsync();
+            }
+        }
+        //Fecha de trabajo
+        else if (tipo == "2")
+        {
+            if (estado == "Total Pendiente")
+            {
+                reudiatablas = await _neocontext.ReuDia
+               //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecTra)
+                .ToListAsync();
+            }
+
+            else if (estado == "Todo")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecTra)
+                .Take(500)
+                .ToListAsync();
+            }
+            else if (estado == "Pendiente-Responsable")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecTra)
+                .Take(350)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else if (estado == "Vencidos")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecTra)
+                .Take(350)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else
+            {
+                reudiatablas = await _neocontext.ReuDia
+              //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+              //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .OrderByDescending(b => b.RdfecTra)
+                .Take(50)
+                .ToListAsync();
+            }
+
+        }
+
+        return Ok(_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
+
     }
-    catch (ArgumentNullException ex)
+
+
+    //historicos
+    [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
+    public async Task<ActionResult<List<ReuDiumDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
     {
-        // Error si algún argumento es nulo
-        return BadRequest($"Argumento nulo detectado: {ex.Message}");
+
+
+        //Consultar nombre del centro y division  para insertarlos
+        OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
+        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
+        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+
+        string centro = centrodiv.Cnom;
+        string div = centrodiv.Dnombre;
+
+        reudiatablas = new List<ReuDium>();
+
+        if (tipo == "2")
+        {
+
+
+            if (estado == "Total Pendiente")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecTra >= f1 & a.RdfecTra <= f2)))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+
+            }
+
+            else if (estado == "Todo")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else if (estado == "Pendiente-Responsable")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else if (estado == "Vencidos")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+
+            else
+            {
+                reudiatablas = await _neocontext.ReuDia
+              //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+              .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecTra >= f1 & a.RdfecTra <= f2))
+              .Include(b => b.IdksfNavigation)
+              .Include(b => b.IdResReuNavigation)
+              .AsNoTracking()
+              .ToListAsync();
+            }
+        }
+        else
+        {
+            if (estado == "Total Pendiente")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+
+            else if (estado == "Todo")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else if (estado == "Pendiente-Responsable")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else if (estado == "Vencidos")
+            {
+                reudiatablas = await _neocontext.ReuDia
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else
+            {
+                reudiatablas = await _neocontext.ReuDia
+              //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+              .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecReu >= f1 & a.RdfecReu <= f2))
+              .Include(b => b.IdksfNavigation)
+              .Include(b => b.IdResReuNavigation)
+              .AsNoTracking()
+              .ToListAsync();
+            }
+        }
+        return (_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
     }
-    catch (InvalidOperationException ex)
-    {
-        // Error si la operación no es válida (por ejemplo, cuando `FirstOrDefaultAsync` no encuentra nada)
-        return BadRequest($"Operación inválida: {ex.Message}");
-    }
-    catch (DbUpdateException ex)
-    {
-        // Error relacionado con la base de datos
-        return StatusCode(500, $"Error en la base de datos: {ex.Message}");
-    }
-    catch (Exception ex)
-    {
-        // Cualquier otro tipo de error general
-        return StatusCode(500, $"Ocurrió un error inesperado: {ex.Message}");
-    }
-}
-
-
-    // //obtener discrepancias para pendientes y reunion 
-    // [HttpGet("GetPendientes/{idcentro:string}/{iddiv:string}/{f1:DateTime}/{f2:DateTime}/{tipo:string}/{estado:string}")]
-    // public async Task<ActionResult<List<ReuDiumDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
-    // {
-
-
-    //     //Consultar nombre del centro y division  para insertarlos
-    //     CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-    //     centrodiv = await GetCentroDiv(idcentro, iddiv, 0);
-
-
-    //     string centro = centrodiv.Cnom;
-    //     string div = centrodiv.Dnombre;
-
-    //     reudiatablas = new List<ReuDium>();
-
-
-    //     // Es Reunión
-    //     if (tipo == "1")
-    //     {
-
-    //         if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
-    //         {
-
-    //             reudiatablas = await _neocontext.ReuDia
-    //             //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2)))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .Include(b => b.IdEmpresaNavigation)
-    //             .OrderByDescending(b => b.RdfecReu)
-    //             .ToListAsync();
-    //         }
-    //         else
-    //         {
-
-    //             reudiatablas = await _neocontext.ReuDia
-    //             //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1 && a.RdfecReu <= f2)))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .Include(b => b.IdEmpresaNavigation)
-    //             .OrderByDescending(b => b.RdfecReu)
-    //             .ToListAsync();
-    //         }
-    //     }
-
-    //     //tipo 0 Pendientes para fecha reunion
-    //     else if (tipo == "0")
-    //     {
-
-
-    //         if (estado == "Total Pendiente")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //            //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //            .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
-    //            .Include(b => b.IdksfNavigation)
-    //            .Include(b => b.IdResReuNavigation)
-    //            .OrderByDescending(b => b.RdfecReu)
-    //            .ToListAsync();
-    //         }
-
-    //         else if (estado == "Todo")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //             //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .OrderByDescending(b => b.RdfecReu)
-    //             .Take(500)
-    //             .ToListAsync();
-    //         }
-
-    //         else if (estado == "Pendiente-Responsable")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .OrderByDescending(b => b.RdfecReu)
-    //             .Take(350)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else if (estado == "Vencidos")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra.Date < DateTime.Now.Date))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .OrderByDescending(b => b.RdfecReu)
-    //             .Take(350)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //           //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //           //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
-    //           .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
-    //           .Include(b => b.IdksfNavigation)
-    //           .Include(b => b.IdResReuNavigation)
-    //           .OrderByDescending(b => b.RdfecReu)
-    //           .Take(350)
-    //           .ToListAsync();
-    //         }
-    //     }
-    //     //Fecha de trabajo
-    //     else if (tipo == "2")
-    //     {
-    //         if (estado == "Total Pendiente")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //            //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //            .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
-    //            .Include(b => b.IdksfNavigation)
-    //            .Include(b => b.IdResReuNavigation)
-    //            .OrderByDescending(b => b.RdfecTra)
-    //            .ToListAsync();
-    //         }
-
-    //         else if (estado == "Todo")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //             //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .OrderByDescending(b => b.RdfecTra)
-    //             .Take(500)
-    //             .ToListAsync();
-    //         }
-    //         else if (estado == "Pendiente-Responsable")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .OrderByDescending(b => b.RdfecTra)
-    //             .Take(350)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else if (estado == "Vencidos")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra.Date < DateTime.Now.Date))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .OrderByDescending(b => b.RdfecTra)
-    //             .Take(350)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //           //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //           //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
-    //           .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
-    //           .Include(b => b.IdksfNavigation)
-    //           .Include(b => b.IdResReuNavigation)
-    //           .OrderByDescending(b => b.RdfecTra)
-    //           .Take(50)
-    //           .ToListAsync();
-    //         }
-
-    //     return Ok(_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
-
-
-    //     }
-
-    // }
-
-    // //historicos
-    // public async Task<List<ReuDium>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
-    // {
-
-
-    //     //Consultar nombre del centro y division  para insertarlos
-    //     CentroDivision centrodiv = new CentroDivision();
-    //     centrodiv = await GetCentroDiv(idcentro, iddiv, 0);
-
-
-    //     string centro = centrodiv.Cnom;
-    //     string div = centrodiv.Dnombre;
-
-    //     reudiatablas = new List<ReuDium>();
-
-    //     if (tipo == "2")
-    //     {
-
-
-    //         if (estado == "Total Pendiente")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecTra >= f1 & a.RdfecTra <= f2)))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-
-    //         }
-
-    //         else if (estado == "Todo")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else if (estado == "Pendiente-Responsable")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.Rdstatus == "Pendiente/Responsable"))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else if (estado == "Vencidos")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.RdfecTra.Date < DateTime.Now.Date))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-
-    //         else
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //           //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //           .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecTra >= f1 & a.RdfecTra <= f2))
-    //           .Include(b => b.IdksfNavigation)
-    //           .Include(b => b.IdResReuNavigation)
-    //           .AsNoTracking()
-    //           .ToListAsync();
-    //         }
-    //     }
-    //     else
-    //     {
-    //         if (estado == "Total Pendiente")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-
-    //         else if (estado == "Todo")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else if (estado == "Pendiente-Responsable")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2) && (a.Rdstatus == "Pendiente/Responsable"))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else if (estado == "Vencidos")
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //             .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.RdfecTra.Date < DateTime.Now.Date))
-    //             .Include(b => b.IdksfNavigation)
-    //             .Include(b => b.IdResReuNavigation)
-    //             .AsNoTracking()
-    //             .ToListAsync();
-    //         }
-    //         else
-    //         {
-    //             reudiatablas = await _neocontext.ReuDia
-    //           //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-    //           .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecReu >= f1 & a.RdfecReu <= f2))
-    //           .Include(b => b.IdksfNavigation)
-    //           .Include(b => b.IdResReuNavigation)
-    //           .AsNoTracking()
-    //           .ToListAsync();
-    //         }
-    //     }
-
-    //     return reudiatablas;
-    // }
 
     // //Update Discrepancia
     // public async Task<bool> UpdateDiscrepancia(ReuDium d, int id, int tipo, string f1, string f2, string estado)
