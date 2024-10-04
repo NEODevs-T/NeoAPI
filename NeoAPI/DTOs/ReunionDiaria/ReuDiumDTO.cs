@@ -44,4 +44,6 @@ public partial class ReuDiumDTO
     public string? Rdobs { get; set; }
 
     public DateOnly? RdfecCrea { get; set; }
+
+    public string? Responsable {get; set;}
 }

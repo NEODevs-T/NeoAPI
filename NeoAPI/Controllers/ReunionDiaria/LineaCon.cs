@@ -28,7 +28,6 @@ public class LineasController : ControllerBase
         _neoVieja = neoVieja;
     }
     public static List<Linea> linea = new List<Linea> { };
-    public static List<Empresa> empresa = new List<Empresa> { };
     public static List<Pai> pais = new List<Pai> { };
     public static List<Division> div = new List<Division> { };
     public static List<Ksf> ksfs = new List<Ksf>();
@@ -40,7 +39,6 @@ public class LineasController : ControllerBase
     public static List<EquipoEam> equipos = new List<EquipoEam>();
 
 
-    //TODO: Areglos proporcionados por chat gpt
 
     [HttpGet("GetBdDiv{cent}")]
     public async Task<ActionResult<List<LineaDTO>>> GetBdDiv(string cent)
@@ -51,7 +49,7 @@ public class LineasController : ControllerBase
         {
             data = await _context.Masters
                .Include(x => x.IdLineaNavigation) // Incluye la tabla Linea
-               .ToListAsync();
+                .ToListAsync();
         }
         else
         {
@@ -128,19 +126,8 @@ public class LineasController : ControllerBase
         }
     }
 
-    [HttpGet("GetDivision/{centro}/{div}")]
-    public async Task<ActionResult<List<DivisionesVDTO>>> GetDivLin(string centro, string div)
-    {
-        List<DivisionesV> divisions = new List<DivisionesV>();
-        divisions = await _context.DivisionesVs
-            .Include(x => x.IdCentro)
-            .ToListAsync();
-
-        return Ok(_mapper.Map<List<DivisionesVDTO>>(divisions));
-    }
-
     [HttpGet("GetAsistencia/{centro}/{empresa}")]
-    public async Task<ActionResult<List<AsistenReuDTO>>> GetAsistencia(string centro, string empresa)
+    public async Task<ActionResult<List<CargoReuDTO>>> GetAsistencia(string centro, string empresa)
     {
 
         cargoreus = await _context.CargoReus
@@ -148,235 +135,212 @@ public class LineasController : ControllerBase
             .OrderByDescending(a => a.Crnombre)
             .ToListAsync();
 
-        return Ok(_mapper.Map<List<AsistenReuDTO>>(cargoreus));
+        return Ok(_mapper.Map<List<CargoReuDTO>>(cargoreus));
     }
 
 
+    [HttpGet("GetKsf")]
+    public async Task<ActionResult<List<KsfDTO>>> GetKsf()
+    {
+
+        ksfs = await _context.Ksfs
+            .Where(a => a.KsfEsta == true)
+            .ToListAsync();
+
+        return Ok(_mapper.Map<List<KsfDTO>>(ksfs));
+    }
+
+    [HttpGet("GetResponsables")]
+    public async Task<ActionResult<List<RespoReuDTO>>> GetRespon()
+    {
 
 
-    // [HttpGet("Ksf")]
-    // public async Task<ActionResult<List<Linea>>> GetKsf()
-    // {
-
-    //     ksfs = await _context.Ksfs
-    //         .Where(a => a.KsfEsta == true)
-    //         .ToListAsync();
-
-    //     return Ok(ksfs);
-    // }
+        resporeu = await _context.RespoReus
+            .Where(a => a.Rresta == true)
+            .ToListAsync();
 
 
+        return Ok(_mapper.Map<List<RespoReuDTO>>(resporeu));
+    }
 
-    // [HttpGet("Responsables")]
-    // public async Task<ActionResult<List<Linea>>> GetRespon()
-    // {
+    //Obtener asistencia en porcentaje
+    [HttpGet("GetStatsAsis/{cent}/{empresa}/{Fecha_inicio}/{Fecha_Final}")]
+    public async Task<ActionResult<List<AsistenReuDTO>>> GetStatsAsis(string cent, string empresa, string Fecha_inicio, string Fecha_Final)
+    {
 
+        string[] fecha1 = Fecha_inicio.Split('-');
+        string[] fecha2 = Fecha_Final.Split('-');
 
-    //     resporeu = await _context.RespoReus
-    //         .Where(a => a.Rresta == true)
-    //         .ToListAsync();
-
-
-    //     return Ok(resporeu);
-    // }
-
-    // //Obtener asistencia en porcentaje
-    // [HttpGet("StatsAsis/{cent}/{empresa}/{f1}/{f2}")]
-    // public async Task<ActionResult<List<StatsAsisDto>>> GetStatsAsis(string cent, string empresa, string f1, string f2)
-    // {
-
-    //     string[] fecha1 = f1.Split('-');
-    //     string[] fecha2 = f2.Split('-');
-
-    //     //año, mes dia
-    //     DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
-    //     DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
+        //año, mes dia
+        DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
+        DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
 
 
+        if (cent == "All")
+        {
+            var result = await _context.AsistenReus
+            .Include(x => x.IdCargoRNavigation)
+            .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
+            .GroupBy(x => x.IdCargoRNavigation.Crnombre)
+            .ToListAsync();
 
-    //     if (cent == "All")
-    //     {
-    //         var result = await _context.AsistenReus
-    //        .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
-    //        .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //        .Select(a => new
-    //        {
-    //            a.Key,
-    //            Asistencias = a.Sum(b => b.ArAsistente)
-    //        })
-    //        .ToListAsync();
+            var carStDTO = result.Select(a => new CarStDTO
+            {
+                Cargo = a.Key,
+                Asistencias = a.Sum(b => b.ArAsistente)
+            });
 
-    //         return Ok(result);
-    //     }
+            return Ok(carStDTO);
+        }
 
-    //     else
-    //     {
-    //         var result = await _context.AsistenReus
-    //         .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.AridCargoRNavigation.Crempresa == empresa)
-    //        .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //        .Select(a => new
-    //        {
-    //            Cargo = a.Key,
-    //            Asistencias = a.Sum(b => b.ArAsistente)
-    //        })
-    //        .ToListAsync();
+        else
+        {
+            var result = await _context.AsistenReus
+            .Include(x => x.IdCargoRNavigation)
+            .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
+            .GroupBy(x => x.IdCargoRNavigation.Crnombre)
+            .ToListAsync();
 
-    //         return Ok(result);
-    //     }
+            var carStDTO = result.Select(a => new CarStDTO
+            {
+                Cargo = a.Key,
+                Asistencias = a.Sum(b => b.ArAsistente)
+            });
 
 
-    //     return Ok();
-    // }
+            return Ok(carStDTO);
+        }
 
-    // //Obtener asistencia por dia
-    // [HttpGet("ListaAsis/{cent}/{empresa}/{f1}/{f2}")]
-    // public async Task<ActionResult<List<AsistenReu>>> GetListaAsis(string cent, string empresa, string f1, string f2)
-    // {
 
-    //     string[] fecha1 = f1.Split('-');
-    //     string[] fecha2 = f2.Split('-');
+    }
 
-    //     //año, mes dia
-    //     DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
-    //     DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
+    //Obtener asistencia por dia
+    [HttpGet("GetListaAsis/{cent}/{empresa}/{f1}/{f2}")]
+    public async Task<ActionResult<List<AsistenReuDTO>>> GetListaAsis(string cent, string empresa, string f1, string f2)
+    {
+
+        string[] fecha1 = f1.Split('-');
+        string[] fecha2 = f2.Split('-');
+
+        //año, mes dia
+        DateTime date1 = new DateTime(int.Parse(fecha1[2]), int.Parse(fecha1[1]), int.Parse(fecha1[0]));
+        DateTime date2 = new DateTime(int.Parse(fecha2[2]), int.Parse(fecha2[1]), int.Parse(fecha2[0]));
 
 
 
-    //     if (cent == "All")
-    //     {
-    //         var result = await _context.AsistenReus
-    //        .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
-    //        .GroupBy(x => x.AridCargoRNavigation.Crnombre)
-    //        .ToListAsync();
+        if (cent == "All")
+        {
+            var result = await _context.AsistenReus
+           .Include(x => x.IdCargoRNavigation)
+           .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
+           .GroupBy(x => x.IdCargoRNavigation.Crnombre)
+           .ToListAsync();
 
-    //         return Ok(result);
-    //     }
+            return Ok(_mapper.Map<List<AsistenReuDTO>>(result));
 
-    //     else
-    //     {
-    //         var result = await _context.AsistenReus
-    //        .Include(x => x.AridCargoRNavigation)
-    //        .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.AridCargoRNavigation.Crempresa == empresa)
-    //        .ToListAsync();
+        }
 
-    //         return Ok(result);
-    //     }
+        else
+        {
+            var result = await _context.AsistenReus
+           .Include(x => x.IdCargoRNavigation)
+           .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
+           .ToListAsync();
 
+            return Ok(_mapper.Map<List<AsistenReuDTO>>(result));
+        }
 
-    //     return Ok();
-    // }
+    }
 
-    // [HttpGet("EquiposLinea/{Centro}")]
-    // public async Task<ActionResult<List<Empresa>>> EquiposLineaEAM(string Centro)
-    // {
-
-    //     empresa = await _context.Empresas
-    //     .Include(x => x.IdPaisNavigation)
-    //     .Include(y => y.Centros)
-    //     .Where(x => x.Centros.First(i => i.Cnom == Centro).IdEmpresa == x.IdEmpresa)
-    //     .ToListAsync();
+    [HttpGet("GetEquiposPorLinea/{Centro}")]
+    public async Task<ActionResult<List<MaestraVDTO>>> EquiposLineaEAM(string Centro)
+    {
+        List<MaestraV> data = new List<MaestraV> { };
 
 
-    //     return Ok(empresa);
-    // }
+        data = await _context.MaestraVs
+        .Where(x => x.Centro == Centro)
+        .Where(x => x.IdEmpresa == x.IdEmpresa)
+        .ToListAsync();
 
-    // [HttpPost("Asistencia")]
-    // public async Task<ActionResult<string>> SaveAsistencia(List<AsistenReu> list)
-    // {
-    //     DateTime d = DateTime.Today;
+        return Ok(_mapper.Map<List<MaestraVDTO>>(data));
+    }
 
-    //     try
-    //     {
-    //         var result = await _context.AsistenReus
-    //         .Include(x => x.AridCargoRNavigation)
-    //         .Where(x => (x.Arfecha >= d) && (x.Ararea == list[0].Ararea) && (x.AridCargoRNavigation.Crempresa == list[0].AridCargoRNavigation.Crempresa) && (x.AridCargoRNavigation.CRBloque == list[0].AridCargoRNavigation.CRBloque))
-    //         .FirstOrDefaultAsync();
-    //         if (result == null)
-    //         {
+    [HttpPost("AddAsistencia")]
+    public async Task<ActionResult<string>> SaveAsistencia(List<AsistenReuDTO> list)
+    {
+        DateTime d = DateTime.Today;
 
-    //             for (var i = 0; i < list.Count; i++)
-    //             {
-    //                 AsistenReu insertar = new AsistenReu();
-    //                 insertar.Ararea = list[i].Ararea;
-    //                 insertar.Arfecha = list[i].Arfecha;
-    //                 insertar.AridCargoR = list[i].AridCargoR;
-    //                 insertar.ArAsistente = list[i].ArAsistente;
-    //                 insertar.ArSuplente = list[i].ArSuplente;
-    //                 insertar.Ararea = list[i].Ararea;
+        try
+        {
+            var result = await _context.AsistenReus
+            .Include(x => x.IdCargoRNavigation)
+            .Where(x => (x.Arfecha >= d) && (x.Ararea == list[0].Ararea) && (x.IdCargoRNavigation.Crempresa == list[0].Cargo.Crempresa) && (x.IdCargoRNavigation.Crbloque == list[0].Cargo.Crbloque))
+            .FirstOrDefaultAsync();
+            if (result == null)
+            {
 
-    //                 _context.AsistenReus.Add(insertar);
-    //                 await _context.SaveChangesAsync();
+                for (var i = 0; i < list.Count; i++)
+                {
+                    AsistenReu insertar = new AsistenReu();
+                    insertar.Ararea = list[i].Ararea;
+                    insertar.Arfecha = list[i].Arfecha;
+                    insertar.IdCargoR = list[i].IdCargoR;
+                    insertar.ArAsistente = list[i].ArAsistente;
+                    insertar.ArSuplente = list[i].ArSuplente;
+                    insertar.Ararea = list[i].Ararea;
 
-    //             }
-    //             return Ok("Registro Exitoso");
-    //         }
-    //         else
-    //         {
-    //             return BadRequest("Ya se registró asistencia");
-    //         }
+                    _context.AsistenReus.Add(insertar);
+                    await _context.SaveChangesAsync();
 
-    //     }
-    //     catch
-    //     {
-    //         return BadRequest("Error, intente nuevamente");
-    //     }
+                }
+                return Ok("Registro Exitoso");
+            }
+            else
+            {
+                return BadRequest("Ya se registró asistencia");
+            }
 
-    // }
+        }
+        catch
+        {
+            return BadRequest("Error, intente nuevamente");
+        }
 
-    // //Obtener trabajos pendientes para el calendario
-    // [HttpGet("TrabajosCalendario/{pais}/{centro}/{division}")]
-    // public async Task<ActionResult<List<CalendarioTrabajoDTO>>> GetTrabajosCalendario(string pais, string centro, string division)
-    // {
-
-    //     if (division == "All")
-    //     {
-    //         var list = await _context.ReuDia
-    //               .Include(x => x.IdResReuNavigation)
-    //                 .Where(d => (d.Rdstatus == "Pendiente/Responsable" | d.Rdstatus == "Pendiente") & (d.IdPais == int.Parse(pais)) & (d.Rdcentro == centro))
-    //                 .Select(rd => new
-    //                 {
-    //                     IdReuDia = rd.IdReuDia,
-    //                     RdcodEq = rd.RdcodEq,
-    //                     Rddisc = rd.Rddisc,
-    //                     Rdodt = rd.Rdodt,
-    //                     Rdtiempo = rd.Rdtiempo,
-    //                     RdfecTra = rd.RdfecTra,
-    //                     Responsable = rd.IdResReuNavigation.Rrnombre,
-    //                     Linea = rd.Rdarea
-
-    //                 })
-    //                 .AsNoTracking()
-    //                 .ToListAsync();
-    //         return Ok(list);
-    //     }
-    //     else
-    //     {
-    //         var list = await _context.ReuDia
-    //               .Include(x => x.IdResReuNavigation)
-    //                 .Where(d => (d.Rdstatus == "Pendiente/Responsable" | d.Rdstatus == "Pendiente") & (d.IdPais == int.Parse(pais)) & (d.Rdcentro == centro) & (d.Rddiv == division))
-    //                 .Select(rd => new
-    //                 {
-    //                     IdReuDia = rd.IdReuDia,
-    //                     RdcodEq = rd.RdcodEq,
-    //                     Rddisc = rd.Rddisc,
-    //                     Rdodt = rd.Rdodt,
-    //                     Rdtiempo = rd.Rdtiempo,
-    //                     RdfecTra = rd.RdfecTra,
-    //                     Responsable = rd.IdResReuNavigation.Rrnombre,
-    //                     Linea = rd.Rdarea
-
-    //                 })
-    //                 .AsNoTracking()
-    //                 .ToListAsync();
-    //         return Ok(list);
-    //     }
+    }
 
 
-    // }
+    //TODO:areglar error de base datos
+    // Obtener trabajos pendientes para el calendario
+    [HttpGet("GetTrabajosPorCalendario/{pais}/{centro}/{division}")]
+    public async Task<ActionResult<List<ReuDiumDTO>>> GetTrabajosCalendario(string pais, string centro, string division)
+    {
 
+        if (division == "All")
+        {
+            var list = await _context.ReuDia
+                    .Include(x => x.IdResReuNavigation)
+                    .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro))
+                    .AsNoTracking()
+                    .ToListAsync();
+
+            return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
+        }
+        else
+        {
+            var list = await _context.ReuDia
+                    .Include(x => x.IdResReuNavigation)
+                    .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro) && (d.Rddiv == division))
+                    .AsNoTracking()
+                    .ToListAsync();
+
+
+            return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
+            // return Ok(result);
+        }
+
+
+    }
 
 }
 

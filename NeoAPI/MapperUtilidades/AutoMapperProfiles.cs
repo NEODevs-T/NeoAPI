@@ -76,9 +76,18 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<MasterDTO, Master>().ReverseMap();
 
+            CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
+
             CreateMap<PaiDTO, Pai>().ReverseMap();
 
             CreateMap<CargoReuDTO, CargoReu>().ReverseMap();
+
+            CreateMap<KsfDTO, Ksf>().ReverseMap();
+
+            CreateMap<RespoReuDTO, RespoReu>().ReverseMap();
+
+            CreateMap<AsistenReuDTO, AsistenReu>().ReverseMap();
+
 
             CreateMap<Resuman, ResumenGeneralDTO>()
                 .ForMember(dest => dest.Nombre, act => act.MapFrom(src => src.IdPersonalNavigation.PeNombre))
@@ -108,6 +117,12 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<EquipoEam, EquipoEamDTO>()
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdLineaNavigation));
+
+            CreateMap<AsistenReu, AsistenReuDTO>()
+                .ForMember(dest => dest.Cargo, act => act.MapFrom(src => src.IdCargoRNavigation));
+
+            CreateMap<ReuDium, ReuDiumDTO>()
+                .ForMember(dest => dest.Responsable, act => act.MapFrom(src => src.IdResReuNavigation.Rrnombre));
 
             CreateMap<Models.PolybaseBPCSVen.Fso, OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
