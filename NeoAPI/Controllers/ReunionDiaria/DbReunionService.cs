@@ -51,7 +51,7 @@ public class DbReunionServiceController : ControllerBase
     [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}")]
     public async Task<ActionResult<List<ReuDiumDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
     {
-        OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
+        ReuClass getDiv = new ReuClass(_neocontext);
         //Consultar nombre del centro y division  para insertarlos
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
@@ -79,7 +79,7 @@ public class DbReunionServiceController : ControllerBase
     {
 
 
-        OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
+        ReuClass getDiv = new ReuClass(_neocontext);
         //Consultar nombre del centro y division  para insertarlos
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
@@ -261,7 +261,7 @@ public class DbReunionServiceController : ControllerBase
 
 
         //Consultar nombre del centro y division  para insertarlos
-        OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
+        ReuClass getDiv = new ReuClass(_neocontext);
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
@@ -389,7 +389,7 @@ public class DbReunionServiceController : ControllerBase
             if (d.Rdcentro is not null)
             {
                 // Consultar nombre del centro y división para retornar el id en pendientes
-                OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
+                ReuClass getDiv = new ReuClass(_neocontext);
                 CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
 
                 if (centrodiv == null)
@@ -463,7 +463,7 @@ public class DbReunionServiceController : ControllerBase
             if (d.Rdcentro is not null)
             {
                 //Consultar nombre del centro y division pra retornar el id en pendientes
-                OptencionDeDiv getDiv = new OptencionDeDiv(_neocontext);
+                ReuClass getDiv = new ReuClass(_neocontext);
                 CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
 
                 var _d = _mapper.Map<ReuDium>(d);
@@ -484,79 +484,148 @@ public class DbReunionServiceController : ControllerBase
 
     }
 
-    // //Obtener id de centro y dic=vision y viceversa
+    //TODO: viejo
 
-    // public async Task<CentroDivision> GetCentroDiv(string centro, string division, int tipo)
+    // //Obtener id de centro y dic=vision y viceversa
+    // [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]
+    // public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
     // {
-    //     CentroDivision CD = new CentroDivision();
+    //     CentroDivisionDTO CD = new CentroDivisionDTO();
     //     if (tipo == 0)
     //     {
 
-    //         centrodiscrepancia = await _neocontext.Divisions
+    //         var centrodiscrepancia = await _neocontext.Masters
     //             .Include(c => c.IdCentroNavigation)
     //             .Where(d => d.IdDivision == int.Parse(division))
-    //             .Select(di => new Division
-    //             {
-    //                 IdDivision = di.IdDivision,
-    //                 Dnombre = di.Dnombre,
-    //                 IdCentroNavigation = di.IdCentroNavigation
-    //             })
+    //             // .Select(di => new Division
+    //             // {
+    //             //     IdDivision = di.IdDivision,
+    //             //     Dnombre = di.IdDivisionNavigation.Dnombre,
+    //             //      = di.IdCentroNavigation
+    //             // })
     //             .AsNoTracking()
     //             .FirstOrDefaultAsync();
-
-
 
     //         CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
     //         CD.IdDivision = centrodiscrepancia.IdDivision;
     //         CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
-    //         CD.Dnombre = centrodiscrepancia.Dnombre;
+    //         CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
     //     }
 
     //     else if (tipo == 1)
     //     {
 
-
-
-    //         centrodiscrepancia = await _neocontext.Divisions
+    //         var centrodiscrepancia = await _neocontext.Masters
     //             .Include(c => c.IdCentroNavigation)
-    //             .Where(d => d.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
-    //             .Select(di => new Division
-    //             {
-    //                 IdDivision = di.IdDivision,
-    //                 Dnombre = di.Dnombre,
-    //                 IdCentroNavigation = di.IdCentroNavigation
-    //             })
+    //             .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
+    //             // .Select(di => new Division
+    //             // {
+    //             //     IdDivision = di.IdDivision,
+    //             //     Dnombre = di.Dnombre,
+    //             //     IdCentroNavigation = di.IdCentroNavigation
+    //             // })
     //             .AsNoTracking()
     //             .FirstOrDefaultAsync();
-
-
 
     //         CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
     //         CD.IdDivision = centrodiscrepancia.IdDivision;
     //         CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
-    //         CD.Dnombre = centrodiscrepancia.Dnombre;
+    //         CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
     //     }
 
 
-    //     return CD;
+    //     return Ok(CD);
     // }
 
-    // //Consultas para los cambios de estatus en una discrepancia
-    // public async Task GetCambioStatus(int idreu)
-    // {
-    //     cambiostatus = await _neocontext.CambStats
-    //         .Where(a => a.IdReuDia == idreu)
-    //         // .OrderByDescending(b => b.IdCambStat)
-    //         .ToListAsync();
-    // }
 
-    // public async Task GetCambioFecha(int idreu)
-    // {
-    //     cambiofecha = await _neocontext.CambFecs
-    //         .Where(a => a.IdReuDia == idreu)
-    //         //.OrderByDescending(b => b.IdCambFec)
-    //         .ToListAsync();
-    // }
+    [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]
+    public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
+    {
+        CentroDivisionDTO CD = new CentroDivisionDTO();
+        ReuClass ReuBuild = new ReuClass(_neocontext);
+
+        if (tipo == 0)
+        {
+            // Validar si 'division' puede convertirse a un entero
+            if (!int.TryParse(division, out int divisionId))
+            {
+                return BadRequest("El valor de la división no es un número válido.");
+            }
+
+            // Ejecutar la consulta para el tipo 0
+            var centrodiscrepancia = await _neocontext.Masters
+                .Include(c => c.IdCentroNavigation)
+                .Include(d => d.IdDivisionNavigation)
+                .Where(d => d.IdDivision == divisionId)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            // Verificar si la consulta devolvió resultados
+            if (centrodiscrepancia == null)
+            {
+                return NotFound("No se encontró el centro o división especificados.");
+            }
+
+            // Verificar si las propiedades de navegación también son válidas
+            if (centrodiscrepancia.IdCentroNavigation == null || centrodiscrepancia.IdDivisionNavigation == null)
+            {
+                return NotFound("Datos incompletos en las propiedades de navegación (Centro o División no encontrados).");
+            }
+
+            // Construir el DTO
+            CD = ReuBuild.BuildCentroDivisionDTO(centrodiscrepancia);
+        }
+        else if (tipo == 1)
+        {
+            // Ejecutar la consulta para el tipo 1
+            var centrodiscrepancia = await _neocontext.Masters
+                .Include(c => c.IdCentroNavigation)
+                .Include(d => d.IdDivisionNavigation)
+                .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            // Verificar si la consulta devolvió resultados
+            if (centrodiscrepancia == null)
+            {
+                return NotFound("No se encontró el centro o división especificados.");
+            }
+
+            // Verificar si las propiedades de navegación también son válidas
+            if (centrodiscrepancia.IdCentroNavigation == null || centrodiscrepancia.IdDivisionNavigation == null)
+            {
+                return NotFound("Datos incompletos en las propiedades de navegación (Centro o División no encontrados).");
+            }
+
+            // Construir el DTO
+            CD = ReuBuild.BuildCentroDivisionDTO(centrodiscrepancia);
+        }
+
+        return Ok(CD);
+    }
+
+    //Consultas para los cambios de estatus en una discrepancia
+    [HttpGet("GetCambioStatus/{idreu:int}")]
+    public async Task<ActionResult<List<CambStatDTO>>> GetCambioStatus(int idreu)
+    {
+        cambiostatus = await _neocontext.CambStats
+            .Where(a => a.IdReuDia == idreu)
+            // .OrderByDescending(b => b.IdCambStat)
+            .ToListAsync();
+
+        return Ok(_mapper.Map<List<CambStatDTO>>(cambiostatus));
+    }
+
+    [HttpGet("GetCambioFecha/{idReu:int}")]
+    public async Task<ActionResult<List<CambFecDTO>>> GetCambioFecha(int idReu)
+    {
+        cambiofecha = await _neocontext.CambFecs
+            .Where(a => a.IdReuDia == idReu)
+            //.OrderByDescending(b => b.IdCambFec)
+            .ToListAsync();
+        return Ok(_mapper.Map<List<CambFecDTO>>(cambiofecha));
+
+    }
 
 
     // //obtener discrepancia a editar

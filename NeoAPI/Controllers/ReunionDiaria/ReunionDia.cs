@@ -5,56 +5,15 @@ using NeoAPI.Models.Neo;
 
 namespace NeoAPI.Controllers.GetCentroDiv;
 
-public class OptencionDeDiv : ControllerBase
+public class ReuClass : ControllerBase
 {
     public Master? centrodiscrepancia { get; set; } = new Master();
     private readonly DbNeoIiContext _neocontext;
 
-    public OptencionDeDiv(DbNeoIiContext DbNeo)
+    public ReuClass(DbNeoIiContext DbNeo)
     {
         _neocontext = DbNeo;
     }
-
-
-    // public async Task<CentroDivisionDTO> GetCentroDivi(string centro, string division, int tipo)
-    // {
-    //     CentroDivisionDTO CD = new CentroDivisionDTO();
-
-    //     if (tipo == 0)
-    //     {
-    //         centrodiscrepancia = await _neocontext.Masters
-    //             .Include(c => c.IdCentroNavigation)
-    //             .Where(d => d.IdDivision == int.Parse(division))
-    //             .AsNoTracking()
-    //             .FirstOrDefaultAsync();
-
-    //         if (centrodiscrepancia != null)
-    //         {
-    //             CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
-    //             CD.IdDivision = centrodiscrepancia.IdDivision;
-    //             CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
-    //             CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
-    //         }
-    //     }
-    //     else if (tipo == 1)
-    //     {
-    //         centrodiscrepancia = await _neocontext.Masters
-    //             .Include(c => c.IdCentroNavigation)
-    //             .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
-    //             .AsNoTracking()
-    //             .FirstOrDefaultAsync();
-
-    //         if (centrodiscrepancia != null)
-    //         {
-    //             CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
-    //             CD.IdDivision = centrodiscrepancia.IdDivision;
-    //             CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
-    //             CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
-    //         }
-    //     }
-
-    //     return CD;
-    // }
     public async Task<CentroDivisionDTO> GetCentroDivi(string centro, string division, int tipo)
     {
         CentroDivisionDTO CD = new CentroDivisionDTO();
@@ -130,4 +89,16 @@ public class OptencionDeDiv : ControllerBase
     }
 
 
+
+
+    public CentroDivisionDTO BuildCentroDivisionDTO(Master centrodiscrepancia)
+    {
+        return new CentroDivisionDTO
+        {
+            IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro,
+            IdDivision = centrodiscrepancia.IdDivision,
+            Cnom = centrodiscrepancia.IdCentroNavigation.Cnom,
+            Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre
+        };
+    }
 }
