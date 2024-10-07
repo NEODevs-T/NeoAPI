@@ -14,4 +14,5 @@ public class CambFecDTO
     public DateTime CffecNew { get; set; }
 
     public string Cfuser { get; set; } = null!;
+
 }

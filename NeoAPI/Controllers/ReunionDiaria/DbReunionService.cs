@@ -628,49 +628,58 @@ public class DbReunionServiceController : ControllerBase
     }
 
 
-    // //obtener discrepancia a editar
-    // public async Task<ReuDium> GetDiscrepantacia(int id)
-    // {
-    //     var disc = await _neocontext.ReuDia
-    //         .Include(b => b.IdksfNavigation)
-    //         .Include(b => b.IdResReuNavigation)
-    //         .FirstOrDefaultAsync(h => h.IdReuDia == id);
-    //     if (disc == null)
-    //         throw new Exception("not found!");
-    //     return disc;
+    //obtener discrepancia a editar
+    [HttpGet("GetDiscrepantaciaJT/{id:int}")]
+    public async Task<ActionResult<ReuDiumDTO>> GetDiscrepantacia(int id)
+    {
+        var disc = await _neocontext.ReuDia
+            .Include(b => b.IdksfNavigation)
+            .Include(b => b.IdResReuNavigation)
+            .FirstOrDefaultAsync(h => h.IdReuDia == id);
+        if (disc == null)
+            throw new Exception("not found!");
+        return Ok(_mapper.Map<ReuDiumDTO>(disc));
+    }
 
-    // }
+    [HttpPost("AddDiscrepancia")]
+    public async Task<ActionResult<int>> InsertDiscrepancia(ReuDiumDTO discre)
+    {
+        ReuDium data = _mapper.Map<ReuDium>(discre);
+        _neocontext.ReuDia.Add(data);
+        await _neocontext.SaveChangesAsync();
+        return Ok(data.IdReuDia);
+    }
 
+    [HttpPost("AddtCambioStatus")]
+    public async Task<ActionResult<bool>> InsertCambioStatus(CambStatDTO status)
+    {
+        CambStat data = _mapper.Map<CambStat>(status);
+        _neocontext.CambStats.Add(data);
 
-    // public async Task<int> InsertDiscrepancia(ReuDium discre)
-    // {
-    //     _neocontext.ReuDia.Add(discre);
-    //     await _neocontext.SaveChangesAsync();
-    //     return discre.IdReuDia;
-    // }
+        return Ok(await _neocontext.SaveChangesAsync() > 0);
+    }
 
+    [HttpPost("AddCambioFec")]
+    public async Task<ActionResult<bool>> InsertCambioFec(CambFecDTO cambiofec)
+    {
+        CambFec data = _mapper.Map<CambFec>(cambiofec);
+        _neocontext.CambFecs.Add(data);
+        return Ok(await _neocontext.SaveChangesAsync() > 0);
+    }
 
-    // public async Task InsertCambioStatus(CambStat status)
-    // {
-    //     _neocontext.CambStats.Add(status);
-    //     await _neocontext.SaveChangesAsync();
-    // }
+    //Insertar discrepancia con chismoso
+    [HttpPost("AddRegistros")]
+    public async Task<ActionResult<bool>> InsertarRegistros(RegistroCambiosDTO registroCambios)
+    {
+        CambFec cambiofec = _mapper.Map<CambFec>(registroCambios.Data);
+        CambStat cambioEstado = _mapper.Map<CambStat>(registroCambios.Data2);
+        _neocontext.CambStats.Add(cambioEstado);
+        _neocontext.CambFecs.Add(cambiofec);
 
-    // public async Task InsertCambioFec(CambFec cambiofec)
-    // {
-    //     _neocontext.CambFecs.Add(cambiofec);
-    //     await _neocontext.SaveChangesAsync();
-    // }
-    // //Insertar discrepancia con chismoso
-    // public async Task<bool> InsertarRegistros(CambFec data, CambStat data2)
-    // {
-    //     data.IdReuDiaNavigation.CambStats.Add(data2);
-    //     _neocontext.CambFecs.Add(data);
     //     //_neocontext.CambStats.Add(data2);
-    //     await _neocontext.SaveChangesAsync();
 
-    //     return true;
-    // }
+        return Ok(await _neocontext.SaveChangesAsync() > 0);
+    }
 
 }
 
