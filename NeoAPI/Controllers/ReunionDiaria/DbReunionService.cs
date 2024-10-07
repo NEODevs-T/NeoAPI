@@ -379,8 +379,8 @@ public class DbReunionServiceController : ControllerBase
     }
 
     // Update Discrepancia
-    [HttpPut("UpdateDiscrepancia/{id:int}/{tipo}")]
-    public async Task<ActionResult<bool>> UpdateDiscrepancia(ReuDiumDTO d, int id, int? tipo)
+    [HttpPut("UpdateDiscrepancia/{id:int}")]
+    public async Task<ActionResult<bool>> UpdateDiscrepancia(ReuDiumDTO d, int id)
     {
         try
         {
@@ -433,16 +433,10 @@ public class DbReunionServiceController : ControllerBase
 
             bdDiscrep.IdEmpresa = d.IdEmpresa;
 
-            // Verifica que el tipo sea válido
-            if (tipo != null && tipo == 0)
-            {
-                _neocontext.Entry(bdDiscrep).State = EntityState.Modified;
-                await _neocontext.SaveChangesAsync();
+            _neocontext.Entry(bdDiscrep).State = EntityState.Modified;
+            await _neocontext.SaveChangesAsync();
 
-                return Ok(true);
-            }
-
-            return BadRequest("El tipo no es válido o no se proporcionó.");
+            return Ok(true);
         }
         catch (Exception ex)
         {
@@ -676,7 +670,7 @@ public class DbReunionServiceController : ControllerBase
         _neocontext.CambStats.Add(cambioEstado);
         _neocontext.CambFecs.Add(cambiofec);
 
-    //     //_neocontext.CambStats.Add(data2);
+        //     //_neocontext.CambStats.Add(data2);
 
         return Ok(await _neocontext.SaveChangesAsync() > 0);
     }
