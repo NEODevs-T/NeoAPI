@@ -26,6 +26,10 @@ namespace NeoAPI.Controllers.PNC
             _mapper = mapper;
         }
 
+
+
+
+
         [HttpGet("GetTodosLosCausantes")]
         public async Task<List<CausanteDTO>> ObtenerTodosLosCausantes()
         {

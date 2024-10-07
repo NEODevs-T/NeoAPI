@@ -4,7 +4,7 @@ using System.Collections.Generic;
 namespace NeoAPI.DTOs.PNC;
 
 
-public partial class ProNoConDTO
+public class ProNoConDTO
 {
     public int IdProNoCon { get; set; }
 

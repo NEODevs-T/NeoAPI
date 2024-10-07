@@ -28,7 +28,7 @@ namespace NeoAPI.Controllers.LibroNovedades
             _mapper = mapper;
         }
 
-        [HttpPost("AddLibroNovedades")]
+        [HttpPost("AddLibroNovedadesPorCorte")]
         public async Task<ActionResult<bool>> AddLibroNovedadesPorCorte(List<LibroNoveDTO> novedades)
         {
             List<LibroNove> data;
@@ -39,6 +39,7 @@ namespace NeoAPI.Controllers.LibroNovedades
                 item.IdAreaCar = (int)DatosNovedad.Operaciones;
                 item.LnisPizUni = false;
                 item.LnisResu = (int)DatosNovedad.NoResuelto;
+                item.IdMaster = await this._context.Masters.Where(m => m.IdLinea == item.IdLinea).Select(m => m.IdMaster).FirstOrDefaultAsync();
             }
 
             data = _mapper.Map<List<LibroNove>>(novedades);

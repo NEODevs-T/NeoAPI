@@ -149,7 +149,7 @@ namespace NeoAPI.AutoMapper
             CreateMap<DisDefiDTO, DispDefi>().ReverseMap();
             CreateMap<CausanteDTO, Causante>().ReverseMap();
             CreateMap<ProDispDTO, PropDisp>().ReverseMap();
-            CreateMap<UnidadeDTO, Unidad>().ReverseMap();
+            CreateMap<CaUnidadDTO, CaUnidad>().ReverseMap();
             CreateMap<causaDTO, Causa>().ReverseMap();
             CreateMap<ProNoConDTO, ProNoCon>().ReverseMap();
 

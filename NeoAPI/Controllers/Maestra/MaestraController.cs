@@ -5,7 +5,6 @@ using AutoMapper;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
 using Microsoft.Data.SqlClient;
 
@@ -28,21 +27,7 @@ namespace NeoAPI.Controllers.Maestras
             _mapper = maper;
             _neoVieja = neoVieja;
         }
-        // public static List<Centro> centro = new List<Centro> { };
-        public static List<Linea> linea = new List<Linea> { };
-        public static List<Empresa> empresa = new List<Empresa> { };
-        public static List<Pai> pais = new List<Pai> { };
-        public static List<Division> div = new List<Division> { };
-        public static List<Ksf> ksfs = new List<Ksf>();
-        public static List<RespoReu> resporeu = new List<RespoReu>();
-        public static List<ReuDium> reunionditabla = new List<ReuDium>();
-        public static List<Division> divisions = new List<Division>();
-        public static List<AsistenReu> asistenreus = new List<AsistenReu>();
-        public static List<CargoReu> cargoreus = new List<CargoReu>();
-        public static List<StatsAsisDto> StatsAsis = new List<StatsAsisDto>();
-        public static List<EquipoEam> equipos = new List<EquipoEam>();
-        public static List<EquipoEam> equiposlinea = new List<EquipoEam>();
-        public static EquipoDTO equipoinsertar = new EquipoDTO();
+        
 
         [HttpGet("GetPaises")]
         public async Task<ActionResult<List<PaiDTO>>> GetPaises()
