@@ -480,58 +480,6 @@ public class DbReunionServiceController : ControllerBase
 
     //TODO: viejo
 
-    // //Obtener id de centro y dic=vision y viceversa
-    // [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]
-    // public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
-    // {
-    //     CentroDivisionDTO CD = new CentroDivisionDTO();
-    //     if (tipo == 0)
-    //     {
-
-    //         var centrodiscrepancia = await _neocontext.Masters
-    //             .Include(c => c.IdCentroNavigation)
-    //             .Where(d => d.IdDivision == int.Parse(division))
-    //             // .Select(di => new Division
-    //             // {
-    //             //     IdDivision = di.IdDivision,
-    //             //     Dnombre = di.IdDivisionNavigation.Dnombre,
-    //             //      = di.IdCentroNavigation
-    //             // })
-    //             .AsNoTracking()
-    //             .FirstOrDefaultAsync();
-
-    //         CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
-    //         CD.IdDivision = centrodiscrepancia.IdDivision;
-    //         CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
-    //         CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
-    //     }
-
-    //     else if (tipo == 1)
-    //     {
-
-    //         var centrodiscrepancia = await _neocontext.Masters
-    //             .Include(c => c.IdCentroNavigation)
-    //             .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
-    //             // .Select(di => new Division
-    //             // {
-    //             //     IdDivision = di.IdDivision,
-    //             //     Dnombre = di.Dnombre,
-    //             //     IdCentroNavigation = di.IdCentroNavigation
-    //             // })
-    //             .AsNoTracking()
-    //             .FirstOrDefaultAsync();
-
-    //         CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
-    //         CD.IdDivision = centrodiscrepancia.IdDivision;
-    //         CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
-    //         CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
-    //     }
-
-
-    //     return Ok(CD);
-    // }
-
-
     [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]
     public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
     {
