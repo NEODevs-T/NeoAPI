@@ -13,7 +13,7 @@ using System.Collections.Generic;
 
 namespace ReunionDiaApi.Controllers;
 
-[Route("/[controller]")]
+[Route("api/[controller]")]
 [ApiController]
 public class LineasController : ControllerBase
 {
