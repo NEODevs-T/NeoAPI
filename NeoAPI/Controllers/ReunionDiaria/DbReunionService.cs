@@ -428,7 +428,7 @@ public class DbReunionServiceController : ControllerBase
 
             if (bdDiscrep.IdMasterNavigation != null)
             {
-                bdDiscrep.IdMasterNavigation.IdPais = d.IdPais;
+                bdDiscrep.IdMasterNavigation.IdPais = d.IdPais ?? 0;
             }
 
             bdDiscrep.IdEmpresa = d.IdEmpresa;

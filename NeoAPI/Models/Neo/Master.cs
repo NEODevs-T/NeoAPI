@@ -11,7 +11,7 @@ public partial class Master
 
     public int IdDivision { get; set; }
 
-    public int? IdPais { get; set; }
+    public int IdPais { get; set; }
 
     public int IdEmpresa { get; set; }
 
