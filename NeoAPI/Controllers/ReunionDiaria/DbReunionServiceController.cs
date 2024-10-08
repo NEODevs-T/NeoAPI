@@ -30,6 +30,7 @@ public class DbReunionServiceController : ControllerBase
     public List<CambStat> cambiostatus { get; set; } = new List<CambStat>();
     public List<CambFec> cambiofecha { get; set; } = new List<CambFec>();
     public List<CalendarioTrabajoDTO> calentrabajo { get; set; } = new List<CalendarioTrabajoDTO>();
+    public Master? centrodiscrepancia { get; set; } = new Master();
 
 
     private readonly DbNeoIiContext _neocontext;
@@ -622,6 +623,84 @@ public class DbReunionServiceController : ControllerBase
 
         return Ok(await _neocontext.SaveChangesAsync() > 0);
     }
+
+//TODO: ARREGLOS DE IMPLEMENTACION
+
+    [HttpGet("GetCentroDivi/{centro}/{division}/{tipo:int}")]
+        public async Task<ActionResult<CentroDivisionDTO>> GetCentroDivi(string centro, string division, int tipo)
+    {
+        CentroDivisionDTO CD = new CentroDivisionDTO();
+
+        if (tipo == 0)
+        {
+            int divisionInt;
+            if (!int.TryParse(division, out divisionInt))
+            {
+                throw new FormatException("El valor de 'division' no es un número válido.");
+            }
+
+            centrodiscrepancia = await _neocontext.Masters
+                .Include(c => c.IdCentroNavigation)
+                .Include(d => d.IdDivisionNavigation)  // Asegúrate de incluir también IdDivisionNavigation
+                .Where(d => d.IdDivision == divisionInt)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (centrodiscrepancia == null)
+            {
+                throw new NullReferenceException("No se encontró ninguna coincidencia para el centro o división proporcionados.");
+            }
+
+            // Verificar que las propiedades de navegación no sean nulas
+            if (centrodiscrepancia.IdCentroNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdCentroNavigation' es nula.");
+            }
+            if (centrodiscrepancia.IdDivisionNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdDivisionNavigation' es nula.");
+            }
+
+            CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+            CD.IdDivision = centrodiscrepancia.IdDivision;
+            CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+            CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
+        }
+        else if (tipo == 1)
+        {
+            centrodiscrepancia = await _neocontext.Masters
+                .Include(c => c.IdCentroNavigation)
+                .Include(d => d.IdDivisionNavigation)  // Asegúrate de incluir también IdDivisionNavigation
+                .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
+                .AsNoTracking()
+                .FirstOrDefaultAsync();
+
+            if (centrodiscrepancia == null)
+            {
+                throw new NullReferenceException("No se encontró ninguna coincidencia para el centro o división proporcionados.");
+            }
+
+            // Verificar que las propiedades de navegación no sean nulas
+            if (centrodiscrepancia.IdCentroNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdCentroNavigation' es nula.");
+            }
+            if (centrodiscrepancia.IdDivisionNavigation == null)
+            {
+                throw new NullReferenceException("La propiedad 'IdDivisionNavigation' es nula.");
+            }
+
+            CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+            CD.IdDivision = centrodiscrepancia.IdDivision;
+            CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+            CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
+        }
+
+
+        return Ok(CD);
+    }
+
+
 
 }
 
