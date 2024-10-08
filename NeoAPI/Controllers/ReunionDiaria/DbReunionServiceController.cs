@@ -6,7 +6,7 @@ using AutoMapper;
 using NeoAPI.Models.Neo;
 using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.ReunionDiaria;
-using NeoAPI.Controllers.GetCentroDiv;
+using NeoAPI.Logic.GetCentroDiv;
 
 
 namespace ReunionWeb.ServicesController;

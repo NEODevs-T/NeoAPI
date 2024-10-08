@@ -3,7 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Models.Neo;
 
-namespace NeoAPI.Controllers.GetCentroDiv;
+namespace NeoAPI.Logic.GetCentroDiv;
 
 public class ReuClass : ControllerBase
 {
