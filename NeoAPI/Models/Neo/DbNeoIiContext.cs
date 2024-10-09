@@ -73,6 +73,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<EquipoEam> EquipoEams { get; set; }
 
+    public virtual DbSet<EquiposEamV> EquiposEamVs { get; set; }
+
     public virtual DbSet<Estado> Estados { get; set; }
 
     public virtual DbSet<Estandar> Estandars { get; set; }
@@ -815,6 +817,31 @@ public partial class DbNeoIiContext : DbContext
                 .HasForeignKey(d => d.IdLinea)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_EquipoEAM_Linea");
+        });
+
+        modelBuilder.Entity<EquiposEamV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("EquiposEAM_V");
+
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Division)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Equipo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.IdMaster).HasColumnName("idMaster");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Lofic)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("LOFIC");
         });
 
         modelBuilder.Entity<Estado>(entity =>

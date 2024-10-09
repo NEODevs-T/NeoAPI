@@ -252,7 +252,7 @@ public class LineasController : ControllerBase
 
     }
 
-    [HttpGet("GetEquiposPorLinea/{Centro}")]
+    [HttpGet("GetEquiposPorCentro/{Centro}")]
     public async Task<ActionResult<List<MaestraVDTO>>> EquiposLineaEAM(string Centro)
     {
         List<MaestraV> data = new List<MaestraV> { };

@@ -160,6 +160,7 @@ namespace NeoAPI.Controllers.Maestras
         }
 
 
+
         [HttpGet("GetLineas/{idDivision:int}")]
         public async Task<ActionResult<List<LineaVDTO>>> GetLineas(int idDivision)
         {
