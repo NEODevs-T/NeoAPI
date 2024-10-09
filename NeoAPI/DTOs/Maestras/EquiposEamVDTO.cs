@@ -24,4 +24,12 @@ public partial class EquiposEamVDTO
     public string Division { get; set; } = null!;
 
     public string? Lofic { get; set; }
+
+    public string CodigoEq { get; set; } = null!;
+
+    public string? Desc { get; set; }
+
+    public bool Estado { get; set; }
+
+    public DateTime FechaEq { get; set; }
 }

@@ -828,12 +828,20 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.Centro)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.CodigoEq)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("codigoEq");
+            entity.Property(e => e.Desc)
+                .HasMaxLength(250)
+                .IsUnicode(false);
             entity.Property(e => e.Division)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Equipo)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.FechaEq).HasColumnType("datetime");
             entity.Property(e => e.IdMaster).HasColumnName("idMaster");
             entity.Property(e => e.Linea)
                 .HasMaxLength(50)
