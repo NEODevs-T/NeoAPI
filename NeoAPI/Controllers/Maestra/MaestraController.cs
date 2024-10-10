@@ -64,13 +64,16 @@ namespace NeoAPI.Controllers.Maestras
                 cen = cent.Substring(0, 3);
                 idempresa = int.Parse(cent.Substring(3));
             }
+            
+            cen = cent;
 
             if (cen == "All")
             {
                 centro = await _context.CentrosVs
-                .Where(c => c.IdEmpresa == idempresa)
+                .Where(c => c.Estado == true)
                     .ToListAsync();
             }
+            
 
             else
             {
