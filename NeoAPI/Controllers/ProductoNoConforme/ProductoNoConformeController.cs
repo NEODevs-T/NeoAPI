@@ -28,7 +28,7 @@ namespace NeoAPI.Controllers.PNC
             _mapper = mapper;
         }
 
-        [HttpPost("AddProductoNoConforme")]
+        [HttpPost("AddProductoNoConforme/{registro}")]
         public async Task<bool> AddProductoNoConforme(ProNoConDTO registro)
         {
             var entidad1 = _mapper.Map<ProNoCon>(registro);
@@ -38,7 +38,7 @@ namespace NeoAPI.Controllers.PNC
 
 
     
-        [HttpPut("PutActualizarProductoNoConforme")]
+        [HttpPut("PutActualizarProductoNoConforme/{idProNoCon}/{registro}")]
 public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO registro)
 {
     ProNoCon? data = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idProNoCon).FirstOrDefaultAsync();
@@ -67,21 +67,21 @@ public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO
 }
 
 
-        [HttpGet("GetProductoNoConformePorFecha")]
+        [HttpGet("GetProductoNoConformePorFecha/{Fecha}")]
         public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformePorFecha(DateTime Fecha){ 
         DateOnly fechaOnly = DateOnly.FromDateTime(Fecha);
         return await this._cotext.ProNoCons.Where(p => p.Pncfecha == fechaOnly).ToListAsync();
         }
 
 
-        [HttpGet("GetProductoNoConformeEntreFechas")]
+        [HttpGet("GetProductoNoConformeEntreFechas/{fechaInicio}/{fechaFinal}")]
         public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformeEntreFechas(DateTime fechaInicio, DateTime fechaFinal){ 
             DateOnly fechaInicioOnly = DateOnly.FromDateTime(fechaInicio);
             DateOnly fechaFinalOnly = DateOnly.FromDateTime(fechaFinal);
             return await this._cotext.ProNoCons.Where(p => p.Pncfecha >= fechaInicioOnly && p.Pncfecha <= fechaFinalOnly).ToListAsync();
         }
 
-        [HttpGet("GetProductoNoConformePorFiltro")]
+        [HttpGet("GetProductoNoConformePorFiltro/{fechaInicio}/{fechaFinal}")]
         public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformePorFiltro(DateTime fechaInicio, DateTime fechaFinal){
             if(fechaInicio.Date == fechaFinal.Date){
                 return await this.ObtenerProductoNoConformePorFecha(fechaInicio);
@@ -93,7 +93,7 @@ public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO
 
 
 
-        [HttpGet("GetProductoNoConforme")]
+        [HttpGet("GetProductoNoConforme/{idRegistro}")]
         public async Task<ProNoConDTO?> ObtenerProductoNoConforme(int idRegistro)
 {
     var proNoCon = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idRegistro).Include(p => p.IdCausaNavigation).ThenInclude(c => c.IdCausanteNavigation).FirstOrDefaultAsync();
@@ -107,7 +107,7 @@ public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO
 }
 
 
-        [HttpGet("GetProductoNoConformeConTodaLaData")]
+        [HttpGet("GetProductoNoConformeConTodaLaData/{idRegistro}")]
         public async Task<ProNoConDTO?> ObtenerProductoNoConformeConTodaLaData(int idRegistro){
             var reg = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idRegistro).Include(p => p.IdDisDefiNavigation).Include(p => p.IdEstadoNavigation)
             .Include(p => p.IdIdentifNavigation).Include(p => p.IdProDispNavigation).Include(p => p.IdTipoNavigation)
