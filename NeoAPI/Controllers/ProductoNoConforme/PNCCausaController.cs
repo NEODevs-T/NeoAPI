@@ -34,7 +34,7 @@ public class PNCCausaController : ControllerBase
             return _mapper.Map<List<causaDTO>>(causaLista);
         }
 
-        [HttpGet("GetTodosLasCausasPorCausante")]
+        [HttpGet("GetTodosLasCausasPorCausante/{idCausante}")]
         public async Task<List<causaDTO>> ObtenerLasCausasPorCausante(int idCausante)
         {
             List<Causa> CausasPorCausanteLista = await this._cotext.Causas.Where(p => p.Cestado == true && p.IdCausante == idCausante).ToListAsync();
@@ -42,8 +42,10 @@ public class PNCCausaController : ControllerBase
         }
 
 
-        [HttpPost("AddPropuestaDisposicion")]
-                public async Task<bool> AddPropuestaDisposicion(causaDTO registro)
+
+
+        [HttpPost("AddCausa/{registro}")]
+                public async Task<bool> AddCausa(causaDTO registro)
         {
             var entidades = _mapper.Map<Causa>(registro);
             

@@ -38,7 +38,7 @@ public class PNCPropuestaDisposicionController : ControllerBase
             return _mapper.Map<List<ProDispDTO>>(proDispsLista);
         }
 
-        [HttpPost("AddPropuestaDisposicion")]
+        [HttpPost("AddPropuestaDisposicion/{registro}")]
         public async Task<bool> AddPropuestaDisposicion(ProDispDTO registro)
         {
             var entidad = _mapper.Map<PropDisp>(registro);
