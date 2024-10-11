@@ -80,7 +80,7 @@ public class LineasController : ControllerBase
 
     //TODO: nueva implementacion
     [HttpGet("GetEquipos/{cent}")]
-    public async Task<ActionResult<List<EquipoEam>>> EquiposEAM(string cent)
+    public async Task<ActionResult<List<EquipoEamDTO>>> EquiposEAM(string cent)
     {
         string cen = "";
         int idempresa = 0;
@@ -93,17 +93,11 @@ public class LineasController : ControllerBase
         if (cen == "All")
         {
             var result = await _context.EquipoEams
-             .Include(x => x.IdLineaNavigation)
-             .Where(x => x.EestaEam == true & x.IdLineaNavigation.Master.IdEmpresaNavigation.IdEmpresa == idempresa)
-             .Select(p => new EquipoEamDTO
-             {
-                 EcodEquiEam = p.EcodEquiEam,
-                 EnombreEam = p.EnombreEam,
-             })
+             .Where(x => x.EestaEam == true & x.IdLineaNavigation.Master.IdEmpresa == idempresa)
              .AsNoTracking()
               .ToListAsync();
 
-            return Ok(result);
+            return Ok(_mapper.Map<List<EquipoEamDTO>>(result));
         }
         else
         {
@@ -113,16 +107,10 @@ public class LineasController : ControllerBase
              .Include(x => x.IdLineaNavigation)
              //.Where(x => x.IdLineaNavigation.IdDivisionNavigation.IdCentroNavigation.Cnom == cent && x.EestaEam == true)
              .Where(x => x.IdLineaNavigation.Master.IdCentro == int.Parse(cent) && x.EestaEam == true)
-             .Select(p => new EquipoEamDTO
-             {
-                 EcodEquiEam = p.EcodEquiEam,
-                 EnombreEam = p.EnombreEam,
-                 // linea = p.IdLineaNavigation
-             })
              .AsNoTracking()
               .ToListAsync();
 
-            return Ok(result);
+            return Ok(_mapper.Map<List<EquipoEamDTO>>(result));
         }
     }
 
