@@ -17,4 +17,6 @@ public partial class LineaVDTO
     public int IdMaster { get; set; }
 
     public bool Estado { get; set; }
+
+    public int? IdCentro { get; set; }
 }

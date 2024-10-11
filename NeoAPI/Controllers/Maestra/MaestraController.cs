@@ -70,7 +70,7 @@ namespace NeoAPI.Controllers.Maestras
             if (cen == "All")
             {
                 centro = await _context.CentrosVs
-                .Where(c => c.Estado == true)
+                .Where(c => c.Estado == true && c.IdEmpresa == idempresa)
                     .ToListAsync();
             }
             
