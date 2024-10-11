@@ -22,4 +22,6 @@ public class EquipoEamDTO
 
     public LineaDTO Linea { get; set; }
 
+    public int? IdEmpresa { get; set; } 
+
 }

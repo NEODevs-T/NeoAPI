@@ -120,6 +120,9 @@ namespace NeoAPI.AutoMapper
             CreateMap<EquipoEam, EquipoEamDTO>()
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdLineaNavigation));
 
+            CreateMap<Master, EquipoEamDTO>()
+                .ForMember(dest => dest.IdEmpresa, act => act.MapFrom(src => src.IdEmpresa));
+
             CreateMap<AsistenReu, AsistenReuDTO>()
                 .ForMember(dest => dest.Cargo, act => act.MapFrom(src => src.IdCargoRNavigation));
 
