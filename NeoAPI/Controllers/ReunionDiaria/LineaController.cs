@@ -111,6 +111,7 @@ public class LineasController : ControllerBase
               .ToListAsync();
 
             return Ok(_mapper.Map<List<EquipoEamDTO>>(result));
+
         }
     }
 

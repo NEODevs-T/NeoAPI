@@ -32,4 +32,6 @@ public partial class EquiposEamVDTO
     public bool Estado { get; set; }
 
     public DateTime FechaEq { get; set; }
+
+    public int? IdEmpresa {get; set;}
 }
