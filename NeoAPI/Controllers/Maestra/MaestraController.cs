@@ -27,7 +27,7 @@ namespace NeoAPI.Controllers.Maestras
             _mapper = maper;
             _neoVieja = neoVieja;
         }
-        
+
 
         [HttpGet("GetPaises")]
         public async Task<ActionResult<List<PaiDTO>>> GetPaises()
@@ -62,28 +62,33 @@ namespace NeoAPI.Controllers.Maestras
             if (cent.Length > 3)
             {
                 cen = cent.Substring(0, 3);
-                idempresa = int.Parse(cent.Substring(3));
+                if (cen == "All")
+                {
+                    if (int.TryParse(cent.Substring(3), out idempresa))
+                    {
+                        centro = await _context.CentrosVs
+                            .Where(c => c.Estado == true && c.IdEmpresa == idempresa)
+                            .ToListAsync();
+                    }
+                    else
+                    {
+                        return BadRequest("El formato del parámetro 'cent' es incorrecto. No se pudo extraer el ID de la empresa.");
+                    }
+                }
             }
-            
-            cen = cent;
-
-            if (cen == "All")
-            {
-                centro = await _context.CentrosVs
-                .Where(c => c.Estado == true && c.IdEmpresa == idempresa)
-                    .ToListAsync();
-            }
-            
-
             else
             {
-                int centroid = int.Parse(cent);
-
-                centro = await _context.CentrosVs
-                    .Where(c => c.IdCentro == centroid)
-                    .ToListAsync();
+                if (int.TryParse(cent, out int centroid))
+                {
+                    centro = await _context.CentrosVs
+                        .Where(c => c.IdCentro == centroid)
+                        .ToListAsync();
+                }
+                else
+                {
+                    return BadRequest("El formato del parámetro 'cent' es incorrecto.");
+                }
             }
-
 
             return Ok(_mapper.Map<List<CentrosVDTO>>(centro));
         }
