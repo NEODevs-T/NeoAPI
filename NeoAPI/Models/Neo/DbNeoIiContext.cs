@@ -733,8 +733,13 @@ public partial class DbNeoIiContext : DbContext
                 .HasNoKey()
                 .ToView("Divisiones_V");
 
+            entity.Property(e => e.IdMaster).HasColumnName("idMaster");
+            entity.Property(e => e.Lnom)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("LNom");
             entity.Property(e => e.Ndivision)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("NDivision");
         });
@@ -2249,19 +2254,19 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Centro)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Contraseña)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.División)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Empresa)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Linea)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Nombre)
                 .HasMaxLength(200)

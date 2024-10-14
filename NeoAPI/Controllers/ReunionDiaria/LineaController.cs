@@ -41,41 +41,25 @@ public class LineasController : ControllerBase
 
 
     [HttpGet("GetBdDiv{cent}")]
-    public async Task<ActionResult<List<LineaDTO>>> GetBdDiv(string cent)
+    public async Task<ActionResult<List<MaestraVDTO>>> GetBdDiv(string cent)
     {
-        List<Master> data = new List<Master>();
+        List<MaestraV> data = new List<MaestraV>();
 
         if (cent == "All")
         {
-            data = await _context.Masters
-               .Include(x => x.IdLineaNavigation) // Incluye la tabla Linea
-                .ToListAsync();
+            data = await _context.MaestraVs
+           .ToListAsync();
         }
+
         else
         {
-            if (!Int32.TryParse(cent, out int _cent)) // Asegura que el parámetro es un número válido
-            {
-                return BadRequest("El parámetro cent debe ser un número entero.");
-            }
-
-            data = await _context.Masters
-               .Where(x => x.IdCentro == _cent) // Filtra por centro
-               .Include(x => x.IdLineaNavigation) // Incluye la tabla Linea
-               .ToListAsync();
+            data = await _context.MaestraVs
+           .Where(x => x.Centro == cent)
+           .ToListAsync();
         }
 
-        var lineasDTO = data.Select(d => new LineaDTO
-        {
-            IdLinea = d.IdLineaNavigation.IdLinea,
-            Lnom = d.IdLineaNavigation.Lnom,
-            Ldetalle = d.IdLineaNavigation.Ldetalle,
-            Lestado = d.IdLineaNavigation.Lestado,
-            LcenCos = d.IdLineaNavigation.LcenCos,
-            Lfecha = d.IdLineaNavigation.Lfecha,
-            Lofic = d.IdLineaNavigation.Lofic
-        }).ToList();
 
-        return Ok(lineasDTO);
+        return Ok(_mapper.Map<List<MaestraVDTO>>(data));
     }
 
     //TODO: nueva implementacion

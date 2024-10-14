@@ -9,7 +9,13 @@ public partial class DivisionesV
 
     public int IdDivision { get; set; }
 
-    public string? Ndivision { get; set; }
+    public string Ndivision { get; set; } = null!;
 
-    public bool? Estado { get; set; }
+    public bool Estado { get; set; }
+
+    public int IdLinea { get; set; }
+
+    public int? IdMaster { get; set; }
+
+    public string Lnom { get; set; } = null!;
 }
