@@ -12,6 +12,4 @@ public partial class DivisionesV
     public string Ndivision { get; set; } = null!;
 
     public bool Estado { get; set; }
-
-    public string Lnom { get; set; } = null!;
 }
