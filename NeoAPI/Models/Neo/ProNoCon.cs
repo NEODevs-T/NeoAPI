@@ -35,7 +35,7 @@ public partial class ProNoCon
 
     public int IdLugaEven { get; set; }
 
-    public DateOnly Pncfecha { get; set; }
+    public DateTime Pncfecha { get; set; }
 
     public string? PncordFabr { get; set; }
 

@@ -69,16 +69,15 @@ public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO
 
         [HttpGet("GetProductoNoConformePorFecha/{Fecha}")]
         public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformePorFecha(DateTime Fecha){ 
-        DateOnly fechaOnly = DateOnly.FromDateTime(Fecha);
-        return await this._cotext.ProNoCons.Where(p => p.Pncfecha == fechaOnly).ToListAsync();
+
+        return await this._cotext.ProNoCons.Where(p => p.Pncfecha == Fecha).ToListAsync();
         }
 
 
         [HttpGet("GetProductoNoConformeEntreFechas/{fechaInicio}/{fechaFinal}")]
         public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformeEntreFechas(DateTime fechaInicio, DateTime fechaFinal){ 
-            DateOnly fechaInicioOnly = DateOnly.FromDateTime(fechaInicio);
-            DateOnly fechaFinalOnly = DateOnly.FromDateTime(fechaFinal);
-            return await this._cotext.ProNoCons.Where(p => p.Pncfecha >= fechaInicioOnly && p.Pncfecha <= fechaFinalOnly).ToListAsync();
+  
+            return await this._cotext.ProNoCons.Where(p => p.Pncfecha >= fechaInicio && p.Pncfecha <= fechaFinal).ToListAsync();
         }
 
         [HttpGet("GetProductoNoConformePorFiltro/{fechaInicio}/{fechaFinal}")]

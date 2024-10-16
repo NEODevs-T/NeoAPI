@@ -1504,7 +1504,9 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("PNCDesProd");
-            entity.Property(e => e.Pncfecha).HasColumnName("PNCFecha");
+            entity.Property(e => e.Pncfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("PNCFecha");
             entity.Property(e => e.PncindLibe)
                 .IsUnicode(false)
                 .HasColumnName("PNCIndLibe");
@@ -1520,7 +1522,7 @@ public partial class DbNeoIiContext : DbContext
             entity.HasOne(d => d.IdCaUnidadNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCaUnidad)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProNoCon_Unidad");
+                .HasConstraintName("FK_ProNoCon_CaUnidad");
 
             entity.HasOne(d => d.IdCausaNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCausa)
