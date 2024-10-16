@@ -15,6 +15,6 @@ public class CambFecDTO
 
     public string Cfuser { get; set; } = null!;
 
-    public virtual ReuDiumDTO? IdReuDiaNavigation { get; set; } = null!;
+    public virtual ReuDiumDTO? ReuDia { get; set; } = null!;
 
-}
+}   
