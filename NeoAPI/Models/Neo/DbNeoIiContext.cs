@@ -734,7 +734,7 @@ public partial class DbNeoIiContext : DbContext
                 .ToView("Divisiones_V");
 
             entity.Property(e => e.Ndivision)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("NDivision");
         });
@@ -1504,7 +1504,9 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("PNCDesProd");
-            entity.Property(e => e.Pncfecha).HasColumnName("PNCFecha");
+            entity.Property(e => e.Pncfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("PNCFecha");
             entity.Property(e => e.PncindLibe)
                 .IsUnicode(false)
                 .HasColumnName("PNCIndLibe");
@@ -1520,7 +1522,7 @@ public partial class DbNeoIiContext : DbContext
             entity.HasOne(d => d.IdCaUnidadNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCaUnidad)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProNoCon_Unidad");
+                .HasConstraintName("FK_ProNoCon_CaUnidad");
 
             entity.HasOne(d => d.IdCausaNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCausa)
@@ -2249,19 +2251,19 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Centro)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Contraseña)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.División)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Empresa)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Linea)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Nombre)
                 .HasMaxLength(200)
