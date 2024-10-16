@@ -40,63 +40,87 @@ public class LineasController : ControllerBase
 
 
 
-    [HttpGet("GetBdDiv{cent}")]
-    public async Task<ActionResult<List<MaestraVDTO>>> GetBdDiv(string cent)
+    [HttpGet("GetBdDiv/{cent}")]
+    public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisionPorCentro(string cent)
     {
-        List<MaestraV> data = new List<MaestraV>();
+            List<DivisionesV> divisiones = new List<DivisionesV> { };
+            string cen = "";
+            int idcentro = 0;
 
-        if (cent == "All")
-        {
-            data = await _context.MaestraVs
-           .ToListAsync();
-        }
+            if (cent.Length > 3)
+            {
+                cen = cent.Substring(0, 3);
+                if (cen == "All")
+                {
+                    if (int.TryParse(cent.Substring(3), out idcentro))
+                    {
+                        divisiones = await _context.DivisionesVs
+                            .Where(c => c.IdCentro == idcentro)
+                            .ToListAsync();
+                    }
+                    else
+                    {
+                        return BadRequest("El formato del parámetro 'cent' es incorrecto. No se pudo extraer el ID de la empresa.");
+                    }
+                }
+            }
+            else
+            {
+                if (int.TryParse(cent, out int divisionid))
+                {
+                    divisiones = await _context.DivisionesVs
+                        .Where(c => c.IdDivision == divisionid)
+                        .ToListAsync();
+                }
+                else
+                {
+                    return BadRequest("El formato del parámetro 'cent' es incorrecto.");
+                }
+            }
 
-        else
-        {
-            data = await _context.MaestraVs
-           .Where(x => x.Centro == cent)
-           .ToListAsync();
-        }
-
-
-        return Ok(_mapper.Map<List<MaestraVDTO>>(data));
+            return Ok(_mapper.Map<List<DivisionesVDTO>>(divisiones));
     }
 
-    //TODO: nueva implementacion
     [HttpGet("GetEquipos/{cent}")]
     public async Task<ActionResult<List<EquipoEamDTO>>> EquiposEAM(string cent)
     {
-        string cen = "";
-        int idempresa = 0;
-        if (cent.Length > 3)
-        {
-            cen = cent.Substring(0, 3);
-            idempresa = int.Parse(cent.Substring(3));
-        }
+            List<EquipoEam> result = new List<EquipoEam>();
+            string cen = "";
+            int idempresa = 0;
 
-        if (cen == "All")
-        {
-            var result = await _context.EquipoEams
-             .Where(x => x.EestaEam == true & x.IdLineaNavigation.Master.IdEmpresa == idempresa)
-             .AsNoTracking()
-              .ToListAsync();
+            if (cent.Length > 3)
+            {
+                cen = cent.Substring(0, 3);
+                if (cen == "All")
+                {
+                    if (int.TryParse(cent.Substring(3), out idempresa))
+                    {
+                        result = await _context.EquipoEams
+                            .Where(c => c.EestaEam == true && c.IdLineaNavigation.Master.IdEmpresa == idempresa)
+                            .ToListAsync();
+                    }
+                    else
+                    {
+                        return BadRequest("El formato del parámetro 'cent' es incorrecto. No se pudo extraer el ID de la empresa.");
+                    }
+                }
+                }
+            else
+            {
+                if (int.TryParse(cent, out int centroid))
+                {
+                    result = await _context.EquipoEams
+                        .Where(c => c.IdLineaNavigation.Master.IdCentro == centroid)
+                        .ToListAsync();
+                }
+                else
+                {
+                    return BadRequest("El formato del parámetro 'cent' es incorrecto.");
+                }           
 
-            return Ok(_mapper.Map<List<EquipoEamDTO>>(result));
-        }
-        else
-        {
+            }
 
-
-            var result = await _context.EquipoEams
-             .Include(x => x.IdLineaNavigation)
-             //.Where(x => x.IdLineaNavigation.IdDivisionNavigation.IdCentroNavigation.Cnom == cent && x.EestaEam == true)
-             .Where(x => x.IdLineaNavigation.Master.IdCentro == int.Parse(cent) && x.EestaEam == true)
-             .AsNoTracking()
-              .ToListAsync();
-
-            return Ok(_mapper.Map<List<EquipoEamDTO>>(result));
-
-        }
+        return _mapper.Map<List<EquipoEamDTO>>(result);
     }
 
     [HttpGet("GetAsistencia/{centro}/{empresa}")]
