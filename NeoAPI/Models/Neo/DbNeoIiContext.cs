@@ -733,11 +733,6 @@ public partial class DbNeoIiContext : DbContext
                 .HasNoKey()
                 .ToView("Divisiones_V");
 
-            entity.Property(e => e.IdMaster).HasColumnName("idMaster");
-            entity.Property(e => e.Lnom)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("LNom");
             entity.Property(e => e.Ndivision)
                 .HasMaxLength(50)
                 .IsUnicode(false)
