@@ -215,7 +215,13 @@ namespace NeoAPI.Controllers.Maestras
             }
                 if (idEmpresa == empresas.PAVECA)
                 {
-                    var data = await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
+                    RotaCalidum data = await this._DOCIng.RotaCalida.Where(r => r.Rcturno == turno && r.Rcfecha == fecha).FirstOrDefaultAsync() ?? new RotaCalidum();
+                    if (data.Rcgrupo == null){
+                        data.RcidRotCal = 0;
+                        data.Rcfecha = fecha;
+                        data.Rcturno = turno;
+                        data.Rcgrupo = "0";
+                    }
                     return Ok(_mapper.Map<RotaCalidumDTO>(data));
                 }
                 else
@@ -228,6 +234,7 @@ namespace NeoAPI.Controllers.Maestras
                     return Ok(_mapper.Map<RotaCalidumDTO>(rotaCalidum));
                 }
         }
+        //TODO: Hacer metodos para otros paises
 
         [HttpGet("GetProductosActuales/{idLinea:int}")]
         public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int idLinea)
@@ -247,13 +254,13 @@ namespace NeoAPI.Controllers.Maestras
             }
 
             idEmpresa = maestra.IdEmpresa;
-            CentroTrabajo = Int32.Parse(maestra.CentroDeTrabajo);
-
+            CentroTrabajo = Int32.Parse(maestra.CentroDeTrabajo ?? "0");
+            
             var result = from Fso in _PolybaseBPCSVen.Fsos
-                         join Iim in _PolybaseBPCSVen.Iims
-                         on Fso.Sprod equals Iim.Iprod
-                         where Fso.Swrkc == CentroTrabajo && Fso.Sstat.Contains(OrdenesAbiertas)
-                         select new { Fso.Sprod, Fso.Sstat, Iim.Idesc };
+                        join Iim in _PolybaseBPCSVen.Iims
+                        on Fso.Sprod equals Iim.Iprod
+                        where Fso.Swrkc == CentroTrabajo && Fso.Sstat.Contains(OrdenesAbiertas)
+                        select new { Fso.Sprod, Fso.Sstat, Iim.Idesc };
 
             foreach (var item in result)
             {
@@ -267,6 +274,51 @@ namespace NeoAPI.Controllers.Maestras
             ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
 
             return ordenesFabricacionDTOList;
+        }
+        //TODO: Hacer metodos para otros paises
+
+        [HttpGet("GetProductosActualesPorCentroDeTrabajoVen/{centroTrabajo}")]
+        public ActionResult<List<OrdenFabricacionDTO>> GetProductosActualesPorCentroDeTrabajoVen(string centroTrabajo)
+        {
+            int centroTrabajoInt;
+            const string OrdenesAbiertas = "5";
+            List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
+            OrdenFabricacionDTO ordenFabricacionDTO;
+
+            centroTrabajoInt = Int32.Parse(centroTrabajo);
+
+            var result = from Fso in _PolybaseBPCSVen.Fsos
+                        join Iim in _PolybaseBPCSVen.Iims
+                        on Fso.Sprod equals Iim.Iprod
+                        where Fso.Swrkc == centroTrabajoInt && Fso.Sstat.Contains(OrdenesAbiertas)
+                        select new { Fso.Sprod, Fso.Sstat, Iim.Idesc };
+
+            foreach (var item in result)
+            {
+                ordenFabricacionDTO = new OrdenFabricacionDTO();
+                ordenFabricacionDTO.Status = item.Sstat;
+                ordenFabricacionDTO.DescProducto = item.Idesc.Trim();
+                ordenFabricacionDTO.CodProducto = item.Sprod.Trim();
+                ordenesFabricacionDTOList.Add(ordenFabricacionDTO);
+            }
+
+            ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
+
+            return ordenesFabricacionDTOList;
+        }
+
+        [HttpGet("GetNombreProductoPorCodigoVen/{codigo}")]
+        public string GetNombreProductoPorCodigoVen(string codigo)
+        {
+            string producto = "";
+            var result = from Iim in _PolybaseBPCSVen.Iims
+                        where Iim.Iprod == codigo
+                        select new { Iim.Iprod, Iim.Idesc };
+            foreach (var item in result)
+            {
+                producto = item.Idesc;
+            }
+            return producto;
         }
 
         [HttpGet("GetPersonalPorFicha/{ficha}")]
@@ -296,5 +348,7 @@ namespace NeoAPI.Controllers.Maestras
 
             return Ok(persona);
         }
+
+
     }
 }
