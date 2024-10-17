@@ -1607,7 +1607,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("PropDisp", "pnc");
 
-            entity.Property(e => e.IdProDisp).ValueGeneratedNever();
             entity.Property(e => e.Pddescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
