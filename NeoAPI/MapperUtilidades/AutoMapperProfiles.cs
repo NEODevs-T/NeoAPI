@@ -58,9 +58,11 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<TiParTpDTO, TiParTp>().ReverseMap();
 
-            CreateMap<CambStatDTO, CambStat>().ReverseMap();
+            CreateMap<CambStat, CambStatDTO>()
+                .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
 
-            CreateMap<CambFecDTO, CambFec>().ReverseMap();
+            CreateMap<CambFecDTO, CambFec>().ReverseMap()
+                .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation));
 
             CreateMap<ReuDiumDTO, ReuDium>().ReverseMap();
 
@@ -122,22 +124,18 @@ namespace NeoAPI.AutoMapper
             CreateMap<Master, EquipoEamDTO>()
                 .ForMember(dest => dest.IdEmpresa, act => act.MapFrom(src => src.IdEmpresa));
 
-            CreateMap<CambFec, CambFecDTO>()
-                .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation));
-
-            CreateMap<CambStat, CambStatDTO>()
-                .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation));
+                
+            CreateMap<ReuDium, ReuDiumDTO>()
+                .ForMember(dest => dest.Responsable, act => act.MapFrom(src => src.IdResReuNavigation.Rrnombre))
+                .ForMember(dest => dest.IdPais, act => act.MapFrom(src => src.IdMasterNavigation.IdPais))
+                .ForMember(dest => dest.ksfNom, act => act.MapFrom(src => src.IdksfNavigation.KsfNombre))
+                .ReverseMap();
 
             CreateMap<AsistenReu, AsistenReuDTO>()
                 .ForMember(dest => dest.Cargo, act => act.MapFrom(src => src.IdCargoRNavigation));
 
             CreateMap<MaestraV, LineaVDTO>()
                 .ForMember(dest => dest.IdCentro, act => act.MapFrom(src => src.IdCentro));
-
-            CreateMap<ReuDium, ReuDiumDTO>()
-                .ForMember(dest => dest.Responsable, act => act.MapFrom(src => src.IdResReuNavigation.Rrnombre))
-                .ForMember(dest => dest.IdPais, act => act.MapFrom(src => src.IdMasterNavigation.IdPais))
-                .ForMember(dest => dest.ksfNom, act => act.MapFrom(src => src.IdksfNavigation.KsfNombre));
 
             CreateMap<Models.PolybaseBPCSVen.Fso, OrdenFabricacionDTO>()
                 .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
