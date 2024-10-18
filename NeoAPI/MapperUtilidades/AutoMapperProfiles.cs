@@ -60,10 +60,10 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<CambStat, CambStatDTO>()
                 .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
-
+                
             CreateMap<CambFec, CambFecDTO>()
                 .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
-
+            
             CreateMap<ReuDiumDTO, ReuDium>().ReverseMap();
 
             CreateMap<CentrosVDTO, CentrosV>().ReverseMap();

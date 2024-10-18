@@ -614,20 +614,60 @@ public class DbReunionServiceController : ControllerBase
     [HttpPost("AddRegistros")]
     public async Task<ActionResult<bool>> InsertarRegistros(RegistroCambiosDTO registroCambios)
     {
-        CambFec cambiofec = _mapper.Map<CambFec>(registroCambios.Data);
-        CambStat cambioEstado = _mapper.Map<CambStat>(registroCambios.Data2);
-        _neocontext.CambStats.Add(cambioEstado);
-        _neocontext.CambFecs.Add(cambiofec);
+        if (registroCambios == null)
+        {
+            return BadRequest("El objeto RegistroCambiosDTO no puede ser nulo.");
+        }
 
-        //     //_neocontext.CambStats.Add(data2);
+        CambFec cambiofec;
+        CambStat cambioEstado;
 
-        return Ok(await _neocontext.SaveChangesAsync() > 0);
+        try
+        {
+            cambiofec = _mapper.Map<CambFec>(registroCambios.Data);
+            cambioEstado = _mapper.Map<CambStat>(registroCambios.Data2);
+        }
+        catch (AutoMapperMappingException ex)
+        {
+            return StatusCode(500, $"Error al mapear los datos: {ex.Message}");
+        }
+
+        if (cambiofec.IdReuDiaNavigation == null || cambioEstado.IdReuDiaNavigation == null)
+        {
+            return BadRequest("Las propiedades de navegación IdReuDiaNavigation no pueden ser nulas.");
+        }
+
+        cambiofec.IdReuDiaNavigation.IdksfNavigation = null;
+        cambiofec.IdReuDiaNavigation.IdMasterNavigation = null;
+        cambiofec.IdReuDiaNavigation.IdResReuNavigation = null;
+
+        cambioEstado.IdReuDiaNavigation.IdksfNavigation = null;
+        cambioEstado.IdReuDiaNavigation.IdMasterNavigation = null;
+        cambioEstado.IdReuDiaNavigation.IdResReuNavigation = null;
+
+        try
+        {
+            _neocontext.CambStats.Add(cambioEstado);
+            _neocontext.CambFecs.Add(cambiofec);
+            bool result = await _neocontext.SaveChangesAsync() > 0;
+
+            return Ok(result);
+        }
+        catch (DbUpdateException ex)
+        {
+            return StatusCode(500, $"Error al guardar en la base de datos: {ex.Message}");
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error desconocido: {ex.Message}");
+        }
     }
 
-//TODO: ARREGLOS DE IMPLEMENTACION
+
+    //TODO: ARREGLOS DE IMPLEMENTACION
 
     [HttpGet("GetCentroDivi/{centro}/{division}/{tipo:int}")]
-        public async Task<ActionResult<CentroDivisionDTO>> GetCentroDivi(string centro, string division, int tipo)
+    public async Task<ActionResult<CentroDivisionDTO>> GetCentroDivi(string centro, string division, int tipo)
     {
         CentroDivisionDTO CD = new CentroDivisionDTO();
 

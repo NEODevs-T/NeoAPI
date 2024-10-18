@@ -49,9 +49,9 @@ public partial class ReuDium
 
     public virtual ICollection<CambStat> CambStats { get; set; } = new List<CambStat>();
 
-    public virtual Master? IdMasterNavigation { get; set; }
+    public virtual Master? IdMasterNavigation { get; set; } = null!;
 
-    public virtual RespoReu IdResReuNavigation { get; set; } = null!;
+    public virtual RespoReu? IdResReuNavigation { get; set; } = null!;
 
-    public virtual Ksf IdksfNavigation { get; set; } = null!;
+    public virtual Ksf? IdksfNavigation { get; set; } = null!;
 }
