@@ -395,7 +395,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("CaUnidad", "pnc");
 
-            entity.Property(e => e.IdCaUnidad).ValueGeneratedNever();
             entity.Property(e => e.Udescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -506,7 +505,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Causa", "pnc");
 
-            entity.Property(e => e.IdCausa).ValueGeneratedNever();
             entity.Property(e => e.Cdescri)
                 .HasMaxLength(500)
                 .IsUnicode(false)
@@ -529,7 +527,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Causante", "pnc");
 
-            entity.Property(e => e.IdCausante).ValueGeneratedNever();
             entity.Property(e => e.Cdescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -695,7 +692,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("DispDefi", "pnc");
 
-            entity.Property(e => e.IdDisDefi).ValueGeneratedNever();
             entity.Property(e => e.Dddescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -858,7 +854,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Estado", "pnc");
 
-            entity.Property(e => e.IdEstado).ValueGeneratedNever();
             entity.Property(e => e.Edescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -943,7 +938,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Identifi", "pnc");
 
-            entity.Property(e => e.IdIdentif).ValueGeneratedNever();
             entity.Property(e => e.Idescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -2101,7 +2095,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Tipo", "pnc");
 
-            entity.Property(e => e.IdTipo).ValueGeneratedNever();
             entity.Property(e => e.Tdescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
