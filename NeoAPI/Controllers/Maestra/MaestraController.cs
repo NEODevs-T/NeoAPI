@@ -7,6 +7,7 @@ using NeoAPI.Models.Neo;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NeoAPI.DTOs.ReunionDiaria;
 using Microsoft.Data.SqlClient;
+using NeoAPI.Logic.GetCentroDiv;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -314,5 +315,252 @@ namespace NeoAPI.Controllers.Maestras
             List<EquipoEam> data = await this._context.EquipoEams.Where(e => e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
             return Ok(_mapper.Map<List<EquipoEamDTO>>(data));
         }
+
+        // Metodos para la reunion  
+
+        [HttpGet("GetBdDiv/{cent}")]
+        public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisionPorCentro(string cent)
+        {
+            List<DivisionesV> divisiones = new List<DivisionesV> { };
+            string cen = "";
+            int idcentro = 0;
+
+            if (cent.Length > 3)
+            {
+                cen = cent.Substring(0, 3);
+                if (cen == "All")
+                {
+                    if (int.TryParse(cent.Substring(3), out idcentro))
+                    {
+                        divisiones = await _context.DivisionesVs
+                            .Where(c => c.IdCentro == idcentro)
+                            .ToListAsync();
+                    }
+                    else
+                    {
+                        return BadRequest("El formato del parámetro 'cent' es incorrecto. No se pudo extraer el ID de la empresa.");
+                    }
+                }
+            }
+            else
+            {
+                if (int.TryParse(cent, out int divisionid))
+                {
+                    divisiones = await _context.DivisionesVs
+                        .Where(c => c.IdDivision == divisionid)
+                        .ToListAsync();
+                }
+                else
+                {
+                    return BadRequest("El formato del parámetro 'cent' es incorrecto.");
+                }
+            }
+
+            return Ok(_mapper.Map<List<DivisionesVDTO>>(divisiones));
+        }
+
+        [HttpGet("GetEquiposPorCentro/{cent}")]
+        public async Task<ActionResult<List<EquipoEamDTO>>> GetEquiposEAM(string cent)
+        {
+            List<EquipoEam> result = new List<EquipoEam>();
+            string cen = "";
+            int idempresa = 0;
+
+            if (cent.Length > 3)
+            {
+                cen = cent.Substring(0, 3);
+                if (cen == "All")
+                {
+                    if (int.TryParse(cent.Substring(3), out idempresa))
+                    {
+                        result = await _context.EquipoEams
+                            .Where(c => c.EestaEam == true && c.IdLineaNavigation.Master.IdEmpresa == idempresa)
+                            .ToListAsync();
+                    }
+                    else
+                    {
+                        return BadRequest("El formato del parámetro 'cent' es incorrecto. No se pudo extraer el ID de la empresa.");
+                    }
+                }
+            }
+            else
+            {
+                if (int.TryParse(cent, out int centroid))
+                {
+                    result = await _context.EquipoEams
+                        .Where(c => c.IdLineaNavigation.Master.IdCentro == centroid)
+                        .ToListAsync();
+                }
+                else
+                {
+                    return BadRequest("El formato del parámetro 'cent' es incorrecto.");
+                }
+
+            }
+
+            return _mapper.Map<List<EquipoEamDTO>>(result);
+        }
+
+
+        [HttpGet("GetEquiposEAMPorLinea/{Centro}")]
+        public async Task<ActionResult<List<MaestraVDTO>>> EquiposLineaEAM(string Centro)
+        {
+            List<MaestraV> data = new List<MaestraV> { };
+
+
+            data = await _context.MaestraVs
+            .Where(x => x.Centro == Centro)
+            .Where(x => x.IdEmpresa == x.IdEmpresa)
+            .ToListAsync();
+
+            return Ok(_mapper.Map<List<MaestraVDTO>>(data));
+        }
+
+
+
+        // linea
+
+
+        [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]
+        public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
+        {
+            CentroDivisionDTO CD = new CentroDivisionDTO();
+            ReuClass ReuBuild = new ReuClass(_context);
+
+            if (tipo == 0)
+            {
+                // Validar si 'division' puede convertirse a un entero
+                if (!int.TryParse(division, out int divisionId))
+                {
+                    return BadRequest("El valor de la división no es un número válido.");
+                }
+
+                // Ejecutar la consulta para el tipo 0
+                var centrodiscrepancia = await _context.Masters
+                    .Include(c => c.IdCentroNavigation)
+                    .Include(d => d.IdDivisionNavigation)
+                    .Where(d => d.IdDivision == divisionId)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+
+                // Verificar si la consulta devolvió resultados
+                if (centrodiscrepancia == null)
+                {
+                    return NotFound("No se encontró el centro o división especificados.");
+                }
+
+                // Verificar si las propiedades de navegación también son válidas
+                if (centrodiscrepancia.IdCentroNavigation == null || centrodiscrepancia.IdDivisionNavigation == null)
+                {
+                    return NotFound("Datos incompletos en las propiedades de navegación (Centro o División no encontrados).");
+                }
+
+                // Construir el DTO
+                CD = ReuBuild.BuildCentroDivisionDTO(centrodiscrepancia);
+            }
+            else if (tipo == 1)
+            {
+                // Ejecutar la consulta para el tipo 1
+                var centrodiscrepancia = await _context.Masters
+                    .Include(c => c.IdCentroNavigation)
+                    .Include(d => d.IdDivisionNavigation)
+                    .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+
+                // Verificar si la consulta devolvió resultados
+                if (centrodiscrepancia == null)
+                {
+                    return NotFound("No se encontró el centro o división especificados.");
+                }
+
+                // Verificar si las propiedades de navegación también son válidas
+                if (centrodiscrepancia.IdCentroNavigation == null || centrodiscrepancia.IdDivisionNavigation == null)
+                {
+                    return NotFound("Datos incompletos en las propiedades de navegación (Centro o División no encontrados).");
+                }
+
+                // Construir el DTO
+                CD = ReuBuild.BuildCentroDivisionDTO(centrodiscrepancia);
+            }
+
+            return Ok(CD);
+        }
+
+        [HttpGet("GetCentroDivi/{centro}/{division}/{tipo:int}")]
+        public async Task<ActionResult<CentroDivisionDTO>> GetCentroDivi(string centro, string division, int tipo)
+        {
+            CentroDivisionDTO CD = new CentroDivisionDTO();
+            Master? centrodiscrepancia = new Master();
+
+            if (tipo == 0)
+            {
+                int divisionInt;
+                if (!int.TryParse(division, out divisionInt))
+                {
+                    throw new FormatException("El valor de 'division' no es un número válido.");
+                }
+
+                centrodiscrepancia = await _context.Masters
+                    .Include(c => c.IdCentroNavigation)
+                    .Include(d => d.IdDivisionNavigation)  // Asegúrate de incluir también IdDivisionNavigation
+                    .Where(d => d.IdDivision == divisionInt)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+
+                if (centrodiscrepancia == null)
+                {
+                    throw new NullReferenceException("No se encontró ninguna coincidencia para el centro o división proporcionados.");
+                }
+
+                // Verificar que las propiedades de navegación no sean nulas
+                if (centrodiscrepancia.IdCentroNavigation == null)
+                {
+                    throw new NullReferenceException("La propiedad 'IdCentroNavigation' es nula.");
+                }
+                if (centrodiscrepancia.IdDivisionNavigation == null)
+                {
+                    throw new NullReferenceException("La propiedad 'IdDivisionNavigation' es nula.");
+                }
+
+                CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+                CD.IdDivision = centrodiscrepancia.IdDivision;
+                CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+                CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
+            }
+            else if (tipo == 1)
+            {
+                centrodiscrepancia = await _context.Masters
+                    .Include(c => c.IdCentroNavigation)
+                    .Include(d => d.IdDivisionNavigation)  // Asegúrate de incluir también IdDivisionNavigation
+                    .Where(d => d.IdDivisionNavigation.Dnombre == division && d.IdCentroNavigation.Cnom == centro)
+                    .AsNoTracking()
+                    .FirstOrDefaultAsync();
+
+                if (centrodiscrepancia == null)
+                {
+                    throw new NullReferenceException("No se encontró ninguna coincidencia para el centro o división proporcionados.");
+                }
+
+                // Verificar que las propiedades de navegación no sean nulas
+                if (centrodiscrepancia.IdCentroNavigation == null)
+                {
+                    throw new NullReferenceException("La propiedad 'IdCentroNavigation' es nula.");
+                }
+                if (centrodiscrepancia.IdDivisionNavigation == null)
+                {
+                    throw new NullReferenceException("La propiedad 'IdDivisionNavigation' es nula.");
+                }
+
+                CD.IdCentro = centrodiscrepancia.IdCentroNavigation.IdCentro;
+                CD.IdDivision = centrodiscrepancia.IdDivision;
+                CD.Cnom = centrodiscrepancia.IdCentroNavigation.Cnom;
+                CD.Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre;
+            }
+
+
+            return Ok(CD);
+        }
     }
+
 }
