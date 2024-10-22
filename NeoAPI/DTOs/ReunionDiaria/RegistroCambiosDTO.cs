@@ -4,6 +4,6 @@ namespace NeoAPI.DTOs.ReunionDiaria;
 
 public class RegistroCambiosDTO
 {
-    public CambFecDTO Data { get; set; }
-    public CambStatDTO Data2 { get; set; }
+    public CambFecDTO? cambFecDTO { get; set; }
+    public CambStatDTO? cambStatDTO { get; set; }
 }

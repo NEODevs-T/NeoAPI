@@ -1,9 +1,9 @@
-﻿using System;
+using System;
 using System.Collections.Generic;
 
 namespace NeoAPI.Models.Neo;
 
-public partial class ReuDium
+public partial class ReuDiaVDTO
 {
     public int IdReuDia { get; set; }
 
@@ -45,13 +45,9 @@ public partial class ReuDium
 
     public DateTime? RdfecCrea { get; set; }
 
-    public virtual ICollection<CambFec> CambFecs { get; set; } = new List<CambFec>();
+    public string Rrnombre { get; set; } = null!;
 
-    public virtual ICollection<CambStat> CambStats { get; set; } = new List<CambStat>();
+    public string KsfNombre { get; set; } = null!;
 
-    public virtual Master? IdMasterNavigation { get; set; }
-
-    public virtual RespoReu IdResReuNavigation { get; set; } = null!;
-
-    public virtual Ksf IdksfNavigation { get; set; } = null!;
+    public int IdPais { get; set; }
 }

@@ -739,8 +739,8 @@ public class AvisadorController : ControllerBase
 
         try
         {
-            cambiofec = _mapper.Map<CambFec>(registroCambios.Data);
-            cambioEstado = _mapper.Map<CambStat>(registroCambios.Data2);
+            cambiofec = _mapper.Map<CambFec>(registroCambios.cambFecDTO);
+            cambioEstado = _mapper.Map<CambStat>(registroCambios.cambStatDTO);
         }
         catch (AutoMapperMappingException ex)
         {

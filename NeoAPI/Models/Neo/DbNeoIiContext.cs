@@ -143,6 +143,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Resuman> Resumen { get; set; }
 
+    public virtual DbSet<ReuDiaV> ReuDiaVs { get; set; }
+
     public virtual DbSet<ReuDium> ReuDia { get; set; }
 
     public virtual DbSet<Rol> Rols { get; set; }
@@ -1848,6 +1850,75 @@ public partial class DbNeoIiContext : DbContext
             entity.HasOne(d => d.IdTipSupleNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdTipSuple)
                 .HasConstraintName("FK_Resumen_TipSuple");
+        });
+
+        modelBuilder.Entity<ReuDiaV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ReuDia_V");
+
+            entity.Property(e => e.KsfNombre)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Rdarea)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDArea");
+            entity.Property(e => e.Rdcentro)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDCentro");
+            entity.Property(e => e.RdcodDis)
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .HasColumnName("RDCodDis");
+            entity.Property(e => e.RdcodEq)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDCodEq");
+            entity.Property(e => e.Rddisc)
+                .HasMaxLength(250)
+                .IsUnicode(false)
+                .HasColumnName("RDDisc");
+            entity.Property(e => e.Rddiv)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDDiv");
+            entity.Property(e => e.RdfecCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecCrea");
+            entity.Property(e => e.RdfecReu)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecReu");
+            entity.Property(e => e.RdfecTra)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecTra");
+            entity.Property(e => e.RdnumDis)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDNumDis");
+            entity.Property(e => e.Rdobs)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("RDObs");
+            entity.Property(e => e.Rdodt)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDOdt");
+            entity.Property(e => e.RdplanAcc)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("RDPlanAcc");
+            entity.Property(e => e.Rdstatus)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDStatus");
+            entity.Property(e => e.Rdtiempo).HasColumnName("RDTiempo");
+            entity.Property(e => e.Rrnombre)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RRNombre");
         });
 
         modelBuilder.Entity<ReuDium>(entity =>
