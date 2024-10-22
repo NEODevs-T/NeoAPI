@@ -125,11 +125,6 @@ namespace NeoAPI.AutoMapper
             CreateMap<Master, EquipoEamDTO>()
                 .ForMember(dest => dest.IdEmpresa, act => act.MapFrom(src => src.IdEmpresa));
 
-                
-            // CreateMap<ReuDium, ReuDiumDTO>()
-            //     .ForMember(dest => dest.IdPais, act => act.MapFrom(src => src.IdMasterNavigation.IdPais))
-            //     .ReverseMap();
-
             CreateMap<AsistenReu, AsistenReuDTO>()
                 .ForMember(dest => dest.Cargo, act => act.MapFrom(src => src.IdCargoRNavigation));
 
