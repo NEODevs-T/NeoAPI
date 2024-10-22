@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.Models.Neo;
+namespace  NeoAPI.DTOs.ReunionDiaria;
 
 public partial class ReuDiaVDTO
 {
