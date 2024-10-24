@@ -115,40 +115,46 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         //      javier metodo
-        [HttpGet("GetEquipos/{idCentro}")]
-        public async Task<ActionResult<List<EquipoEamDTO>>> EquiposEAM(string idCentro)
+        [HttpGet("GetEquipos/{cent}")]
+        public async Task<ActionResult<List<EquipoEamDTO>>> EquiposEAM(string cent)
         {
             List<EquipoEam> listaEquipo = new List<EquipoEam>();
 
-            if (idCentro == "All")
-            {
-                listaEquipo = await _context.EquipoEams
-                    .Include(x => x.IdLineaNavigation)
-                    .Where(x => x.EestaEam == true)
-                    .AsNoTracking()
-                    .ToListAsync();
+            string cen = "";
+            int idempresa = 0;
 
-                return Ok(_mapper.Map<List<EquipoEamDTO>>(listaEquipo));
+            if (cent.Length > 3)
+            {
+                cen = cent.Substring(0, 3);
+                if (cen == "All")
+                {
+                    if (int.TryParse(cent.Substring(3), out idempresa))
+                    {
+                        listaEquipo = await _context.EquipoEams
+                            .Where(c => c.EestaEam == true && c.IdLineaNavigation.Master.IdEmpresa == idempresa)
+                            .ToListAsync();
+                    }
+                    else
+                    {
+                        return BadRequest("El formato del parámetro 'cent' es incorrecto. No se pudo extraer el ID de la empresa.");
+                    }
+                }
             }
             else
             {
-                int idcentro = int.Parse(idCentro);
-
-                var result = await _context.Masters
-                    .Where(x => x.IdCentro == idcentro)
-                    .Include(x => x.IdLineaNavigation)
-                    .ThenInclude(x => x.EquipoEams)
-                    .AsNoTracking()
-                    .ToListAsync();
-
-                // TODO: Ver la implentacion de las modificaciones de este metodo
-
-                foreach (var item in result)
+                if (int.TryParse(cent, out int equipoid))
                 {
-                    listaEquipo.AddRange(item.IdLineaNavigation.EquipoEams);
+                    listaEquipo = await _context.EquipoEams
+                        .Where(c => c.IdEquipo == equipoid)
+                        .ToListAsync();
                 }
-                return Ok(_mapper.Map<List<EquipoEamDTO>>(listaEquipo));
+                else
+                {
+                    return BadRequest("El formato del parámetro 'cent' es incorrecto.");
+                }
             }
+
+            return Ok(_mapper.Map<List<EquipoEamDTO>>(listaEquipo));
         }
 
         //TODO: Sujeta a revision
