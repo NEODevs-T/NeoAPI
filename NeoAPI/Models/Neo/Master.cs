@@ -31,6 +31,8 @@ public partial class Master
 
     public virtual ICollection<Nivel> Nivels { get; set; } = new List<Nivel>();
 
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
+
     public virtual ICollection<Rango> Rangos { get; set; } = new List<Rango>();
 
     public virtual ICollection<ReuDium> ReuDia { get; set; } = new List<ReuDium>();

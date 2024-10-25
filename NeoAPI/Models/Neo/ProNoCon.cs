@@ -49,6 +49,8 @@ public partial class ProNoCon
 
     public virtual Estado IdEstadoNavigation { get; set; } = null!;
 
+    public virtual Master? IdIdentif1 { get; set; }
+
     public virtual Identifi? IdIdentifNavigation { get; set; }
 
     public virtual PropDisp IdProDispNavigation { get; set; } = null!;

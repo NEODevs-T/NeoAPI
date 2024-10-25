@@ -314,5 +314,15 @@ namespace NeoAPI.Controllers.Maestras
             List<EquipoEam> data = await this._context.EquipoEams.Where(e => e.IdLinea == idLinea && e.EestaEam).AsNoTracking().ToListAsync();
             return Ok(_mapper.Map<List<EquipoEamDTO>>(data));
         }
+
+
+        [HttpGet("GetempresaporIdPais/{IdPais:int}")] 
+        public async Task<ActionResult<List<MaestraDTO>>> GetempresaporIdPais(int IdPais) 
+        {
+
+            List<MaestraV> data = await this._context.MaestraVs.Where(l => l.IdPais == IdPais) .ToListAsync();
+            return Ok(_mapper.Map<List<MaestraDTO>>(data));
+        }
+
     }
 }
