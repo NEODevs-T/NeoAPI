@@ -38,7 +38,7 @@ public class PizarraController : ControllerBase
 
 
     [HttpGet("GetTrabajosPorCalendario/{pais}/{centro}/{division}")]
-    public async Task<ActionResult<List<ReuDiumDTO>>> GetTrabajosCalendario(string pais, string centro, string division)
+    public async Task<ActionResult<List<CalendarioTrabajoDTO>>> GetTrabajosCalendario(string pais, string centro, string division)
     {
 
         if (division == "All")
@@ -49,7 +49,18 @@ public class PizarraController : ControllerBase
                     .AsNoTracking()
                     .ToListAsync();
 
-            return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
+            var result = list.Select(r => new CalendarioTrabajoDTO 
+            {
+                IdReuDia = r.IdReuDia,
+                RdcodEq = r.RdcodEq,
+                Rddisc = r.Rddisc,
+                Rdodt = r.Rdodt,
+                Rdtiempo = r.Rdtiempo.ToString(),
+                RdfecTra = r.RdfecTra ?? DateTime.Now
+            });
+
+            return Ok(result);
+            // return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
         }
         else
         {
@@ -60,8 +71,18 @@ public class PizarraController : ControllerBase
                     .ToListAsync();
 
 
-            return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
-            // return Ok(result);
+            var result = list.Select(r => new CalendarioTrabajoDTO 
+            {
+                IdReuDia = r.IdReuDia,
+                RdcodEq = r.RdcodEq,
+                Rddisc = r.Rddisc,
+                Rdodt = r.Rdodt,
+                Rdtiempo = r.Rdtiempo.ToString(),
+                RdfecTra = r.RdfecTra ?? DateTime.Now
+            });
+
+            // return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
+            return Ok(result);
         }
     }
 
@@ -459,11 +480,12 @@ public class PizarraController : ControllerBase
         }
     }
 
-    [HttpPut("UpdateDiscrepancia2")]
-    public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d)
+    [HttpPut("UpdateDiscrepancia2/{id:int}")]
+    public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
     {
         if (d?.Rdcentro == null)
         {
+
             return BadRequest("El centro no es válido o no se proporcionó.");
         }
 
@@ -474,6 +496,10 @@ public class PizarraController : ControllerBase
 
             // Mapeo con AutoMapper
             var entity = _mapper.Map<ReuDium>(d);
+
+            entity = await _context.ReuDia
+                .FirstOrDefaultAsync(sh => sh.IdReuDia == id);
+
 
             _context.ReuDia.Update(entity);
             bool isUpdated = await _context.SaveChangesAsync() > 0;
