@@ -93,13 +93,6 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<AsistenReuDTO, AsistenReu>().ReverseMap();
 
-            // CreateMap<Master, MasterDTO>()
-            // .ForMember(dest => dest.Centro, act => act.MapFrom(src => src.IdCentroNavigation))
-            // .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdLineaNavigation))
-            // .ForMember(dest => dest.Division, act => act.MapFrom(src => src.IdDivisionNavigation))
-            // .ReverseMap();
-
-
             CreateMap<Resuman, ResumenGeneralDTO>()
                 .ForMember(dest => dest.Nombre, act => act.MapFrom(src => src.IdPersonalNavigation.PeNombre))
                 .ForMember(dest => dest.Apellido, act => act.MapFrom(src => src.IdPersonalNavigation.PeApellido))
