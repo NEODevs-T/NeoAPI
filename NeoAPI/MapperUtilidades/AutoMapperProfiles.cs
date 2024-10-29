@@ -157,6 +157,7 @@ namespace NeoAPI.AutoMapper
             CreateMap<CaUnidadDTO, CaUnidad>().ReverseMap();
             CreateMap<causaDTO, Causa>().ReverseMap();
             CreateMap<ProNoConDTO, ProNoCon>().ReverseMap();
+            CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
 
 
 

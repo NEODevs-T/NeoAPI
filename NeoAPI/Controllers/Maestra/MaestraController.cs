@@ -411,13 +411,42 @@ namespace NeoAPI.Controllers.Maestras
         [HttpGet("GetEquiposEAMPorLinea/{Centro}")]
         public async Task<ActionResult<List<MaestraVDTO>>> EquiposLineaEAM(string Centro)
         {
-            List<MaestraV> data = new List<MaestraV> { };
+            try
+            {
+                List<MaestraV> data = await _context.MaestraVs
+                    .Where(x => x.Centro == Centro)
+                    .Where(x => x.IdEmpresa == x.IdEmpresa)
+                    .ToListAsync();
+
+                if (data == null || !data.Any())
+                {
+                    return NotFound();
+                }
+
+                // Aquí puedes mapear data a MaestraVDTO si es necesario
+                List<MaestraVDTO> dataDTO = data.Select(x => new MaestraVDTO
+                {
+                    // Asigna las propiedades de MaestraV a MaestraVDTO
+                }).ToList();
+
+                return Ok(dataDTO);
+            }
+            catch (Exception ex)
+            {
+                // Manejo de errores
+                return StatusCode(500, "Internal server error: " + ex.Message);
+            }
+        }
 
 
-            data = await _context.MaestraVs
-            .Where(x => x.Centro == Centro)
-            .Where(x => x.IdEmpresa == x.IdEmpresa)
-            .ToListAsync();
+        
+        [HttpGet("GetempresaporIdPais/{IdPais:int}")] 
+        public async Task<ActionResult<List<MaestraVDTO>>> GetempresaporIdPais(int IdPais) 
+        {
+
+            List<MaestraV> data = await this._context.MaestraVs
+                .Where(l => l.IdPais == IdPais) 
+                .ToListAsync();
 
             return Ok(_mapper.Map<List<MaestraVDTO>>(data));
         }
@@ -494,6 +523,7 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetCentroDivi/{centro}/{division}/{tipo:int}")]
+
         public async Task<ActionResult<CentroDivisionDTO>> GetCentroDivi(string centro, string division, int tipo)
         {
             CentroDivisionDTO CD = new CentroDivisionDTO();
