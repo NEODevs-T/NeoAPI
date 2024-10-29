@@ -17,5 +17,10 @@ public class MasterDTO
 
     public int IdLinea { get; set; }
 
+    public CentroDTO? Centro {get; set;}
+
+    public DivisionDTO? Division {get; set;}
+
+    public LineaDTO? Linea {get; set;}
 
 }

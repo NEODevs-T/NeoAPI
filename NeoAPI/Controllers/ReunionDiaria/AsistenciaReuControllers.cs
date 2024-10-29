@@ -67,7 +67,7 @@ public class AsistenciaReuControllers : ControllerBase
     }
 
     [HttpGet("GetStatsAsis/{cent}/{empresa}/{Fecha_inicio}/{Fecha_Final}")]
-    public async Task<ActionResult<List<AsistenReuDTO>>> GetStatsAsis(string cent, string empresa, string Fecha_inicio, string Fecha_Final)
+    public async Task<ActionResult<List<StatsAsisDto>>> GetStatsAsis(string cent, string empresa, string Fecha_inicio, string Fecha_Final)
     {
 
         string[] fecha1 = Fecha_inicio.Split('-');
@@ -86,13 +86,15 @@ public class AsistenciaReuControllers : ControllerBase
             .GroupBy(x => x.IdCargoRNavigation.Crnombre)
             .ToListAsync();
 
-            var carStDTO = result.Select(a => new CarStDTO
+            var statsAsisDto = result.Select(a => new StatsAsisDto
             {
                 Cargo = a.Key,
                 Asistencias = a.Sum(b => b.ArAsistente)
             });
 
-            return Ok(carStDTO);
+
+            // return Ok(carStDTO);
+            return Ok(statsAsisDto);
         }
 
         else
@@ -103,14 +105,16 @@ public class AsistenciaReuControllers : ControllerBase
             .GroupBy(x => x.IdCargoRNavigation.Crnombre)
             .ToListAsync();
 
-            var carStDTO = result.Select(a => new CarStDTO
+            var statsAsisDto = result.Select(a => new StatsAsisDto
             {
                 Cargo = a.Key,
                 Asistencias = a.Sum(b => b.ArAsistente)
             });
 
 
-            return Ok(carStDTO);
+            // return Ok(carStDTO);
+            return Ok(statsAsisDto);
+
         }
     }
 
