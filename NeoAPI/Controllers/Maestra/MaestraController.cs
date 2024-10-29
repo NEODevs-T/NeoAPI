@@ -93,6 +93,57 @@ namespace NeoAPI.Controllers.Maestras
 
             return Ok(_mapper.Map<List<CentrosVDTO>>(centro));
         }
+        // [HttpGet("GetMaestraG/{cent}")]
+
+        // //TODO: IMPLEMENTACION DE METODO GET MAESTRA Global
+        // public async Task<ActionResult<List<MasterDTO>>> GetMaestraG(string cent)
+        // {
+        //     List<Master> listMaestra = new List<Master> { };
+        //     string cen = "";
+        //     int idempresa = 0;
+
+        //     if (cent.Length > 3)
+        //     {
+        //         cen = cent.Substring(0, 3);
+        //         if (cen == "All")
+        //         {
+        //             if (int.TryParse(cent.Substring(3), out idempresa))
+        //             {
+        //                 listMaestra = await _context.Masters
+        //                     .Where(c => c.IdEmpresaNavigation.Eestado == true && c.IdEmpresa == idempresa)
+        //                     .Include(c => c.IdCentroNavigation)
+        //                     .Include(d => d.IdDivisionNavigation)
+        //                     .Include(l => l.IdLineaNavigation)
+        //                     .ToListAsync();
+
+        //             }
+        //             else
+        //             {
+        //                 return BadRequest("El formato del parámetro 'cent' es incorrecto. No se pudo extraer el ID de la empresa.");
+        //             }
+        //         }
+        //     }
+        //     else
+        //     {
+        //         if (int.TryParse(cent, out int centroid))
+        //         {
+        //             listMaestra = await _context.Masters
+        //                 .Where(c => c.IdCentro == centroid)
+        //                 .Include(c => c.IdCentroNavigation)
+        //                 .Include(d => d.IdDivisionNavigation)
+        //                 .Include(l => l.IdLineaNavigation)
+        //                 .ToListAsync();
+        //         }
+        //         else
+        //         {
+        //             return BadRequest("El formato del parámetro 'cent' es incorrecto.");
+        //         }
+        //     }
+
+        //     return Ok(_mapper.Map<List<MasterDTO>>(listMaestra));
+        // }
+
+        
         [HttpGet("GetAllCentros/")]
         public async Task<ActionResult<List<CentrosVDTO>>> GetAllCentros()
         {
