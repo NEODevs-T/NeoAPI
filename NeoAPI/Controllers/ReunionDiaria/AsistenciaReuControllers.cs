@@ -42,7 +42,7 @@ public class AsistenciaReuControllers : ControllerBase
                     AsistenReu insertar = new AsistenReu();
                     insertar.Ararea = list[i].Ararea;
                     insertar.Arfecha = list[i].Arfecha;
-                    insertar.IdCargoR = list[i].IdCargoR;
+                    insertar.IdCargoR = list[i].Cargo.IdCargoR;
                     insertar.ArAsistente = list[i].ArAsistente;
                     insertar.ArSuplente = list[i].ArSuplente;
                     insertar.Ararea = list[i].Ararea;
