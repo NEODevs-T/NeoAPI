@@ -26,9 +26,6 @@ namespace NeoAPI.Controllers.Maestras
     public class GlobalController : ControllerBase
     {
         private readonly DOCIngContext _DOCIng;
-        private readonly PolybaseBPCSVenContext _PolybaseBPCSVen;
-        private readonly PolybaseBPCSColContext _PolybaseBPCSVCol;
-        private readonly PolybaseBPCSCenContext _PolybaseBPCSVCen;
         private readonly IMapper _mapper;
         private readonly DbNeoIiContext _context;
         private readonly DbSPIContext _SPI;
@@ -39,9 +36,6 @@ namespace NeoAPI.Controllers.Maestras
         public GlobalController(DOCIngContext DOCIng, PolybaseBPCSVenContext polybaseBPCSVen, PolybaseBPCSColContext polybaseBPCSVCol, PolybaseBPCSCenContext polybaseBPCSVCen, IMapper mapper, DbNeoIiContext DbNeo,DbSPIContext SPI)
         {
             _DOCIng = DOCIng;
-            _PolybaseBPCSVen = polybaseBPCSVen;
-            _PolybaseBPCSVCol = polybaseBPCSVCol;
-            _PolybaseBPCSVCen = polybaseBPCSVCen;
             _mapper = mapper;
             _context = DbNeo;
             _SPI = SPI;
@@ -234,92 +228,7 @@ namespace NeoAPI.Controllers.Maestras
                     return Ok(_mapper.Map<RotaCalidumDTO>(rotaCalidum));
                 }
         }
-        //TODO: Hacer metodos para otros paises
-
-        [HttpGet("GetProductosActuales/{idLinea:int}")]
-        public async Task<ActionResult<List<OrdenFabricacionDTO>>> GetProductosActuales(int idLinea)
-        {
-            int idEmpresa;
-            int CentroTrabajo;
-            const string OrdenesAbiertas = "5";
-            MaestraV? maestra;
-            List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
-            OrdenFabricacionDTO ordenFabricacionDTO;
-
-            maestra = await _context.MaestraVs.Where(m => m.IdLinea == idLinea).FirstOrDefaultAsync();
-
-            if (maestra == null)
-            {
-                return BadRequest();
-            }
-
-            idEmpresa = maestra.IdEmpresa;
-            CentroTrabajo = Int32.Parse(maestra.CentroDeTrabajo ?? "0");
-            
-            var result = from Fso in _PolybaseBPCSVen.Fsos
-                        join Iim in _PolybaseBPCSVen.Iims
-                        on Fso.Sprod equals Iim.Iprod
-                        where Fso.Swrkc == CentroTrabajo && Fso.Sstat.Contains(OrdenesAbiertas)
-                        select new { Fso.Sprod, Fso.Sstat, Iim.Idesc };
-
-            foreach (var item in result)
-            {
-                ordenFabricacionDTO = new OrdenFabricacionDTO();
-                ordenFabricacionDTO.Status = item.Sstat;
-                ordenFabricacionDTO.DescProducto = item.Idesc.Trim();
-                ordenFabricacionDTO.CodProducto = item.Sprod.Trim();
-                ordenesFabricacionDTOList.Add(ordenFabricacionDTO);
-            }
-
-            ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
-
-            return ordenesFabricacionDTOList;
-        }
-        //TODO: Hacer metodos para otros paises
-
-        [HttpGet("GetProductosActualesPorCentroDeTrabajoVen/{centroTrabajo}")]
-        public ActionResult<List<OrdenFabricacionDTO>> GetProductosActualesPorCentroDeTrabajoVen(string centroTrabajo)
-        {
-            int centroTrabajoInt;
-            const string OrdenesAbiertas = "5";
-            List<OrdenFabricacionDTO> ordenesFabricacionDTOList = new List<OrdenFabricacionDTO>();
-            OrdenFabricacionDTO ordenFabricacionDTO;
-
-            centroTrabajoInt = Int32.Parse(centroTrabajo);
-
-            var result = from Fso in _PolybaseBPCSVen.Fsos
-                        join Iim in _PolybaseBPCSVen.Iims
-                        on Fso.Sprod equals Iim.Iprod
-                        where Fso.Swrkc == centroTrabajoInt && Fso.Sstat.Contains(OrdenesAbiertas)
-                        select new { Fso.Sprod, Fso.Sstat, Iim.Idesc };
-
-            foreach (var item in result)
-            {
-                ordenFabricacionDTO = new OrdenFabricacionDTO();
-                ordenFabricacionDTO.Status = item.Sstat;
-                ordenFabricacionDTO.DescProducto = item.Idesc.Trim();
-                ordenFabricacionDTO.CodProducto = item.Sprod.Trim();
-                ordenesFabricacionDTOList.Add(ordenFabricacionDTO);
-            }
-
-            ordenesFabricacionDTOList = ordenesFabricacionDTOList.GroupBy(f => f.CodProducto).Select(f => f.First()).ToList();
-
-            return ordenesFabricacionDTOList;
-        }
-
-        [HttpGet("GetNombreProductoPorCodigoVen/{codigo}")]
-        public string GetNombreProductoPorCodigoVen(string codigo)
-        {
-            string producto = "";
-            var result = from Iim in _PolybaseBPCSVen.Iims
-                        where Iim.Iprod == codigo
-                        select new { Iim.Iprod, Iim.Idesc };
-            foreach (var item in result)
-            {
-                producto = item.Idesc;
-            }
-            return producto;
-        }
+        
 
         [HttpGet("GetPersonalPorFicha/{ficha}")]
 
