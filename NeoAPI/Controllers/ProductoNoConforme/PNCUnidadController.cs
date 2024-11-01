@@ -27,9 +27,6 @@ public class PNCCaUnidadController : ControllerBase
             _mapper = mapper;       
         }
 
-
-
-
         [HttpGet("GetTodosLasUnidades")]
         public async Task<List<CaUnidadDTO>> ObtenerTodosLasUnidades()
         {
