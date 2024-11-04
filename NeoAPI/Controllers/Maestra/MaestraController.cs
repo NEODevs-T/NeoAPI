@@ -6,7 +6,9 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Data.SqlClient;
-using NeoAPI.Logic.GetCentroDiv;
+using NeoAPI.Logic.ReunionDia;
+using NeoAPI.Logic.Global;
+using NeoAPI.Interface;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -461,7 +463,7 @@ namespace NeoAPI.Controllers.Maestras
         public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
         {
             CentroDivisionDTO CD = new CentroDivisionDTO();
-            ReuClass ReuBuild = new ReuClass(_context);
+            IReunionDiaLogic ReuBuild = new ReunionDiaLogic(_context);
 
             if (tipo == 0)
             {

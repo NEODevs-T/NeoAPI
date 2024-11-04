@@ -11,7 +11,7 @@ using NeoAPI.Models.Neo;
 using NeoAPI.Models.SPI;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Interface;
-using NeoAPI.Logic;
+using NeoAPI.Logic.Global;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using NeoAPI.DTOs.Global;

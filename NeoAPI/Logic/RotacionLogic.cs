@@ -3,7 +3,7 @@ using NeoAPI.Interface;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models;
 
-namespace NeoAPI.Logic
+namespace NeoAPI.Logic.Global
 {
     public class RotacionLogic : IRotacionLogic
     {

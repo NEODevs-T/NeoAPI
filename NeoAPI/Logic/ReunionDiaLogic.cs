@@ -2,15 +2,16 @@
 using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
+using NeoAPI.Interface;
 
-namespace NeoAPI.Logic.GetCentroDiv;
+namespace NeoAPI.Logic.ReunionDia;
 
-public class ReuClass : ControllerBase
+public class ReunionDiaLogic : IReunionDiaLogic
 {
     public Master? centrodiscrepancia { get; set; } = new Master();
     private readonly DbNeoIiContext _neocontext;
 
-    public ReuClass(DbNeoIiContext DbNeo)
+    public ReunionDiaLogic(DbNeoIiContext DbNeo)
     {
         _neocontext = DbNeo;
     }

@@ -7,7 +7,8 @@ using NeoAPI.Models.Neo;
 using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
-using NeoAPI.Logic.GetCentroDiv;
+using NeoAPI.Logic.ReunionDia;
+using NeoAPI.Interface;
 
 
 namespace NeoAPI.Controllers.Pizarra;
@@ -92,7 +93,7 @@ public class PizarraController : ControllerBase
     {
 
 
-        ReuClass getDiv = new ReuClass(_context);
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         List<ReuDium> reudiatablas = new List<ReuDium>();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
@@ -269,7 +270,7 @@ public class PizarraController : ControllerBase
     [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}")]
     public async Task<ActionResult<List<ReuDiumDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
     {
-        ReuClass getDiv = new ReuClass(_context);
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         //Consultar nombre del centro y division  para insertarlos
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
@@ -300,7 +301,7 @@ public class PizarraController : ControllerBase
 
 
         //Consultar nombre del centro y division  para insertarlos
-        ReuClass getDiv = new ReuClass(_context);
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
         List<ReuDium> reudiatablas;
@@ -430,7 +431,7 @@ public class PizarraController : ControllerBase
             if (d.Rdcentro is not null)
             {
                 // Consultar nombre del centro y división para retornar el id en pendientes
-                ReuClass getDiv = new ReuClass(_context);
+                IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
                 CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
 
                 if (centrodiv == null)
@@ -492,7 +493,7 @@ public class PizarraController : ControllerBase
 
         try
         {
-            ReuClass getDiv = new ReuClass(_context);
+            IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
             CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
 
             // Mapeo con AutoMapper
