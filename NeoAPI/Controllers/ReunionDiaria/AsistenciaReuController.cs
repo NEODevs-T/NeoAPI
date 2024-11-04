@@ -10,13 +10,13 @@ using NeoAPI.Logic.GetCentroDiv;
 namespace NeoAPI.Controllers.AsistenciaReuControllers;
 [ApiController]
 [Route("api/[controller]")]
-public class AsistenciaReuControllers : ControllerBase
+public class AsistenciaReuController : ControllerBase
 {
 
     private readonly DbNeoIiContext _context;
     private readonly IMapper _mapper;
 
-    public AsistenciaReuControllers(DbNeoIiContext context, IMapper mapper)
+    public AsistenciaReuController(DbNeoIiContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

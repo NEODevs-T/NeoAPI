@@ -14,12 +14,12 @@ namespace NeoAPI.Controllers.CargoReuControllers;
 [ApiController]
 [Route("api/[controller]")]
 
-public class CargoReuControllers: ControllerBase
+public class CargoReuController: ControllerBase
 {
     private readonly DbNeoIiContext _context;
     private readonly IMapper _mapper;
 
-    public CargoReuControllers(DbNeoIiContext context, IMapper mapper)
+    public CargoReuController(DbNeoIiContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;

@@ -14,13 +14,13 @@ namespace NeoAPI.Controllers.Avisador;
 [ApiController]
 [Route("api/[controller]")]
 
-public class KsfControllers : ControllerBase
+public class KsfController : ControllerBase
 {
 
     private readonly DbNeoIiContext _context;
     private readonly IMapper _mapper;
 
-    public KsfControllers(DbNeoIiContext context, IMapper mapper)
+    public KsfController(DbNeoIiContext context, IMapper mapper)
     {
         _context = context;
         _mapper = mapper;
