@@ -5,7 +5,6 @@ using AutoMapper;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
-using NeoAPI.DTOs.ReunionDiaria;
 using Microsoft.Data.SqlClient;
 using NeoAPI.Logic.GetCentroDiv;
 
@@ -195,7 +194,7 @@ namespace NeoAPI.Controllers.Maestras
         //TODO: Revisar implentacion
 
         [HttpPost("AddEquipo")]
-        public async Task<ActionResult<string>> AddEquipo(EquipoDTO equipo)
+        public async Task<ActionResult<string>> AddEquipo(EquipoEamDTO equipo)
         {
             if (equipo.IdEquipo == 0)
             {

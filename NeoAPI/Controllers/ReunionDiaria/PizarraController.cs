@@ -5,6 +5,7 @@ using System.Text.Json;
 using AutoMapper;
 using NeoAPI.Models.Neo;
 using NeoAPI.DTOs.LibroNovedades;
+using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Logic.GetCentroDiv;
 

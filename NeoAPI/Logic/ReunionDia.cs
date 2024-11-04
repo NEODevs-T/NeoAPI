@@ -1,6 +1,6 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
-using NeoAPI.DTOs.ReunionDiaria;
+using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
 
 namespace NeoAPI.Logic.GetCentroDiv;

@@ -14,14 +14,13 @@ public class EquipoEamDTO
 
     public string EnombreEam { get; set; } = null!;
 
-    public string? EdescriEam { get; set; }
+    public string? EdescriEam { get; set; } = null;
 
     public bool EestaEam { get; set; }
 
     public DateTime Efecha { get; set; }
 
-    public LineaDTO Linea { get; set; }
+    public LineaDTO? Linea { get; set; } = null;
 
-    public int? IdEmpresa { get; set; } 
-
+    public int? IdEmpresa { get; set; } = null;
 }

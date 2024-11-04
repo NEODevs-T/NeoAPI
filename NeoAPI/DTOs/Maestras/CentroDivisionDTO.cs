@@ -1,6 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 
-namespace NeoAPI.DTOs.ReunionDiaria;
+namespace NeoAPI.DTOs.Maestra;
 
     public class CentroDivisionDTO
     {
