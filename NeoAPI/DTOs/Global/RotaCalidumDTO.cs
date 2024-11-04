@@ -1,7 +1,7 @@
 using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.DTOs.GlobalCo;
+namespace NeoAPI.DTOs.Global;
 
 public partial class RotaCalidumDTO
 {

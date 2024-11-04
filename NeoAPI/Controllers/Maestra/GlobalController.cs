@@ -14,7 +14,7 @@ using NeoAPI.Interface;
 using NeoAPI.Logic;
 using Microsoft.Data.SqlClient;
 using Microsoft.AspNetCore.Mvc.Rendering;
-using NeoAPI.DTOs.GlobalCo;
+using NeoAPI.DTOs.Global;
 using Microsoft.Identity.Client;
 
 namespace NeoAPI.Controllers.Maestras

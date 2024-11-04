@@ -3,6 +3,7 @@ using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Bonificaciones;
 using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.BPSC;
+using NeoAPI.DTOs.Global;
 using NeoAPI.Models.Neo;
 using NeoAPI.Models.PolybaseBPCSVen;
 using NeoAPI.Models.PolybaseBPCSCol;
@@ -11,6 +12,7 @@ using System.Collections.Generic;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.PNC;
+using NeoAPI.ModelsDOCIng;
 
 
 namespace NeoAPI.AutoMapper
@@ -146,7 +148,7 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
                 .ReverseMap();
 
-
+            CreateMap<RotaCalidumDTO, RotaCalidum>().ReverseMap();
             //Producto No Conforme //
 
             CreateMap<IdentifDTO, Identifi>().ReverseMap();
@@ -160,7 +162,7 @@ namespace NeoAPI.AutoMapper
             CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
 
 
-
+    
 
             // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()
             //     .ConvertUsing(src => src.Select(pai => _mapper.Map<PaiDTO>(pai)));
