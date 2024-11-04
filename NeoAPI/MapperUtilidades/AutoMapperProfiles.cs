@@ -19,6 +19,7 @@ namespace NeoAPI.AutoMapper
 {
     public class AutoMapperProfiles : Profile
     {
+        //TODO: Reordenar el MAPEO por grupos de DTO
 
         public AutoMapperProfiles()
         {
