@@ -93,34 +93,25 @@ public class AvisadorController : ControllerBase
 
         CambFec cambiofec;
         CambStat cambioEstado;
+        ReuDium regiReudia;
 
-        try
-        {
-            cambiofec = _mapper.Map<CambFec>(registroCambios.cambFecDTO);
-            cambioEstado = _mapper.Map<CambStat>(registroCambios.cambStatDTO);
-        }
-        catch (AutoMapperMappingException ex)
-        {
-            return StatusCode(500, $"Error al mapear los datos: {ex.Message}");
-        }
+        registroCambios.cambFecDTO.IdReuDia = registroCambios.regisReudia.IdReuDia;
+        registroCambios.cambStatDTO.IdReuDia = registroCambios.regisReudia.IdReuDia;
 
-        if (cambiofec.IdReuDiaNavigation == null || cambioEstado.IdReuDiaNavigation == null)
-        {
-            return BadRequest("Las propiedades de navegación IdReuDiaNavigation no pueden ser nulas.");
-        }
+        cambiofec = _mapper.Map<CambFec>(registroCambios.cambFecDTO);
+        cambioEstado = _mapper.Map<CambStat>(registroCambios.cambStatDTO);
+        regiReudia = _mapper.Map<ReuDium>(registroCambios.regisReudia);
 
-        cambiofec.IdReuDiaNavigation.IdksfNavigation = null;
-        cambiofec.IdReuDiaNavigation.IdMasterNavigation = null;
-        cambiofec.IdReuDiaNavigation.IdResReuNavigation = null;
+        regiReudia.IdksfNavigation = null;
+        regiReudia.IdMasterNavigation = null;
+        regiReudia.IdResReuNavigation = null;
 
-        cambioEstado.IdReuDiaNavigation.IdksfNavigation = null;
-        cambioEstado.IdReuDiaNavigation.IdMasterNavigation = null;
-        cambioEstado.IdReuDiaNavigation.IdResReuNavigation = null;
-
+        
         try
         {
             _context.CambStats.Add(cambioEstado);
             _context.CambFecs.Add(cambiofec);
+            _context.ReuDia.Add(regiReudia);
             bool result = await _context.SaveChangesAsync() > 0;
 
             return Ok(result);
@@ -134,5 +125,58 @@ public class AvisadorController : ControllerBase
             return StatusCode(500, $"Error desconocido: {ex.Message}");
         }
     }
+    // //Insertar discrepancia con chismoso
+    // [HttpPost("AddRegistrosCambios")]
+    // public async Task<ActionResult<bool>> InsertarRegistros(RegistroCambiosDTO registroCambios)
+    // {
+    //     if (registroCambios == null)
+    //     {
+    //         return BadRequest("El objeto RegistroCambiosDTO no puede ser nulo.");
+    //     }
+
+    //     CambFec cambiofec;
+    //     CambStat cambioEstado;
+    //     ReuDium regiReudia;
+
+    //     try
+    //     {
+    //         cambiofec = _mapper.Map<CambFec>(registroCambios.cambFecDTO);
+    //         cambioEstado = _mapper.Map<CambStat>(registroCambios.cambStatDTO);
+    //     }
+    //     catch (AutoMapperMappingException ex)
+    //     {
+    //         return StatusCode(500, $"Error al mapear los datos: {ex.Message}");
+    //     }
+
+    //     if (cambiofec.IdReuDiaNavigation == null || cambioEstado.IdReuDiaNavigation == null)
+    //     {
+    //         return BadRequest("Las propiedades de navegación IdReuDiaNavigation no pueden ser nulas.");
+    //     }
+
+    //     cambiofec.IdReuDiaNavigation.IdksfNavigation = null;
+    //     cambiofec.IdReuDiaNavigation.IdMasterNavigation = null;
+    //     cambiofec.IdReuDiaNavigation.IdResReuNavigation = null;
+
+    //     cambioEstado.IdReuDiaNavigation.IdksfNavigation = null;
+    //     cambioEstado.IdReuDiaNavigation.IdMasterNavigation = null;
+    //     cambioEstado.IdReuDiaNavigation.IdResReuNavigation = null;
+
+    //     try
+    //     {
+    //         _context.CambStats.Add(cambioEstado);
+    //         _context.CambFecs.Add(cambiofec);
+    //         bool result = await _context.SaveChangesAsync() > 0;
+
+    //         return Ok(result);
+    //     }
+    //     catch (DbUpdateException ex)
+    //     {
+    //         return StatusCode(500, $"Error al guardar en la base de datos: {ex.Message}");
+    //     }
+    //     catch (Exception ex)
+    //     {
+    //         return StatusCode(500, $"Error desconocido: {ex.Message}");
+    //     }
+    // }
 
 }

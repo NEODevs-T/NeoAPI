@@ -160,7 +160,6 @@ namespace NeoAPI.Controllers.Maestras
             return Ok(_mapper.Map<List<EquipoEamDTO>>(listaEquipo));
         }
 
-        //TODO: Sujeta a revision
         [HttpGet("GetEquiposPorLinea/{linea}")]
         public async Task<ActionResult<List<EquipoEamDTO>>> EquiposEAMxLinea(string linea)
         {
@@ -193,7 +192,6 @@ namespace NeoAPI.Controllers.Maestras
             return Ok(_mapper.Map<LineaVDTO>(data));
         }
 
-        //TODO: Revisar implentacion
 
         [HttpPost("AddEquipo")]
         public async Task<ActionResult<string>> AddEquipo(EquipoEamDTO equipo)
