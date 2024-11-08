@@ -94,24 +94,24 @@ public class AvisadorController : ControllerBase
         CambFec cambiofec;
         CambStat cambioEstado;
         ReuDium regiReudia;
-
-        registroCambios.cambFecDTO.IdReuDia = registroCambios.regisReudia.IdReuDia;
-        registroCambios.cambStatDTO.IdReuDia = registroCambios.regisReudia.IdReuDia;
-
-        cambiofec = _mapper.Map<CambFec>(registroCambios.cambFecDTO);
-        cambioEstado = _mapper.Map<CambStat>(registroCambios.cambStatDTO);
         regiReudia = _mapper.Map<ReuDium>(registroCambios.regisReudia);
 
         regiReudia.IdksfNavigation = null;
         regiReudia.IdMasterNavigation = null;
-        regiReudia.IdResReuNavigation = null;
+        regiReudia.IdResReuNavigation = null;   
+
+
+        cambiofec = _mapper.Map<CambFec>(registroCambios.cambFecDTO);
+        cambioEstado = _mapper.Map<CambStat>(registroCambios.cambStatDTO);
+
+        cambiofec.IdReuDiaNavigation = regiReudia;
+        cambioEstado.IdReuDiaNavigation = regiReudia;
 
         
         try
         {
             _context.CambStats.Add(cambioEstado);
             _context.CambFecs.Add(cambiofec);
-            _context.ReuDia.Add(regiReudia);
             bool result = await _context.SaveChangesAsync() > 0;
 
             return Ok(result);
