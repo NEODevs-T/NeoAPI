@@ -11,5 +11,7 @@ public partial class ClasifiTpm
 
     public bool Ctpmestado { get; set; }
 
+    public string Ctpmenglis { get; set; } = null!;
+
     public virtual ICollection<LibroNove> LibroNoves { get; set; } = new List<LibroNove>();
 }
