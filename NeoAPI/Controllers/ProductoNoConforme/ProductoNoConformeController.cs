@@ -62,21 +62,21 @@ namespace NeoAPI.Controllers.PNC
         }
 
         [HttpGet("GetProductoNoConformePorFecha/{Fecha}")]
-        public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformePorFecha(DateTime Fecha)
+        public async Task<List<NeoAPI.Models.Neo.ProductoNoConformeV>> ObtenerProductoNoConformePorFecha(DateTime Fecha)
         {
 
-            return await this._cotext.ProNoCons.Where(p => p.Pncfecha == Fecha).ToListAsync();
+            return await this._cotext.ProductoNoConformeVs.Where(p => p.Fecha == Fecha).ToListAsync();
         }
 
         [HttpGet("GetProductoNoConformeEntreFechas/{fechaInicio}/{fechaFinal}")]
-        public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformeEntreFechas(DateTime fechaInicio, DateTime fechaFinal)
+        public async Task<List<NeoAPI.Models.Neo.ProductoNoConformeV>> ObtenerProductoNoConformeEntreFechas(DateTime fechaInicio, DateTime fechaFinal)
         {
 
-            return await this._cotext.ProNoCons.Where(p => p.Pncfecha >= fechaInicio && p.Pncfecha <= fechaFinal).ToListAsync();
+            return await this._cotext.ProductoNoConformeVs.Where(p => p.Fecha >= fechaInicio && p.Fecha <= fechaFinal).ToListAsync();
         }
 
         [HttpGet("GetProductoNoConformePorFiltro/{fechaInicio}/{fechaFinal}")]
-        public async Task<List<NeoAPI.Models.Neo.ProNoCon>> ObtenerProductoNoConformePorFiltro(DateTime fechaInicio, DateTime fechaFinal)
+        public async Task<List<NeoAPI.Models.Neo.ProductoNoConformeV>> ObtenerProductoNoConformePorFiltro(DateTime fechaInicio, DateTime fechaFinal)
         {
             if (fechaInicio.Date == fechaFinal.Date)
             {
