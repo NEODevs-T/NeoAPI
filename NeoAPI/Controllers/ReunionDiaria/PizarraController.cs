@@ -114,7 +114,7 @@ public class PizarraController : ControllerBase
 
                 reudiatablas = await _context.ReuDia
                 //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2)))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
@@ -126,7 +126,7 @@ public class PizarraController : ControllerBase
 
                 reudiatablas = await _context.ReuDia
                 //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1 && a.RdfecReu <= f2)))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.Date && a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
@@ -320,7 +320,7 @@ public class PizarraController : ControllerBase
             if (estado == "Total Pendiente")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecTra >= f1 & a.RdfecTra <= f2)))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -331,7 +331,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Todo")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -340,7 +340,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Pendiente-Responsable")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -349,7 +349,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Vencidos")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.RdfecTra < DateTime.Now.Date))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -360,7 +360,7 @@ public class PizarraController : ControllerBase
             {
                 reudiatablas = await _context.ReuDia
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecTra >= f1 & a.RdfecTra <= f2))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -372,7 +372,7 @@ public class PizarraController : ControllerBase
             if (estado == "Total Pendiente")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -382,7 +382,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Todo")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -391,7 +391,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Pendiente-Responsable")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -400,7 +400,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Vencidos")
             {
                 reudiatablas = await _context.ReuDia
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2) && (a.RdfecTra < DateTime.Now.Date))
+                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -410,7 +410,7 @@ public class PizarraController : ControllerBase
             {
                 reudiatablas = await _context.ReuDia
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecReu >= f1 & a.RdfecReu <= f2))
+                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
