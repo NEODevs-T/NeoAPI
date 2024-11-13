@@ -42,12 +42,6 @@ public class ProNoConDTO
 
     public int IdCausa { get; set; }
 
-
-
-
-
-
-
     public string NombreTipo  { get; set; } = null!;
 
     public string Lugarnombre { get; set; } = null!;

@@ -160,9 +160,8 @@ namespace NeoAPI.AutoMapper
             CreateMap<CaUnidadDTO, CaUnidad>().ReverseMap();
             CreateMap<causaDTO, Causa>().ReverseMap();
             CreateMap<ProNoConDTO, ProNoCon>().ReverseMap()
-
             .ForMember(dest => dest.NombreTipo, act => act.MapFrom(src => src.IdTipoNavigation.Tnombre))
-            .ForMember(dest => dest.Lugarnombre, act => act.MapFrom(src => src.IdLugaEvenNavigation.Lnom))
+            .ForMember(dest => dest.Lugarnombre, act => act.MapFrom(src => src.IdLugaEvenNavigation.IdLineaNavigation.Lnom))
             .ForMember(dest => dest.Causantenombre, act => act.MapFrom(src => src.IdCausaNavigation.IdCausanteNavigation.Cnombre))
             .ForMember(dest => dest.UnidadNombre, act => act.MapFrom(src => src.IdCaUnidadNavigation.Unombre))
             .ForMember(dest => dest.IdentifidNombre, act => act.MapFrom(src => src.IdIdentifNavigation.Inombre))
@@ -170,12 +169,9 @@ namespace NeoAPI.AutoMapper
             .ForMember(dest => dest.DisDefiNombre, act => act.MapFrom(src => src.IdDisDefiNavigation.Ddnombre))
             .ForMember(dest => dest.Causanombre, act => act.MapFrom(src => src.IdCausaNavigation.Cnombre))
             .ReverseMap();
-
-
             CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
 
 
-    
 
             // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()
             //     .ConvertUsing(src => src.Select(pai => _mapper.Map<PaiDTO>(pai)));
