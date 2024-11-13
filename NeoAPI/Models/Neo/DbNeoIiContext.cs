@@ -1548,9 +1548,10 @@ public partial class DbNeoIiContext : DbContext
                 .HasForeignKey(d => d.IdIdentif)
                 .HasConstraintName("FK_ProNoCon_Identifi");
 
-            entity.HasOne(d => d.IdIdentif1).WithMany(p => p.ProNoCons)
-                .HasForeignKey(d => d.IdIdentif)
-                .HasConstraintName("FK_ProNoCon_Master");
+            entity.HasOne(d => d.IdLugaEvenNavigation).WithMany(p => p.ProNoCons)
+                .HasForeignKey(d => d.IdLugaEven)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProNoCon_Master1");
 
             entity.HasOne(d => d.IdProDispNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdProDisp)

@@ -42,5 +42,20 @@ public class ProNoConDTO
 
     public int IdCausa { get; set; }
 
+    public string NombreTipo  { get; set; } = null!;
 
-}
+    public string Lugarnombre { get; set; } = null!;
+
+    public string Causantenombre { get; set; } = null!;
+
+    public string UnidadNombre { get; set; } = null!;
+    
+    public string IdentifidNombre { get; set; } = null!;
+
+    public string ProDisNombre { get; set; } = null!;
+
+    public string DisDefiNombre { get; set; } = null!;
+
+    public string Causanombre { get; set; } = null!;
+
+}   
