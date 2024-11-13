@@ -125,6 +125,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Producto> Productos { get; set; }
 
+    public virtual DbSet<ProductoNoConformeV> ProductoNoConformeVs { get; set; }
+
     public virtual DbSet<ProductosV> ProductosVs { get; set; }
 
     public virtual DbSet<PropDisp> PropDisps { get; set; }
@@ -617,6 +619,10 @@ public partial class DbNeoIiContext : DbContext
             entity.ToTable("ClasifiTPM", "lib");
 
             entity.Property(e => e.IdCtpm).HasColumnName("IdCTPM");
+            entity.Property(e => e.Ctpmenglis)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CTPMEnglis");
             entity.Property(e => e.Ctpmestado).HasColumnName("CTPMEstado");
             entity.Property(e => e.Ctpmnom)
                 .HasMaxLength(50)
@@ -807,7 +813,7 @@ public partial class DbNeoIiContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("EFecha");
             entity.Property(e => e.EnombreEam)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("ENombreEAM");
 
@@ -1013,6 +1019,9 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("KSF", "reu");
 
+            entity.Property(e => e.KsfEnglish)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.KsfNombre)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -1583,6 +1592,71 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_Producto_TipoProd");
         });
 
+        modelBuilder.Entity<ProductoNoConformeV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ProductoNoConforme_V");
+
+            entity.Property(e => e.AlternativaPropuestoDeDisposicion)
+                .HasMaxLength(80)
+                .IsUnicode(false)
+                .HasColumnName("Alternativa Propuesto De Disposicion");
+            entity.Property(e => e.CausaDeLiberación)
+                .IsUnicode(false)
+                .HasColumnName("Causa de Liberación");
+            entity.Property(e => e.Causante)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CodigoDeProducto)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Codigo de Producto");
+            entity.Property(e => e.DescripcionDeProducto)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("Descripcion de Producto");
+            entity.Property(e => e.DisposicionDefinitiva)
+                .HasMaxLength(80)
+                .IsUnicode(false)
+                .HasColumnName("Disposicion Definitiva");
+            entity.Property(e => e.Estado)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.FichaDelCargador)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Ficha del Cargador");
+            entity.Property(e => e.Identificacion)
+                .HasMaxLength(80)
+                .IsUnicode(false);
+            entity.Property(e => e.IndicacionDeLiberacion)
+                .IsUnicode(false)
+                .HasColumnName("Indicacion de Liberacion");
+            entity.Property(e => e.Lote)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.LugarEvento)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Lugar Evento");
+            entity.Property(e => e.NoConformidad)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("No Conformidad");
+            entity.Property(e => e.OrdenDeFabricacion)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Orden de Fabricacion");
+            entity.Property(e => e.Tipo)
+                .HasMaxLength(80)
+                .IsUnicode(false);
+            entity.Property(e => e.Unidad)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<ProductosV>(entity =>
         {
             entity
@@ -1795,6 +1869,10 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("RRDesc");
+            entity.Property(e => e.Rrenglish)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RREnglish");
             entity.Property(e => e.Rresta).HasColumnName("RREsta");
             entity.Property(e => e.Rrnombre)
                 .HasMaxLength(50)

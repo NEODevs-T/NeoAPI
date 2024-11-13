@@ -3,7 +3,6 @@ using System.Collections.Generic;
 
 namespace NeoAPI.Models.Neo;
 
-
 public partial class ReuDiaV
 {
     public int IdReuDia { get; set; }
