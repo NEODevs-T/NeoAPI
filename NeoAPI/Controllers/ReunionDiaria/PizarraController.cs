@@ -482,38 +482,72 @@ public class PizarraController : ControllerBase
         }
     }
 
-    [HttpPut("UpdateDiscrepancia2/{id:int}")]
-    public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
+    // [HttpPut("UpdateDiscrepancia2/{id:int}")]
+    // public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
+    // {
+    //     if (d?.Rdcentro == null)
+    //     {
+
+    //         return BadRequest("El centro no es válido o no se proporcionó.");
+    //     }
+
+    //     try
+    //     {
+    //         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+    //         CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
+
+    //         // Mapeo con AutoMapper
+    //         var entity = _mapper.Map<ReuDium>(d);
+
+    //         entity = await _context.ReuDia
+    //             .FirstOrDefaultAsync(sh => sh.IdReuDia == id);
+
+
+    //         _context.ReuDia.Update(entity);
+    //         bool isUpdated = await _context.SaveChangesAsync() > 0;
+
+    //         return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
+    //     }
+    //     catch (Exception ex)
+    //     {
+
+    //         return StatusCode(500, $"Ocurrió un error en el servidor: {ex.Message}");
+    //     }
+    // }
+
+[HttpPut("UpdateDiscrepancia2/{id:int}")]
+public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
+{
+    if (d?.Rdcentro == null)
     {
-        if (d?.Rdcentro == null)
-        {
-
-            return BadRequest("El centro no es válido o no se proporcionó.");
-        }
-
-        try
-        {
-            IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-            CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
-
-            // Mapeo con AutoMapper
-            var entity = _mapper.Map<ReuDium>(d);
-
-            entity = await _context.ReuDia
-                .FirstOrDefaultAsync(sh => sh.IdReuDia == id);
-
-
-            _context.ReuDia.Update(entity);
-            bool isUpdated = await _context.SaveChangesAsync() > 0;
-
-            return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
-        }
-        catch (Exception ex)
-        {
-
-            return StatusCode(500, $"Ocurrió un error en el servidor: {ex.Message}");
-        }
+        return BadRequest("El centro no es válido o no se proporcionó.");
     }
+
+    try
+    {
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+        CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
+
+        // Cargar la entidad desde la base de datos
+        var entity = await _context.ReuDia.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
+        if (entity == null)
+        {
+            return NotFound("La entidad no fue encontrada.");
+        }
+
+        // Mapeo de los cambios de d a la entidad cargada
+        _mapper.Map(d, entity);
+
+        // Guardar los cambios sin usar Update
+        bool isUpdated = await _context.SaveChangesAsync() > 0;
+
+        return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
+    }
+    catch (Exception ex)
+    {
+        return StatusCode(500, $"Ocurrió un error en el servidor: {ex.Message}");
+    }
+}
 
        //obtener discrepancia a editar
     [HttpGet("GetDiscrepantacia/{id:int}")]
