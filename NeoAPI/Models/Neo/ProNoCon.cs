@@ -56,4 +56,23 @@ public partial class ProNoCon
     public virtual PropDisp IdProDispNavigation { get; set; } = null!;
 
     public virtual Tipo IdTipoNavigation { get; set; } = null!;
+
+    
+
+    
+    public string NombreTipo { get; set; } = null!;
+
+    public string Lugarnombre { get; set; } = null!;
+
+    public string Causantenombre { get; set; } = null!;
+
+    public string UnidadNombre { get; set; } = null!;
+    
+    public string IdentifidNombre { get; set; } = null!;
+
+    public string ProDisNombre { get; set; } = null!;
+
+    public string DisDefiNombre { get; set; } = null!;
+
+    public string Causanombre { get; set; } = null!;
 }

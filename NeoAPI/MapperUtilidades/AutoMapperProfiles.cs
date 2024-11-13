@@ -159,7 +159,19 @@ namespace NeoAPI.AutoMapper
             CreateMap<ProDispDTO, PropDisp>().ReverseMap();
             CreateMap<CaUnidadDTO, CaUnidad>().ReverseMap();
             CreateMap<causaDTO, Causa>().ReverseMap();
-            CreateMap<ProNoConDTO, ProNoCon>().ReverseMap();
+            CreateMap<ProNoConDTO, ProNoCon>().ReverseMap()
+
+            .ForMember(dest => dest.NombreTipo, act => act.MapFrom(src => src.IdTipoNavigation.Tnombre))
+            .ForMember(dest => dest.Lugarnombre, act => act.MapFrom(src => src.IdLugaEvenNavigation.Lnom))
+            .ForMember(dest => dest.Causantenombre, act => act.MapFrom(src => src.IdCausaNavigation.IdCausanteNavigation.Cnombre))
+            .ForMember(dest => dest.UnidadNombre, act => act.MapFrom(src => src.IdCaUnidadNavigation.Unombre))
+            .ForMember(dest => dest.IdentifidNombre, act => act.MapFrom(src => src.IdIdentifNavigation.Inombre))
+            .ForMember(dest => dest.ProDisNombre, act => act.MapFrom(src => src.IdProDispNavigation.Pdnombre))
+            .ForMember(dest => dest.DisDefiNombre, act => act.MapFrom(src => src.IdDisDefiNavigation.Ddnombre))
+            .ForMember(dest => dest.Causanombre, act => act.MapFrom(src => src.IdCausaNavigation.Cnombre))
+            .ReverseMap();
+
+
             CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
 
 
