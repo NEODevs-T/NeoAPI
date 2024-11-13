@@ -114,6 +114,30 @@ namespace NeoAPI.Controllers.PNC
                 return null;
             }
             return _mapper.Map<ProNoConDTO>(reg);
+
+
+
         }
+
+
+        // [HttpGet("ObtenerProductoNoConformeConTodaLaDataDePruebadeLosNavigation/{idRegistro}")]
+        // public async Task<ProNoConDTO?> ObtenerProductoNoConformeConTodaLaDataDePruebadeLosNavigation(int idRegistro)
+        // {
+        //     var reg = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idRegistro).Include(p => p.IdTipoNavigation).Include(p => p.IdCaUnidadNavigation)
+        //     .Include(p => p.IdIdentifNavigation).Include(p => p.IdProDispNavigation).Include(p => p.IdDisDefiNavigation)
+        //     .Include(p => p.IdCausaNavigation).Include(c => c.IdLugaEvenNavigation.IdLineaNavigation).Include(p => p.IdCausaNavigation.IdCausanteNavigation).FirstOrDefaultAsync();
+
+        //     if (reg == null)
+        //     {
+        //         return null;
+        //     }
+        //     return _mapper.Map<ProNoConDTO>(reg);
+
+
+     //   }
+
+
+
+    
     }
 }
