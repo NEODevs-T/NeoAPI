@@ -105,9 +105,9 @@ namespace NeoAPI.Controllers.PNC
         [HttpGet("GetProductoNoConformeConTodaLaData/{idRegistro}")]
         public async Task<ProNoConDTO?> ObtenerProductoNoConformeConTodaLaData(int idRegistro)
         {
-            var reg = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idRegistro).Include(p => p.IdDisDefiNavigation).Include(p => p.IdEstadoNavigation)
-            .Include(p => p.IdIdentifNavigation).Include(p => p.IdProDispNavigation).Include(p => p.IdTipoNavigation)
-            .Include(p => p.IdCausaNavigation).ThenInclude(c => c.IdCausanteNavigation).FirstOrDefaultAsync();
+            var reg = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idRegistro).Include(p => p.IdTipoNavigation).Include(p => p.IdCaUnidadNavigation)
+            .Include(p => p.IdIdentifNavigation).Include(p => p.IdProDispNavigation).Include(p => p.IdDisDefiNavigation)
+            .Include(p => p.IdCausaNavigation).Include(c => c.IdLugaEvenNavigation.IdLineaNavigation).Include(p => p.IdCausaNavigation.IdCausanteNavigation).FirstOrDefaultAsync();
 
             if (reg == null)
             {
