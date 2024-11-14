@@ -122,6 +122,11 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdMasterNavigation.IdLineaNavigation.Lnom))
                 .ForMember(dest => dest.AreaCarga, act => act.MapFrom(src => src.IdAreaCarNavigation.Acnombre));
 
+            CreateMap<ReuDium, ReuDiumDTO>()            
+                .ForMember(dest => dest.Ksf, act => act.MapFrom(src => src.IdksfNavigation.KsfNombre))
+                .ForMember(dest => dest.Responsable, act => act.MapFrom(src => src.IdResReuNavigation.Rrnombre))
+                .ForMember(dest => dest.IdPais, act => act.MapFrom(src => src.IdMasterNavigation.IdPais));
+
             CreateMap<EquipoEam, EquipoEamDTO>()
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdLineaNavigation));
 

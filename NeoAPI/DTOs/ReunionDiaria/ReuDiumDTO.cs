@@ -45,4 +45,10 @@ public partial class ReuDiumDTO
 
     public DateTime? RdfecCrea { get; set; }
 
+    public string? Ksf {get; set; }
+    
+    public string? Responsable {get; set; }
+
+    public int? IdPais {get; set; }
+
 }
