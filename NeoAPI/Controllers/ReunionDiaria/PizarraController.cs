@@ -9,6 +9,7 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Logic.ReunionDia;
 using NeoAPI.Interface;
+using NeoAPI.DTOs.PNC;
 
 
 namespace NeoAPI.Controllers.Pizarra;
@@ -516,9 +517,12 @@ public class PizarraController : ControllerBase
     // }
 
 [HttpPut("UpdateDiscrepancia2/{id:int}")]
-public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
+public async Task<ActionResult<bool>> UpdateDiscrepancia2(RegistroCambiosDTO d, int id)
 {
-    if (d?.Rdcentro == null)
+    CambFec cambF  = new CambFec();
+    CambStat cambS = new CambStat();
+
+    if (d.regisReudia?.Rdcentro == null)
     {
         return BadRequest("El centro no es válido o no se proporcionó.");
     }
@@ -526,17 +530,25 @@ public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
     try
     {
         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-        CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.Rdcentro, d.Rddiv, 1);
+        CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.regisReudia.Rdcentro, d.regisReudia.Rddiv, 1);
 
         // Cargar la entidad desde la base de datos
-        var entity = await _context.ReuDia.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
+        ReuDium? entity = await _context.ReuDia.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
         if (entity == null)
         {
             return NotFound("La entidad no fue encontrada.");
         }
 
         // Mapeo de los cambios de d a la entidad cargada
-        _mapper.Map(d, entity);
+        _mapper.Map(d.regisReudia, entity);
+        _mapper.Map(d.cambFecDTO, cambF);
+        _mapper.Map(d.cambStatDTO, cambS);
+
+
+        cambF.IdReuDia = entity.IdReuDia;
+        cambS.IdReuDia = entity.IdReuDia;
+        cambF.IdReuDiaNavigation = null;
+        cambS.IdReuDiaNavigation = null;
 
         // Guardar los cambios sin usar Update
         bool isUpdated = await _context.SaveChangesAsync() > 0;
