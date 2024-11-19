@@ -519,18 +519,13 @@ public class PizarraController : ControllerBase
 [HttpPut("UpdateDiscrepancia2/{id:int}")]
 public async Task<ActionResult<bool>> UpdateDiscrepancia2(RegistroCambiosDTO d, int id)
 {
-    CambFec cambF  = new CambFec();
-    CambStat cambS = new CambStat();
+        CambFec cambF  = new CambFec();
+        CambStat cambS = new CambStat();
 
-    if (d.regisReudia?.Rdcentro == null)
-    {
-        return BadRequest("El centro no es válido o no se proporcionó.");
-    }
-
-    try
-    {
-        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-        CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(d.regisReudia.Rdcentro, d.regisReudia.Rddiv, 1);
+        if (d.regisReudia?.Rdcentro == null)
+        {
+            return BadRequest("El centro no es válido o no se proporcionó.");
+        }
 
         // Cargar la entidad desde la base de datos
         ReuDium? entity = await _context.ReuDia.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
@@ -539,10 +534,14 @@ public async Task<ActionResult<bool>> UpdateDiscrepancia2(RegistroCambiosDTO d, 
             return NotFound("La entidad no fue encontrada.");
         }
 
+        //Asignacion de Id
+        d.cambFecDTO.IdReuDia = d.regisReudia.IdReuDia;
+        d.cambStatDTO.IdReuDia = d.regisReudia.IdReuDia;
+
         // Mapeo de los cambios de d a la entidad cargada
         _mapper.Map(d.regisReudia, entity);
-        _mapper.Map(d.cambFecDTO, cambF);
-        _mapper.Map(d.cambStatDTO, cambS);
+        cambF = _mapper.Map<CambFec>(d.cambFecDTO);
+        cambS = _mapper.Map<CambStat>(d.cambStatDTO);
 
 
         cambF.IdReuDia = entity.IdReuDia;
@@ -553,12 +552,7 @@ public async Task<ActionResult<bool>> UpdateDiscrepancia2(RegistroCambiosDTO d, 
         // Guardar los cambios sin usar Update
         bool isUpdated = await _context.SaveChangesAsync() > 0;
 
-        return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
-    }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Ocurrió un error en el servidor: {ex.Message}");
-    }
+        return isUpdated;
 }
 
        //obtener discrepancia a editar
