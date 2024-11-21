@@ -41,19 +41,19 @@ public partial class ProNoCon
 
     public int IdCausa { get; set; }
 
-    public virtual CaUnidad IdCaUnidadNavigation { get; set; } = null!;
+    public virtual CaUnidad? IdCaUnidadNavigation { get; set; } = null!;
 
-    public virtual Causa IdCausaNavigation { get; set; } = null!;
+    public virtual Causa? IdCausaNavigation { get; set; } = null!;
 
-    public virtual DispDefi IdDisDefiNavigation { get; set; } = null!;
+    public virtual DispDefi? IdDisDefiNavigation { get; set; } = null!;
 
-    public virtual Estado IdEstadoNavigation { get; set; } = null!;
+    public virtual Estado? IdEstadoNavigation { get; set; } = null!;
 
-    public virtual Identifi? IdIdentifNavigation { get; set; }
+    public virtual Identifi? IdIdentifNavigation { get; set; } = null!;
 
-    public virtual Master IdLugaEvenNavigation { get; set; } = null!;
+    public virtual Master? IdLugaEvenNavigation { get; set; } = null!;
 
-    public virtual PropDisp IdProDispNavigation { get; set; } = null!;
+    public virtual PropDisp? IdProDispNavigation { get; set; } = null!;
 
-    public virtual Tipo IdTipoNavigation { get; set; } = null!;
+    public virtual Tipo? IdTipoNavigation { get; set; } = null!;
 }

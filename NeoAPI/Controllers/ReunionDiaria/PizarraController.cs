@@ -482,7 +482,7 @@ public class PizarraController : ControllerBase
         }
     }
 
-
+//TODO:Arreglos al ultimo commit
 [HttpPut("UpdateDiscrepancia2/{id:int}")]
 public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
 {
