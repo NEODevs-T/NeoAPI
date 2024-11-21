@@ -29,6 +29,15 @@ namespace NeoAPI.Controllers.PNC
         public async Task<bool> AddProductoNoConforme(ProNoConDTO registro)
         {
             var entidad1 = _mapper.Map<ProNoCon>(registro);
+            entidad1.IdCaUnidadNavigation = null;
+            entidad1.IdCausaNavigation = null;
+            entidad1.IdDisDefiNavigation = null;
+            entidad1.IdEstadoNavigation = null;
+            entidad1.IdIdentifNavigation = null;
+            entidad1.IdLugaEvenNavigation = null;
+            entidad1.IdProDispNavigation = null;
+            entidad1.IdTipoNavigation = null;
+
             this._cotext.ProNoCons.Add(entidad1);
             return await _cotext.SaveChangesAsync() > 0;
         }
