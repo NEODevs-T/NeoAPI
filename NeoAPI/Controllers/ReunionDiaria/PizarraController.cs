@@ -9,7 +9,6 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Logic.ReunionDia;
 using NeoAPI.Interface;
-using NeoAPI.DTOs.PNC;
 
 
 namespace NeoAPI.Controllers.Pizarra;
@@ -483,46 +482,30 @@ public class PizarraController : ControllerBase
         }
     }
 
-
+//TODO:Arreglos al ultimo commit
 [HttpPut("UpdateDiscrepancia2/{id:int}")]
-public async Task<ActionResult<bool>> UpdateDiscrepancia2(RegistroCambiosDTO d, int id)
+public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
 {
-        CambFec cambF  = new CambFec();
-        CambStat cambS = new CambStat();
-
-        if (d.regisReudia?.Rdcentro == null)
+        if (d?.Rdcentro == null)
         {
             return BadRequest("El centro no es válido o no se proporcionó.");
         }
-
         // Cargar la entidad desde la base de datos
-        ReuDium? entity = await _context.ReuDia.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
+        var entity = await _context.ReuDia.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
         if (entity == null)
         {
             return NotFound("La entidad no fue encontrada.");
         }
 
-        //Asignacion de Id
-        d.cambFecDTO.IdReuDia = d.regisReudia.IdReuDia;
-        d.cambStatDTO.IdReuDia = d.regisReudia.IdReuDia;
-
         // Mapeo de los cambios de d a la entidad cargada
-        _mapper.Map(d.regisReudia, entity);
-        cambF = _mapper.Map<CambFec>(d.cambFecDTO);
-        cambS = _mapper.Map<CambStat>(d.cambStatDTO);
-
-
-        cambF.IdReuDia = entity.IdReuDia;
-        cambS.IdReuDia = entity.IdReuDia;
-        cambF.IdReuDiaNavigation = null;
-        cambS.IdReuDiaNavigation = null;
+        _mapper.Map(d, entity);
 
         // Guardar los cambios sin usar Update
         bool isUpdated = await _context.SaveChangesAsync() > 0;
 
-        return isUpdated;
+        return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
+    
 }
-
        //obtener discrepancia a editar
     [HttpGet("GetDiscrepantacia/{id:int}")]
     public async Task<ActionResult<ReuDiumDTO>> GetDiscrepantacia(int id)
