@@ -25,7 +25,7 @@ namespace NeoAPI.Controllers.PNC
             _mapper = mapper;
         }
 
-        [HttpPost("AddProductoNoConforme/{registro}")]
+        [HttpPost("AddProductoNoConforme")]
         public async Task<bool> AddProductoNoConforme(ProNoConDTO registro)
         {
             var entidad1 = _mapper.Map<ProNoCon>(registro);
@@ -42,7 +42,7 @@ namespace NeoAPI.Controllers.PNC
             return await _cotext.SaveChangesAsync() > 0;
         }
 
-        [HttpPut("PutActualizarProductoNoConforme/{idProNoCon}/{registro}")]
+        [HttpPut("PutActualizarProductoNoConforme/{idProNoCon}")]
         public async Task<bool> ActualizarProductoNoConforme(int idProNoCon, ProNoConDTO registro)
         {
             ProNoCon? data = await this._cotext.ProNoCons.Where(p => p.IdProNoCon == idProNoCon).FirstOrDefaultAsync();
