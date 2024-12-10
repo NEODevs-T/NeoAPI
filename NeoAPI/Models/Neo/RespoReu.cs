@@ -15,5 +15,5 @@ public partial class RespoReu
 
     public string Rrenglish { get; set; } = null!;
 
-    public virtual ICollection<ReuDium> ReuDia { get; set; } = new List<ReuDium>();
+    public virtual ICollection<Reunion> Reunions { get; set; } = new List<Reunion>();
 }

@@ -43,6 +43,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Causa> Causas { get; set; }
 
+    public virtual DbSet<CausaCal> CausaCals { get; set; }
+
     public virtual DbSet<Causante> Causantes { get; set; }
 
     public virtual DbSet<Centro> Centros { get; set; }
@@ -78,6 +80,8 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<Estado> Estados { get; set; }
 
     public virtual DbSet<Estandar> Estandars { get; set; }
+
+    public virtual DbSet<FechaProg> FechaProgs { get; set; }
 
     public virtual DbSet<GeneralGbV> GeneralGbVs { get; set; }
 
@@ -147,7 +151,7 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<ReuDiaV> ReuDiaVs { get; set; }
 
-    public virtual DbSet<ReuDium> ReuDia { get; set; }
+    public virtual DbSet<Reunion> Reunions { get; set; }
 
     public virtual DbSet<Rol> Rols { get; set; }
 
@@ -162,6 +166,8 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<TieParTp> TieParTps { get; set; }
 
     public virtual DbSet<TipIncen> TipIncens { get; set; }
+
+    public virtual DbSet<TipReu> TipReus { get; set; }
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
@@ -523,6 +529,31 @@ public partial class DbNeoIiContext : DbContext
                 .HasForeignKey(d => d.IdCausante)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Causa_Causante");
+        });
+
+        modelBuilder.Entity<CausaCal>(entity =>
+        {
+            entity.HasKey(e => e.IdCausaCal);
+
+            entity.ToTable("CausaCal", "reu");
+
+            entity.Property(e => e.IdCausaCal).HasColumnName("idCausaCal");
+            entity.Property(e => e.Ccdescri)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("CCDescri");
+            entity.Property(e => e.Ccenglish)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CCEnglish");
+            entity.Property(e => e.Ccestado).HasColumnName("CCEstado");
+            entity.Property(e => e.Ccfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("CCFecha");
+            entity.Property(e => e.Ccnombre)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CCNombre");
         });
 
         modelBuilder.Entity<Causante>(entity =>
@@ -893,6 +924,33 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("ENombre");
+        });
+
+        modelBuilder.Entity<FechaProg>(entity =>
+        {
+            entity.HasKey(e => e.IdFechaPr);
+
+            entity.ToTable("FechaProg", "reu");
+
+            entity.Property(e => e.Fpcrea)
+                .HasColumnType("datetime")
+                .HasColumnName("FPCrea");
+            entity.Property(e => e.Fpdesc)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("FPDesc");
+            entity.Property(e => e.Fpestado).HasColumnName("FPEstado");
+            entity.Property(e => e.Fpmodic)
+                .HasColumnType("datetime")
+                .HasColumnName("FPModic");
+            entity.Property(e => e.Fpprogra)
+                .HasColumnType("datetime")
+                .HasColumnName("FPProgra");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.FechaProgs)
+                .HasForeignKey(d => d.IdMaster)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FechaProg_Master");
         });
 
         modelBuilder.Entity<GeneralGbV>(entity =>
@@ -1721,6 +1779,7 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("PTNombre");
+            entity.Property(e => e.Ptorden).HasColumnName("PTOrden");
         });
 
         modelBuilder.Entity<Rango>(entity =>
@@ -2004,11 +2063,11 @@ public partial class DbNeoIiContext : DbContext
                 .HasColumnName("RRNombre");
         });
 
-        modelBuilder.Entity<ReuDium>(entity =>
+        modelBuilder.Entity<Reunion>(entity =>
         {
             entity.HasKey(e => e.IdReuDia).HasName("PK_ReuDia_1");
 
-            entity.ToTable("ReuDia", "reu");
+            entity.ToTable("Reunion", "reu");
 
             entity.Property(e => e.Rdarea)
                 .HasMaxLength(50)
@@ -2065,16 +2124,26 @@ public partial class DbNeoIiContext : DbContext
                 .HasColumnName("RDStatus");
             entity.Property(e => e.Rdtiempo).HasColumnName("RDTiempo");
 
-            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.ReuDia)
+            entity.HasOne(d => d.IdCausaCalNavigation).WithMany(p => p.Reunions)
+                .HasForeignKey(d => d.IdCausaCal)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReuDia_CausaCal");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.Reunions)
                 .HasForeignKey(d => d.IdMaster)
                 .HasConstraintName("FK_ReuDia_Master");
 
-            entity.HasOne(d => d.IdResReuNavigation).WithMany(p => p.ReuDia)
+            entity.HasOne(d => d.IdResReuNavigation).WithMany(p => p.Reunions)
                 .HasForeignKey(d => d.IdResReu)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ReuDia_RespoReu");
 
-            entity.HasOne(d => d.IdksfNavigation).WithMany(p => p.ReuDia)
+            entity.HasOne(d => d.IdTipReuNavigation).WithMany(p => p.Reunions)
+                .HasForeignKey(d => d.IdTipReu)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReuDia_TipReu");
+
+            entity.HasOne(d => d.IdksfNavigation).WithMany(p => p.Reunions)
                 .HasForeignKey(d => d.Idksf)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ReuDia_KSF");
@@ -2224,6 +2293,27 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("TINombre");
+        });
+
+        modelBuilder.Entity<TipReu>(entity =>
+        {
+            entity.HasKey(e => e.IdTipReu);
+
+            entity.ToTable("TipReu", "reu");
+
+            entity.Property(e => e.IdTipReu).HasColumnName("idTipReu");
+            entity.Property(e => e.Tpdescri)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("TPDescri");
+            entity.Property(e => e.Tpestado).HasColumnName("TPEstado");
+            entity.Property(e => e.Tpfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("TPFecha");
+            entity.Property(e => e.Tpnombre)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("TPNombre");
         });
 
         modelBuilder.Entity<TipSuple>(entity =>

@@ -28,12 +28,12 @@ public class PizarraController : ControllerBase
         _mapper = mapper;
     }
     [HttpPost("AddRegistros")]
-    public async Task<ActionResult<bool>> InsertarRegistros(List<ReuDiumDTO> reunionDia)
+    public async Task<ActionResult<bool>> InsertarRegistros(List<ReunionDTO> reunionDia)
     {
-        List<ReuDium> reunionDia1 = _mapper.Map<List<ReuDium>>(reunionDia);
+        List<Reunion> reunionDia1 = _mapper.Map<List<Reunion>>(reunionDia);
         foreach (var item in reunionDia1)
         {
-            this._context.ReuDia.Add(item);
+            this._context.Reunions.Add(item);
         }
         return Ok(await _context.SaveChangesAsync() > 0);
     }
@@ -45,7 +45,7 @@ public class PizarraController : ControllerBase
 
         if (division == "All")
         {
-            var list = await _context.ReuDia
+            var list = await _context.Reunions
                     .Include(x => x.IdResReuNavigation)
                     .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro))
                     .AsNoTracking()
@@ -58,15 +58,15 @@ public class PizarraController : ControllerBase
                 Rddisc = r.Rddisc,
                 Rdodt = r.Rdodt,
                 Rdtiempo = r.Rdtiempo.ToString(),
-                RdfecTra = r.RdfecTra ?? DateTime.Now
+                RdfecTra = r.RdfecTra //?? DateTime.Now
             });
 
             return Ok(result);
-            // return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
+            // return Ok(_mapper.Map<List<ReunionDTO>>(list));
         }
         else
         {
-            var list = await _context.ReuDia
+            var list = await _context.Reunions
                     .Include(x => x.IdResReuNavigation)
                     .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro) && (d.Rddiv == division))
                     .AsNoTracking()
@@ -80,29 +80,29 @@ public class PizarraController : ControllerBase
                 Rddisc = r.Rddisc,
                 Rdodt = r.Rdodt,
                 Rdtiempo = r.Rdtiempo.ToString(),
-                RdfecTra = r.RdfecTra ?? DateTime.Now
+                RdfecTra = r.RdfecTra //?? DateTime.Now
             });
 
-            // return Ok(_mapper.Map<List<ReuDiumDTO>>(list));
+            // return Ok(_mapper.Map<List<ReunionDTO>>(list));
             return Ok(result);
         }
     }
 
     [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
-    public async Task<ActionResult<List<ReuDiumDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
+    public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
     {
 
 
         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-        List<ReuDium> reudiatablas = new List<ReuDium>();
+        List<Reunion> reudiatablas = new List<Reunion>();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
 
         string centro = centrodiv.Cnom;
         string div = centrodiv.Dnombre;
 
-        reudiatablas = new List<ReuDium>();
+        reudiatablas = new List<Reunion>();
 
 
         // Es Reunión
@@ -112,7 +112,7 @@ public class PizarraController : ControllerBase
             if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
             {
 
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
@@ -124,7 +124,7 @@ public class PizarraController : ControllerBase
             else
             {
 
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.Date && a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
@@ -142,7 +142,7 @@ public class PizarraController : ControllerBase
 
             if (estado == "Total Pendiente")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
@@ -153,7 +153,7 @@ public class PizarraController : ControllerBase
 
             else if (estado == "Todo")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
@@ -166,7 +166,7 @@ public class PizarraController : ControllerBase
 
             else if (estado == "Pendiente-Responsable")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -178,7 +178,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Vencidos")
             {
 
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -189,7 +189,7 @@ public class PizarraController : ControllerBase
             }
             else
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
@@ -205,7 +205,7 @@ public class PizarraController : ControllerBase
         {
             if (estado == "Total Pendiente")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
@@ -216,7 +216,7 @@ public class PizarraController : ControllerBase
 
             else if (estado == "Todo")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
@@ -228,7 +228,7 @@ public class PizarraController : ControllerBase
             }
             else if (estado == "Pendiente-Responsable")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -239,7 +239,7 @@ public class PizarraController : ControllerBase
             }
             else if (estado == "Vencidos")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -250,7 +250,7 @@ public class PizarraController : ControllerBase
             }
             else
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
@@ -263,27 +263,27 @@ public class PizarraController : ControllerBase
 
         }
 
-        return Ok(_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
+        return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
 
     }
 
     [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}")]
-    public async Task<ActionResult<List<ReuDiumDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
+    public async Task<ActionResult<List<ReunionDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
     {
         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         //Consultar nombre del centro y division  para insertarlos
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-        List<ReuDium> reudiatablas = new List<ReuDium>();
+        List<Reunion> reudiatablas = new List<Reunion>();
 
 
 
         string centro = centrodiv.Cnom;
         string div = centrodiv.Dnombre;
 
-        reudiatablas = new List<ReuDium>();
+        reudiatablas = new List<Reunion>();
 
-        reudiatablas = await _context.ReuDia
+        reudiatablas = await _context.Reunions
         .Where(a => a.Rdodt.Contains(ODT) && (a.Rdcentro == centrodiv.Cnom && a.Rddiv == centrodiv.Dnombre))
         .Include(b => b.IdksfNavigation)
         .Include(b => b.IdResReuNavigation)
@@ -291,12 +291,12 @@ public class PizarraController : ControllerBase
         .OrderByDescending(b => b.RdfecReu)
         .ToListAsync();
 
-        return Ok(_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
+        return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
     }
 
     //historicos
     [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
-    public async Task<ActionResult<List<ReuDiumDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
+    public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
     {
 
 
@@ -304,14 +304,14 @@ public class PizarraController : ControllerBase
         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-        List<ReuDium> reudiatablas;
+        List<Reunion> reudiatablas;
 
 
 
         string centro = centrodiv.Cnom;
         string div = centrodiv.Dnombre;
 
-        reudiatablas = new List<ReuDium>();
+        reudiatablas = new List<Reunion>();
 
         if (tipo == "2")
         {
@@ -319,7 +319,7 @@ public class PizarraController : ControllerBase
 
             if (estado == "Total Pendiente")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -330,7 +330,7 @@ public class PizarraController : ControllerBase
 
             else if (estado == "Todo")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -339,7 +339,7 @@ public class PizarraController : ControllerBase
             }
             else if (estado == "Pendiente-Responsable")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -348,7 +348,7 @@ public class PizarraController : ControllerBase
             }
             else if (estado == "Vencidos")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -358,7 +358,7 @@ public class PizarraController : ControllerBase
 
             else
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
@@ -371,7 +371,7 @@ public class PizarraController : ControllerBase
         {
             if (estado == "Total Pendiente")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -381,7 +381,7 @@ public class PizarraController : ControllerBase
 
             else if (estado == "Todo")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -390,7 +390,7 @@ public class PizarraController : ControllerBase
             }
             else if (estado == "Pendiente-Responsable")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -399,7 +399,7 @@ public class PizarraController : ControllerBase
             }
             else if (estado == "Vencidos")
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -408,7 +408,7 @@ public class PizarraController : ControllerBase
             }
             else
             {
-                reudiatablas = await _context.ReuDia
+                reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
                 .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
@@ -417,12 +417,12 @@ public class PizarraController : ControllerBase
                 .ToListAsync();
             }
         }
-        return (_mapper.Map<List<ReuDiumDTO>>(reudiatablas));
+        return (_mapper.Map<List<ReunionDTO>>(reudiatablas));
     }
 
     // Update Discrepancia
     [HttpPut("UpdateDiscrepancia/{id:int}")]
-    public async Task<ActionResult<bool>> UpdateDiscrepancia(ReuDiumDTO d, int id)
+    public async Task<ActionResult<bool>> UpdateDiscrepancia(ReunionDTO d, int id)
     {
         try
         {
@@ -443,7 +443,7 @@ public class PizarraController : ControllerBase
                 div = centrodiv.IdDivision.ToString();
             }
 
-            ReuDium bdDiscrep = await _context.ReuDia
+            Reunion bdDiscrep = await _context.Reunions
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .FirstOrDefaultAsync(sh => sh.IdReuDia == id);
@@ -467,8 +467,15 @@ public class PizarraController : ControllerBase
             bdDiscrep.IdResReu = d.IdResReu;
             bdDiscrep.Rdstatus = d.Rdstatus;
             bdDiscrep.Rdtiempo = d.Rdtiempo;
-
+            bdDiscrep.IdMaster = d.IdMaster;
             bdDiscrep.IdEmpresa = d.IdEmpresa;
+            bdDiscrep.IdOrigen = 0;
+
+            /* 
+            Campos faltantes
+            IdCausaCal 
+            IdTipReu 
+            */
 
             _context.Entry(bdDiscrep).State = EntityState.Modified;
             await _context.SaveChangesAsync();
@@ -484,14 +491,14 @@ public class PizarraController : ControllerBase
 
 //TODO:Arreglos al ultimo commit
 [HttpPut("UpdateDiscrepancia2/{id:int}")]
-public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
+public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReunionDTO d, int id)
 {
         if (d?.Rdcentro == null)
         {
             return BadRequest("El centro no es válido o no se proporcionó.");
         }
         // Cargar la entidad desde la base de datos
-        var entity = await _context.ReuDia.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
+        var entity = await _context.Reunions.FirstOrDefaultAsync(sh => sh.IdReuDia == id);
         if (entity == null)
         {
             return NotFound("La entidad no fue encontrada.");
@@ -508,22 +515,22 @@ public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReuDiumDTO d, int id)
 }
        //obtener discrepancia a editar
     [HttpGet("GetDiscrepantacia/{id:int}")]
-    public async Task<ActionResult<ReuDiumDTO>> GetDiscrepantacia(int id)
+    public async Task<ActionResult<ReunionDTO>> GetDiscrepantacia(int id)
     {
-        var disc = await _context.ReuDia
+        var disc = await _context.Reunions
             .Include(b => b.IdksfNavigation)
             .Include(b => b.IdResReuNavigation)
             .FirstOrDefaultAsync(h => h.IdReuDia == id);
         if (disc == null)
             throw new Exception("not found!");
-        return Ok(_mapper.Map<ReuDiumDTO>(disc));
+        return Ok(_mapper.Map<ReunionDTO>(disc));
     }
 
     [HttpPost("AddDiscrepancia")]
-    public async Task<ActionResult<int>> InsertDiscrepancia(ReuDiumDTO discre)
+    public async Task<ActionResult<int>> InsertDiscrepancia(ReunionDTO discre)
     {
-        ReuDium data = _mapper.Map<ReuDium>(discre);
-        _context.ReuDia.Add(data);
+        Reunion data = _mapper.Map<Reunion>(discre);
+        _context.Reunions.Add(data);
         await _context.SaveChangesAsync();
         return Ok(data.IdReuDia);
     }

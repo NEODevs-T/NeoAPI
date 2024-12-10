@@ -62,13 +62,13 @@ namespace NeoAPI.AutoMapper
             CreateMap<TiParTpDTO, TiParTp>().ReverseMap();
 
             CreateMap<CambStat, CambStatDTO>()
-                .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
+                .ForMember(dest => dest.Reunions, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
                 
             CreateMap<CambFec, CambFecDTO>()
-                .ForMember(dest => dest.ReuDia, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
+                .ForMember(dest => dest.Reunions, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
             
 
-            CreateMap<ReuDiumDTO, ReuDium>().ReverseMap();
+            CreateMap<ReunionDTO, Reunion>().ReverseMap();
 
             CreateMap<CentrosVDTO, CentrosV>().ReverseMap();
 
@@ -122,7 +122,7 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdMasterNavigation.IdLineaNavigation.Lnom))
                 .ForMember(dest => dest.AreaCarga, act => act.MapFrom(src => src.IdAreaCarNavigation.Acnombre));
 
-            CreateMap<ReuDium, ReuDiumDTO>()            
+            CreateMap<ReuDium, ReunionDTO>()            
                 .ForMember(dest => dest.Ksf, act => act.MapFrom(src => src.IdksfNavigation.KsfNombre))
                 .ForMember(dest => dest.Responsable, act => act.MapFrom(src => src.IdResReuNavigation.Rrnombre))
                 .ForMember(dest => dest.IdPais, act => act.MapFrom(src => src.IdMasterNavigation.IdPais));

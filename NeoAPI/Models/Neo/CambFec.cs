@@ -15,5 +15,5 @@ public partial class CambFec
 
     public string Cfuser { get; set; } = null!;
 
-    public virtual ReuDium IdReuDiaNavigation { get; set; } = null!;
+    public virtual Reunion IdReuDiaNavigation { get; set; } = null!;
 }

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NeoAPI.DTOs.ReunionDiaria;
 
-public partial class ReuDiumDTO
+public partial class ReunionDTO
 {
     public int IdReuDia { get; set; }
 
@@ -39,11 +39,17 @@ public partial class ReuDiumDTO
 
     public DateTime? RdfecReu { get; set; }
 
-    public DateTime? RdfecTra { get; set; }
+    public DateTime RdfecTra { get; set; }
 
     public string? Rdobs { get; set; }
 
     public DateTime? RdfecCrea { get; set; }
+
+    public int IdCausaCal { get; set; }
+
+    public int IdOrigen { get; set; }
+
+    public int IdTipReu { get; set; }
 
     public string? Ksf {get; set; }
     

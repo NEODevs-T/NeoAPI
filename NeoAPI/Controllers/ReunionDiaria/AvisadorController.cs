@@ -93,8 +93,8 @@ public class AvisadorController : ControllerBase
 
         CambFec cambiofec;
         CambStat cambioEstado;
-        ReuDium regiReudia;
-        regiReudia = _mapper.Map<ReuDium>(registroCambios.regisReudia);
+        Reunion regiReudia;
+        regiReudia = _mapper.Map<Reunion>(registroCambios.regisReudia);
 
         regiReudia.IdksfNavigation = null;
         regiReudia.IdMasterNavigation = null;

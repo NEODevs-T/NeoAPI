@@ -15,5 +15,5 @@ public partial class CambStat
 
     public string? Cbuser { get; set; }
 
-    public virtual ReuDium IdReuDiaNavigation { get; set; } = null!;
+    public virtual Reunion IdReuDiaNavigation { get; set; } = null!;
 }
