@@ -88,8 +88,8 @@ public class PizarraController : ControllerBase
         }
     }
 
-    [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
-    public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
+    [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
+    public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado,int reunion)
     {
 
 
@@ -101,173 +101,175 @@ public class PizarraController : ControllerBase
 
         string centro = centrodiv.Cnom;
         string div = centrodiv.Dnombre;
+        int reunionDiaria = 1;
+        int reunionTurno = 2;
 
         reudiatablas = new List<Reunion>();
 
 
-        // Es Reunión
-        if (tipo == "1")
-        {
 
-            if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+            if (tipo == "1")
             {
 
-                reudiatablas = await _context.Reunions
-                //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1))))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .ToListAsync();
-            }
-            else
-            {
+                if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+                {
 
-                reudiatablas = await _context.Reunions
-                //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.Date && a.RdfecReu <= f2.AddDays(+1))))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .ToListAsync();
-            }
-        }
+                    reudiatablas = await _context.Reunions
+                    //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1))))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
+                    .OrderByDescending(b => b.RdfecReu)
+                    .ToListAsync();
+                }
+                else
+                {
 
-        //tipo 0 Pendientes para fecha reunion
-        else if (tipo == "0")
-        {
-
-
-            if (estado == "Total Pendiente")
-            {
-                reudiatablas = await _context.Reunions
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .ToListAsync();
+                    reudiatablas = await _context.Reunions
+                    //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.Date && a.RdfecReu <= f2.AddDays(+1))))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
+                    .OrderByDescending(b => b.RdfecReu)
+                    .ToListAsync();
+                }
             }
 
-            else if (estado == "Todo")
-            {
-                reudiatablas = await _context.Reunions
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .Take(500)
-                .ToListAsync();
-            }
-
-            else if (estado == "Pendiente-Responsable")
-            {
-                reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .Take(350)
-                .AsNoTracking()
-                .ToListAsync();
-            }
-            else if (estado == "Vencidos")
+            //tipo 0 Pendientes para fecha reunion
+            else if (tipo == "0")
             {
 
-                reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .Take(350)
-                .AsNoTracking()
-                .ToListAsync();
-            }
-            else
-            {
-                reudiatablas = await _context.Reunions
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .Take(350)
-                .ToListAsync();
-            }
-        }
-        //Fecha de trabajo
-        else if (tipo == "2")
-        {
-            if (estado == "Total Pendiente")
-            {
-                reudiatablas = await _context.Reunions
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .ToListAsync();
-            }
 
-            else if (estado == "Todo")
-            {
-                reudiatablas = await _context.Reunions
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .Take(500)
-                .ToListAsync();
-            }
-            else if (estado == "Pendiente-Responsable")
-            {
-                reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .Take(350)
-                .AsNoTracking()
-                .ToListAsync();
-            }
-            else if (estado == "Vencidos")
-            {
-                reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .Take(350)
-                .AsNoTracking()
-                .ToListAsync();
-            }
-            else
-            {
-                reudiatablas = await _context.Reunions
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus == estado))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .Take(50)
-                .ToListAsync();
-            }
+                if (estado == "Total Pendiente")
+                {
+                    reudiatablas = await _context.Reunions
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecReu)
+                    .ToListAsync();
+                }
 
-        }
+                else if (estado == "Todo")
+                {
+                    reudiatablas = await _context.Reunions
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecReu)
+                    .Take(500)
+                    .ToListAsync();
+                }
+
+                else if (estado == "Pendiente-Responsable")
+                {
+                    reudiatablas = await _context.Reunions
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecReu)
+                    .Take(350)
+                    .AsNoTracking()
+                    .ToListAsync();
+                }
+                else if (estado == "Vencidos")
+                {
+
+                    reudiatablas = await _context.Reunions
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecReu)
+                    .Take(350)
+                    .AsNoTracking()
+                    .ToListAsync();
+                }
+                else
+                {
+                    reudiatablas = await _context.Reunions
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus == estado))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecReu)
+                    .Take(350)
+                    .ToListAsync();
+                }
+            }
+            //Fecha de trabajo
+            else if (tipo == "2")
+            {
+                if (estado == "Total Pendiente")
+                {
+                    reudiatablas = await _context.Reunions
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecTra)
+                    .ToListAsync();
+                }
+
+                else if (estado == "Todo")
+                {
+                    reudiatablas = await _context.Reunions
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.RdplanAcc != null))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecTra)
+                    .Take(500)
+                    .ToListAsync();
+                }
+                else if (estado == "Pendiente-Responsable")
+                {
+                    reudiatablas = await _context.Reunions
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus == "Pendiente/Responsable"))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecTra)
+                    .Take(350)
+                    .AsNoTracking()
+                    .ToListAsync();
+                }
+                else if (estado == "Vencidos")
+                {
+                    reudiatablas = await _context.Reunions
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra < DateTime.Now.Date))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecTra)
+                    .Take(350)
+                    .AsNoTracking()
+                    .ToListAsync();
+                }
+                else
+                {
+                    reudiatablas = await _context.Reunions
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
+                    //.Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) & (a.RdplanAcc != null))
+                    .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus == estado))
+                    .Include(b => b.IdksfNavigation)
+                    .Include(b => b.IdResReuNavigation)
+                    .OrderByDescending(b => b.RdfecTra)
+                    .Take(50)
+                    .ToListAsync();
+                }
+
+            }
 
         return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
 
     }
 
-    [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}")]
+    [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}/{reunion:int}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
     {
         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
@@ -284,7 +286,7 @@ public class PizarraController : ControllerBase
         reudiatablas = new List<Reunion>();
 
         reudiatablas = await _context.Reunions
-        .Where(a => a.Rdodt.Contains(ODT) && (a.Rdcentro == centrodiv.Cnom && a.Rddiv == centrodiv.Dnombre))
+        .Where(a => a.Rdodt.Contains(ODT) && (a.Rdcentro == centrodiv.Cnom && a.Rddiv == centrodiv.Dnombre && a.IdTipReu == 1))
         .Include(b => b.IdksfNavigation)
         .Include(b => b.IdResReuNavigation)
         .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
@@ -296,7 +298,7 @@ public class PizarraController : ControllerBase
 
     //historicos
     [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
-    public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado)
+    public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
     {
 
 
@@ -320,7 +322,7 @@ public class PizarraController : ControllerBase
             if (estado == "Total Pendiente")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1))))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -331,7 +333,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Todo")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -340,7 +342,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Pendiente-Responsable")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -349,7 +351,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Vencidos")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -360,7 +362,7 @@ public class PizarraController : ControllerBase
             {
                 reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -372,7 +374,7 @@ public class PizarraController : ControllerBase
             if (estado == "Total Pendiente")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1))))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div & (a.Rdstatus == "Pendiente" | a.Rdstatus == "Pendiente/Responsable") && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -382,7 +384,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Todo")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -391,7 +393,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Pendiente-Responsable")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)) && (a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -400,7 +402,7 @@ public class PizarraController : ControllerBase
             else if (estado == "Vencidos")
             {
                 reudiatablas = await _context.Reunions
-                .Where(a => (a.Rdcentro == centro && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -410,7 +412,7 @@ public class PizarraController : ControllerBase
             {
                 reudiatablas = await _context.Reunions
                 //.Where(a => (a.Rdcentro == centro & a.Rddiv == div & (a.RdfecReu >= f1 & a.RdfecReu <= f2)))
-                .Where(a => (a.Rdcentro == centro & a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div) & (a.Rdstatus == estado) && (a.RdfecReu >= f1 & a.RdfecReu <= f2.AddDays(+1)))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()

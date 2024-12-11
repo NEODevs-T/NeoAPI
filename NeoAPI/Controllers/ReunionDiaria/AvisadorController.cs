@@ -99,6 +99,8 @@ public class AvisadorController : ControllerBase
         regiReudia.IdksfNavigation = null;
         regiReudia.IdMasterNavigation = null;
         regiReudia.IdResReuNavigation = null;   
+        regiReudia.IdCausaCalNavigation = null;   
+        regiReudia.IdTipReuNavigation = null;   
 
 
         cambiofec = _mapper.Map<CambFec>(registroCambios.cambFecDTO);
