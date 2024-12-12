@@ -31,6 +31,15 @@ namespace NeoAPI.Controllers.Maestras
         }
 
 
+        [HttpGet("GetMaestraId/{idMaster:int}")]
+        public async Task<ActionResult<List<MaestraVDTO>>> GetMaestraId(int idMaster)
+        {
+
+            List<MaestraV> data = await this._context.MaestraVs.Where(p => p.IdMaster == idMaster).ToListAsync();
+            return Ok(_mapper.Map<List<MaestraVDTO>>(data));
+
+        }
+
         [HttpGet("GetPaises")]
         public async Task<ActionResult<List<PaiDTO>>> GetPaises()
         {
