@@ -296,6 +296,35 @@ public class PizarraController : ControllerBase
         return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
     }
 
+    [HttpGet("GetPendientesTurno/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
+    public async Task<ActionResult<List<ReunionDTO>>> GetPendientesTurno(string idcentro, string iddiv, string estado,int reunion)
+    {
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
+        List<Reunion> reudiatablas = new List<Reunion>();
+        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+
+        string centro = centrodiv.Cnom;
+        string div = centrodiv.Dnombre;
+        int reunionDiaria = 1;
+        int reunionTurno = 2;
+
+        reudiatablas = new List<Reunion>();
+
+        reudiatablas = await _context.Reunions
+        //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
+        .Where(a => (a.Rdcentro == centro && a.IdTipReu == 2 && a.Rddiv == div && (a.Rdstatus == "Pendientes") && (a.RdfecReu <= DateTime.Now.Date)))
+        .Include(b => b.IdksfNavigation)
+        .Include(b => b.IdResReuNavigation)
+        .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
+        .OrderByDescending(b => b.RdfecReu)
+        .ToListAsync();
+
+        return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
+
+    }
+
     //historicos
     [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
