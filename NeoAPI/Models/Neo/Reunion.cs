@@ -45,9 +45,9 @@ public partial class Reunion
 
     public DateTime? RdfecCrea { get; set; }
 
-    public int IdCausaCal { get; set; }
+    public int? IdCausaCal { get; set; }
 
-    public int IdOrigen { get; set; }
+    public int? IdOrigen { get; set; }
 
     public int IdTipReu { get; set; }
 

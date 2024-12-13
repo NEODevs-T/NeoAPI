@@ -39,15 +39,15 @@ public class PizarraController : ControllerBase
     }
 
 
-    [HttpGet("GetTrabajosPorCalendario/{pais}/{centro}/{division}")]
-    public async Task<ActionResult<List<CalendarioTrabajoDTO>>> GetTrabajosCalendario(string pais, string centro, string division)
+    [HttpGet("GetTrabajosPorCalendario/{pais}/{centro}/{division}/{reunion:int}")]
+    public async Task<ActionResult<List<CalendarioTrabajoDTO>>> GetTrabajosCalendario(string pais, string centro, string division, int reunion)
     {
 
         if (division == "All")
         {
             var list = await _context.Reunions
                     .Include(x => x.IdResReuNavigation)
-                    .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro))
+                    .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro) && (d.IdTipReu == reunion))
                     .AsNoTracking()
                     .ToListAsync();
 
@@ -68,7 +68,7 @@ public class PizarraController : ControllerBase
         {
             var list = await _context.Reunions
                     .Include(x => x.IdResReuNavigation)
-                    .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro) && (d.Rddiv == division))
+                    .Where(d => (d.Rdstatus == "Pendiente/Responsable" || d.Rdstatus == "Pendiente") && (d.IdMasterNavigation.IdPais == int.Parse(pais)) && (d.Rdcentro == centro) && (d.Rddiv == division) && (d.IdTipReu == reunion))
                     .AsNoTracking()
                     .ToListAsync();
 
