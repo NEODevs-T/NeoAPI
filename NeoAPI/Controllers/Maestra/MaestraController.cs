@@ -41,10 +41,10 @@ namespace NeoAPI.Controllers.Maestras
         }
 // Es para ubicar el id master en la reunion
         [HttpGet("GetMaestraXLinea")]
-        public async Task<ActionResult<List<MaestraVDTO>>> GetMaestraXLinea(string linea)
+        public async Task<ActionResult<List<MaestraVDTO>>> GetMaestraXLinea(int idlinea)
         {
 
-            List<MaestraV> data = await this._context.MaestraVs.Where(p => p.Linea == linea).ToListAsync();
+            List<MaestraV> data = await this._context.MaestraVs.Where(p => p.IdLinea == idlinea).ToListAsync();
             return Ok(_mapper.Map<List<MaestraVDTO>>(data));
 
         }
