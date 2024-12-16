@@ -301,26 +301,20 @@ public class PizarraController : ControllerBase
     {
         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-        List<Reunion> reudiatablas = new List<Reunion>();
         centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-
 
         string centro = centrodiv.Cnom;
         string div = centrodiv.Dnombre;
-        int reunionDiaria = 1;
         int reunionTurno = 2;
 
-        reudiatablas = new List<Reunion>();
-
-        reudiatablas = await _context.Reunions
-        .Where(a => (a.Rdcentro == centro && a.IdTipReu == 2 && a.Rddiv == div && (a.Rdstatus == "Pendientes") && (a.RdfecReu <= DateTime.Now.Date)))
-        .Include(b => b.IdksfNavigation)
-        .Include(b => b.IdResReuNavigation)
-        .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
-        .OrderByDescending(b => b.RdfecReu)
-        .ToListAsync();
-
-        return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
+        List<Reunion> disc = await _context.Reunions
+            .Include(b => b.IdksfNavigation)
+            .Include(b => b.IdResReuNavigation)
+            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.RdfecReu.Date <= DateTime.Now.Date)
+            .ToListAsync();
+        if (disc == null)
+            throw new Exception("not found!");
+        return Ok(_mapper.Map<List<ReunionDTO>>(disc));
 
     }
 
@@ -519,7 +513,6 @@ public class PizarraController : ControllerBase
         }
     }
 
-    //TODO:Arreglos al ultimo commit
     [HttpPut("UpdateDiscrepancia2/{id:int}")]
     public async Task<ActionResult<bool>> UpdateDiscrepancia2(ReunionDTO d, int id)
     {
