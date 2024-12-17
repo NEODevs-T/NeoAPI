@@ -310,7 +310,7 @@ public class PizarraController : ControllerBase
         List<Reunion> disc = await _context.Reunions
             .Include(b => b.IdksfNavigation)
             .Include(b => b.IdResReuNavigation)
-            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" && h.RdfecReu.Date <= DateTime.Now.Date)
+            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" && h.RdfecReu.Date <= DateTime.Now.Date)
             .ToListAsync();
         if (disc == null)
             throw new Exception("not found!");
