@@ -37,7 +37,7 @@ public partial class Reunion
 
     public string? RdnumDis { get; set; }
 
-    public DateTime? RdfecReu { get; set; }
+    public DateTime RdfecReu { get; set; }
 
     public DateTime RdfecTra { get; set; }
 
@@ -45,9 +45,9 @@ public partial class Reunion
 
     public DateTime? RdfecCrea { get; set; }
 
-    public int IdCausaCal { get; set; }
+    public int? IdCausaCal { get; set; }
 
-    public int IdOrigen { get; set; }
+    public int? IdOrigen { get; set; }
 
     public int IdTipReu { get; set; }
 
