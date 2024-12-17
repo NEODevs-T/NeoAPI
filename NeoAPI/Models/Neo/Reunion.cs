@@ -51,6 +51,12 @@ public partial class Reunion
 
     public int IdTipReu { get; set; }
 
+    public string? Ksf {get; set; }
+    
+    public string? Responsable {get; set; }
+
+    public int? IdPais {get; set; }
+
     public virtual ICollection<CambFec> CambFecs { get; set; } = new List<CambFec>();
 
     public virtual ICollection<CambStat> CambStats { get; set; } = new List<CambStat>();
