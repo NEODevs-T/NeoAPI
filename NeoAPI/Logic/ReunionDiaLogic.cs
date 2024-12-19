@@ -3,6 +3,7 @@ using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
 using NeoAPI.Interface;
+using NeoAPI.DTOs.ReunionDiaria;
 
 namespace NeoAPI.Logic.ReunionDia;
 
@@ -89,7 +90,37 @@ public class ReunionDiaLogic : IReunionDiaLogic
         return CD;
     }
 
+    public async Task<List<CambFec>> GetPendientesQuincenal(CentroDivisionDTO centrodiv)
+    {
 
+        string centro = centrodiv.Cnom;
+        string div = centrodiv.Dnombre;
+        int reunionDiaria = 1;
+
+        List<Reunion> discs = await _neocontext.Reunions
+            .Include(b => b.IdksfNavigation)
+            .Include(b => b.IdResReuNavigation)
+            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionDiaria && h.RdfecTra.Date < DateTime.Now.Date && h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo")
+            .ToListAsync();
+
+        List<CambFec> result = new List<CambFec>();
+
+        foreach(var iten in discs)
+        {
+            List<CambFec> filt = await _neocontext.CambFecs
+                .Where(h => h.IdReuDia == iten.IdReuDia)
+                .ToListAsync();
+
+            var grouped = filt.GroupBy(x => x.IdReuDia)
+                .Where(g => g.Count() > 3)
+                .SelectMany(g => g)
+                .ToList();
+
+            result.AddRange(grouped);
+        }
+
+        return result;
+    }
 
 
     public CentroDivisionDTO BuildCentroDivisionDTO(Master centrodiscrepancia)
