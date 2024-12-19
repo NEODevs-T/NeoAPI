@@ -342,7 +342,7 @@ public class PizarraController : ControllerBase
 
     }
     [HttpGet("GetPendientesQuincenal2/{idcentro}/{iddiv}")]
-    public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string idcentro, string iddiv)
+    public async Task<ActionResult<List<CambiReuVDTO>>> GetPendientesQuincenal2(string idcentro, string iddiv)
     {
         IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
         CentroDivisionDTO centrodiv = new CentroDivisionDTO();
