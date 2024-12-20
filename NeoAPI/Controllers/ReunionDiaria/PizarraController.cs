@@ -351,9 +351,9 @@ public class PizarraController : ControllerBase
         string div = centrodiv.Dnombre;
         int reunionDiaria = 1;
 
-        List<CambiReuV> disc = await _context.CambiReuVs
-            .Where(h => h.Centro == centro && h.Division == div && h.TipoReunion == reunionDiaria && h.FechaTrabajo.Date < DateTime.Now.Date && h.Estado == "Pendiente" || h.Estado == "Pendiente/Responsable" || h.Estado == "Listo")
-            .ToListAsync();
+List<CambiReuV> disc = await _context.CambiReuVs
+    .Where(h => h.Centro == centro && h.Division == div && h.TipoReunion == reunionDiaria && h.FechaTrabajo.Date >= DateTime.Now.AddMonths(-3) && (h.Estado == "Pendiente" || h.Estado == "Pendiente/Responsable" || h.Estado == "Listo"))
+    .ToListAsync();
 
 
         if (disc == null)
