@@ -35,19 +35,4 @@ namespace NeoAPI.Controllers.CausaCalidad;
             return Ok(_mapper.Map<List<CausaCalDTO>>(causaCals));
         }
 
-
-
-          [HttpGet("GetCausasCali1221dad")]
-        public async Task<ActionResult<List<CausaCalDTO>>> GetCausasCali1221dad()
-        {
-
-            List<CausaCal> causaCals = await _context.CausaCals
-                .Where(a => a.Ccestado == true)
-                .ToListAsync();
-
-            return Ok(_mapper.Map<List<CausaCalDTO>>(causaCals));
-        }
-
-
-
     }
