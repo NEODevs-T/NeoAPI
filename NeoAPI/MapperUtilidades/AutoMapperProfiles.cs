@@ -85,6 +85,8 @@ namespace NeoAPI.AutoMapper
             CreateMap<MasterDTO, Master>().ReverseMap();
 
             CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
+            
+            CreateMap<CambiReuVDTO, CambiReuV>().ReverseMap();
 
             CreateMap<PaiDTO, Pai>().ReverseMap();
 

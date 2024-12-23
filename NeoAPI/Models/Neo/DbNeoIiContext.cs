@@ -37,6 +37,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<CambStat> CambStats { get; set; }
 
+    public virtual DbSet<CambiReuV> CambiReuVs { get; set; }
+
     public virtual DbSet<CargoReu> CargoReus { get; set; }
 
     public virtual DbSet<Categori> Categoris { get; set; }
@@ -461,6 +463,41 @@ public partial class DbNeoIiContext : DbContext
                 .HasForeignKey(d => d.IdReuDia)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_CambStat_ReuDia");
+        });
+
+        modelBuilder.Entity<CambiReuV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("CambiReu_V");
+
+            entity.Property(e => e.Accion)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Discrepancia)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Division)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.EquipoCodigo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Estado)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("estado");
+            entity.Property(e => e.FechaCambio).HasColumnType("datetime");
+            entity.Property(e => e.FechaTrabajo).HasColumnType("datetime");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Responsable)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<CargoReu>(entity =>

@@ -310,16 +310,60 @@ public class PizarraController : ControllerBase
         List<Reunion> disc = await _context.Reunions
             .Include(b => b.IdksfNavigation)
             .Include(b => b.IdResReuNavigation)
-            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" && h.RdfecReu.Date <= DateTime.Now.Date)
+            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" && h.RdfecReu.Date < DateTime.Now.Date)
             .ToListAsync();
         if (disc == null)
             throw new Exception("not found!");
         return Ok(_mapper.Map<List<ReunionDTO>>(disc));
 
     }
+    [HttpGet("GetPendientesQuincenal/{idcentro}/{iddiv}")]
+    public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal(string idcentro, string iddiv)
+    {
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
+        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+        List<CambFec> filt = await getDiv.GetPendientesQuincenal(centrodiv);
+        List<Reunion> disc = new List<Reunion>();
+
+        foreach(var iten in filt)
+        {
+            List<Reunion> discs = await _context.Reunions
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .Where(h => h.IdReuDia == iten.IdReuDia)
+                .ToListAsync();
+            disc.AddRange(discs);
+        }
+
+        if (disc == null)
+            throw new Exception("not found!");
+        return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+
+    }
+    [HttpGet("GetPendientesQuincenal2/{idcentro}/{iddiv}")]
+    public async Task<ActionResult<List<CambiReuVDTO>>> GetPendientesQuincenal2(string idcentro, string iddiv)
+    {
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
+        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+        string centro = centrodiv.Cnom;
+        string div = centrodiv.Dnombre;
+        int reunionDiaria = 1;
+
+List<CambiReuV> disc = await _context.CambiReuVs
+    .Where(h => h.Centro == centro && h.Division == div && h.TipoReunion == reunionDiaria && h.FechaTrabajo.Date >= DateTime.Now.AddMonths(-3) && (h.Estado == "Pendiente" || h.Estado == "Pendiente/Responsable" || h.Estado == "Listo"))
+    .ToListAsync();
+
+
+        if (disc == null)
+            throw new Exception("not found!");
+        return Ok(_mapper.Map<List<CambiReuVDTO>>(disc));
+
+    }
 
     //historicos
-    [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}")]
+    [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
     {
 
@@ -348,7 +392,7 @@ public class PizarraController : ControllerBase
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
-                .ToListAsync();
+                .ToListAsync(); 
 
             }
 
