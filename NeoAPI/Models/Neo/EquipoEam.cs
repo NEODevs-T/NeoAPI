@@ -13,7 +13,7 @@ public partial class EquipoEam
 
     public string EnombreEam { get; set; } = null!;
 
-    public string? EdescriEam { get; set; }
+    public string EdescriEam { get; set; } = null!;
 
     public bool EestaEam { get; set; }
 

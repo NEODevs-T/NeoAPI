@@ -318,6 +318,28 @@ public class PizarraController : ControllerBase
 
     }
 
+    [HttpGet("GetPendientesTurnoPrueba/{idcentro}/{iddiv}")]
+    public async Task<ActionResult<List<ReunionDTO>>> GetPendientesTurnoPrueba(string idcentro, string iddiv)
+    {
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
+        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+        string centro = centrodiv.Cnom;
+        string div = centrodiv.Dnombre;
+        int reunionTurno = 2;
+
+        List<Reunion> disc = await _context.Reunions
+            .Include(b => b.IdksfNavigation)
+            .Include(b => b.IdResReuNavigation)
+            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" && h.RdfecReu.Date < DateTime.Now.Date)
+            .ToListAsync();
+        if (disc == null)
+            throw new Exception("not found!");
+        return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+
+    }
+
     //historicos
     [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)

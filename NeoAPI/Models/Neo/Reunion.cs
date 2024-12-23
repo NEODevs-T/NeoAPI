@@ -45,29 +45,23 @@ public partial class Reunion
 
     public DateTime? RdfecCrea { get; set; }
 
-    public int? IdCausaCal { get; set; }
+    public int IdCausaCal { get; set; }
 
-    public int? IdOrigen { get; set; }
+    public int IdOrigen { get; set; }
 
     public int IdTipReu { get; set; }
-
-    public string? Ksf {get; set; }
-    
-    public string? Responsable {get; set; }
-
-    public int? IdPais {get; set; }
 
     public virtual ICollection<CambFec> CambFecs { get; set; } = new List<CambFec>();
 
     public virtual ICollection<CambStat> CambStats { get; set; } = new List<CambStat>();
 
-    public virtual CausaCal? IdCausaCalNavigation { get; set; } = null!;
+    public virtual CausaCal IdCausaCalNavigation { get; set; } = null!;
 
     public virtual Master? IdMasterNavigation { get; set; }
 
-    public virtual RespoReu? IdResReuNavigation { get; set; } = null!;
+    public virtual RespoReu IdResReuNavigation { get; set; } = null!;
 
-    public virtual TipReu? IdTipReuNavigation { get; set; } = null!;
+    public virtual TipReu IdTipReuNavigation { get; set; } = null!;
 
-    public virtual Ksf? IdksfNavigation { get; set; } = null!;
+    public virtual Ksf IdksfNavigation { get; set; } = null!;
 }
