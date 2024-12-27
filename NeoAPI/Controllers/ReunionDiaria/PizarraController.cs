@@ -474,6 +474,15 @@ List<CambiReuV> disc = await _context.CambiReuVs
                 .AsNoTracking()
                 .ToListAsync();
             }
+            else if (estado == "VencidosDiaria")
+            {
+                reudiatablas = await _context.Reunions
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == 1 && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
             else
             {
                 reudiatablas = await _context.Reunions
