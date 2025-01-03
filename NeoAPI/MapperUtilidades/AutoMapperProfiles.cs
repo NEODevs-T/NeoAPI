@@ -180,6 +180,14 @@ namespace NeoAPI.AutoMapper
 
 
 
+            // Reunion De Turno
+
+
+            CreateMap<CausaCalDTO, CausaCal>().ReverseMap();
+            
+
+
+
             // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()
             //     .ConvertUsing(src => src.Select(pai => _mapper.Map<PaiDTO>(pai)));
 
