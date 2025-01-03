@@ -189,6 +189,17 @@ public class PizarraController : ControllerBase
                 .AsNoTracking()
                 .ToListAsync();
             }
+            else if (estado == "VencidasDiaria")
+            {
+                f1 = DateTime.Now.AddMonths(-3);
+                f2 = DateTime.Now.Date;
+                reudiatablas = await _context.Reunions
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == 1 && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
             else
             {
                 reudiatablas = await _context.Reunions
@@ -247,6 +258,15 @@ public class PizarraController : ControllerBase
                 .Include(b => b.IdResReuNavigation)
                 .OrderByDescending(b => b.RdfecTra)
                 .Take(350)
+                .AsNoTracking()
+                .ToListAsync();
+            }
+            else if (estado == "VencidasDiaria")
+            {
+                reudiatablas = await _context.Reunions
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == 1 && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
                 .ToListAsync();
             }
@@ -423,6 +443,15 @@ List<CambiReuV> disc = await _context.CambiReuVs
                 .AsNoTracking()
                 .ToListAsync();
             }
+            else if (estado == "VencidasDiaria")
+            {
+                reudiatablas = await _context.Reunions
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == 1 && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
+                .Include(b => b.IdksfNavigation)
+                .Include(b => b.IdResReuNavigation)
+                .AsNoTracking()
+                .ToListAsync();
+            }
 
             else
             {
@@ -474,7 +503,7 @@ List<CambiReuV> disc = await _context.CambiReuVs
                 .AsNoTracking()
                 .ToListAsync();
             }
-            else if (estado == "VencidosDiaria")
+            else if (estado == "VencidasDiaria")
             {
                 reudiatablas = await _context.Reunions
                 .Where(a => (a.Rdcentro == centro && a.IdTipReu == 1 && a.Rddiv == div) && (a.Rdstatus.StartsWith("Pendiente")) && (a.RdfecTra >= f1 & a.RdfecTra <= f2.AddDays(+1)) && (a.RdfecTra < DateTime.Now.Date))
