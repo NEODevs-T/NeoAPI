@@ -497,7 +497,7 @@ namespace NeoAPI.Controllers.Maestras
         {
 
             List<FechaProg> data = await this._context.FechaProgs
-                .Where(f=> f.IdMaster == IdMaster) 
+                .Where(f=> f.IdMaster == IdMaster && f.Fpestado == true) 
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
@@ -508,7 +508,7 @@ namespace NeoAPI.Controllers.Maestras
         {
 
             List<FechaProg> data = await this._context.FechaProgs
-                .Where(f=> f.Fpprogra >= f1.Date && f.Fpprogra <= f2.AddDays(+1)) 
+                .Where(f=> f.Fpprogra >= f1.Date && f.Fpprogra <= f2.AddDays(+1) && f.Fpestado == true) 
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
