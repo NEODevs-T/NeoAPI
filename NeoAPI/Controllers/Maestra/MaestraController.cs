@@ -470,9 +470,67 @@ namespace NeoAPI.Controllers.Maestras
             return Ok(_mapper.Map<List<MaestraVDTO>>(data));
         }
 
+        [HttpGet("GetFechaTrabajo")] 
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajo() 
+        {
 
+            List<FechaProg> data = await this._context.FechaProgs
+                .Where(f=> f.Fpestado == true) 
+                .ToListAsync();
 
-        // linea
+            return Ok(_mapper.Map<List<FechaProgDTO>>(data));
+        }
+        
+        [HttpGet("GetFechaTrabajoXId/{idFechaPr:int}")] 
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXId(int idFechaPr) 
+        {
+
+            List<FechaProg> data = await this._context.FechaProgs
+                .Where(f=> f.IdFechaPr == idFechaPr) 
+                .ToListAsync();
+
+            return Ok(_mapper.Map<List<FechaProgDTO>>(data));
+        }
+
+        [HttpGet("GetFechaTrabajoXIdMaster/{IdMaster:int}")] 
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXIdMaster(int IdMaster) 
+        {
+
+            List<FechaProg> data = await this._context.FechaProgs
+                .Where(f=> f.IdMaster == IdMaster) 
+                .ToListAsync();
+
+            return Ok(_mapper.Map<List<FechaProgDTO>>(data));
+        }
+
+        [HttpGet("GetFechaTrabajoXFecha/{f1:DateTime}/{f2:DateTime}")] 
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXIdMaster(DateTime f1, DateTime f2) 
+        {
+
+            List<FechaProg> data = await this._context.FechaProgs
+                .Where(f=> f.Fpprogra >= f1.Date && f.Fpprogra <= f2.AddDays(+1)) 
+                .ToListAsync();
+
+            return Ok(_mapper.Map<List<FechaProgDTO>>(data));
+        }
+
+        [HttpPost("AddFechaTrabajo")]
+        public async Task<ActionResult<bool>>  AddFechaTrabajo(List<FechaProgDTO> newFecha)
+        {
+            try
+            {
+                List<FechaProg> fechaProg = _mapper.Map<List<FechaProg>>(newFecha);
+                foreach (var item in fechaProg)
+                {
+                    this._context.FechaProgs.Add(item);
+                }
+                return Ok(await _context.SaveChangesAsync() > 0);
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+        }
 
 
         [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]

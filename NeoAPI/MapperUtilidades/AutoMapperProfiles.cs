@@ -90,6 +90,8 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<PaiDTO, Pai>().ReverseMap();
 
+            CreateMap<FechaProgDTO, FechaProg>().ReverseMap();
+
             CreateMap<CargoReuDTO, CargoReu>().ReverseMap();
 
             CreateMap<KsfDTO, Ksf>().ReverseMap();
