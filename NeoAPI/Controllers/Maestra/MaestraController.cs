@@ -532,6 +532,28 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
+        [HttpPut("UpdateFechaTrabajo/{id:int}")]
+        public async Task<ActionResult<bool>> UpdateDiscrepancia2(FechaProgDTO d, int id)
+        {
+            if (d?.IdMaster == null)
+            {
+                return BadRequest("la maestra no es válido o no se proporcionó.");
+            }
+            var entity = await _context.FechaProgs.FirstOrDefaultAsync(sh => sh.IdFechaPr == id);
+            if (entity == null)
+            {
+                return NotFound("La entidad no fue encontrada.");
+            }
+
+            // Mapeo de los cambios de d a la entidad cargada
+            _mapper.Map(d, entity);
+
+            // Guardar los cambios sin usar Update
+            bool isUpdated = await _context.SaveChangesAsync() > 0;
+
+            return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
+
+        }
 
         [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]
         public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
