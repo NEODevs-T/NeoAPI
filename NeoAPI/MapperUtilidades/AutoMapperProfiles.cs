@@ -187,6 +187,16 @@ namespace NeoAPI.AutoMapper
 
             CreateMap<CausaCalDTO, CausaCal>().ReverseMap();
             
+            CreateMap<CausaCalDTO, CausaCal>().ReverseMap();
+        CreateMap<Reunion, CausaCalDTO>()
+            .ForMember(dest => dest.IdCausaCal, opt => opt.MapFrom(src => src.IdCausaCalNavigation.IdCausaCal))
+            .ForMember(dest => dest.Ccnombre, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccnombre))
+            .ForMember(dest => dest.Ccdescri, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccdescri))
+            .ForMember(dest => dest.Ccfecha, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccfecha))
+            .ForMember(dest => dest.Ccestado, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccestado))
+            .ForMember(dest => dest.Ccenglish, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccenglish));
+
+
 
 
 
