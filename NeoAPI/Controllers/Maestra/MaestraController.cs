@@ -504,7 +504,7 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetFechaTrabajoXFecha/{f1:DateTime}/{f2:DateTime}")] 
-        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXIdMaster(DateTime f1, DateTime f2) 
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXFecha(DateTime f1, DateTime f2) 
         {
 
             List<FechaProg> data = await this._context.FechaProgs
