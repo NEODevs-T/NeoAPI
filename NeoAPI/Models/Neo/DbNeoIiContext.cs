@@ -47,6 +47,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<CausaCal> CausaCals { get; set; }
 
+    public virtual DbSet<CausaCalidadV> CausaCalidadVs { get; set; }
+
     public virtual DbSet<Causante> Causantes { get; set; }
 
     public virtual DbSet<Centro> Centros { get; set; }
@@ -591,6 +593,32 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("CCNombre");
+        });
+
+        modelBuilder.Entity<CausaCalidadV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("CausaCalidad_V");
+
+            entity.Property(e => e.CausaDeLaCalidad)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Causa de la Calidad ");
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.División)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaDeReunion)
+                .HasColumnType("datetime")
+                .HasColumnName("Fecha de Reunion");
+            entity.Property(e => e.Idcausa).HasColumnName("IDCausa");
+            entity.Property(e => e.Idregistro).HasColumnName("IDRegistro");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Causante>(entity =>
