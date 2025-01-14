@@ -43,11 +43,11 @@ public partial class Reunion
 
     public string? Rdobs { get; set; }
 
-    public DateTime? RdfecCrea { get; set; }
+    public DateTime RdfecCrea { get; set; }
 
     public int IdCausaCal { get; set; }
 
-    public int IdOrigen { get; set; }
+    public string OrigenCal { get; set; } = null!;
 
     public int IdTipReu { get; set; }
 
