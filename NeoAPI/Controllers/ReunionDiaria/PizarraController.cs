@@ -597,7 +597,7 @@ List<CambiReuV> disc = await _context.CambiReuVs
             bdDiscrep.Rdtiempo = d.Rdtiempo;
             bdDiscrep.IdMaster = d.IdMaster;
             bdDiscrep.IdEmpresa = d.IdEmpresa;
-            bdDiscrep.IdOrigen = 0;
+            bdDiscrep.OrigenCal = "N/A";
 
             /* 
             Campos faltantes
