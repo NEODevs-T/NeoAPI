@@ -43,7 +43,7 @@ public partial class Reunion
 
     public string? Rdobs { get; set; }
 
-    public DateTime RdfecCrea { get; set; }
+    public DateTime? RdfecCrea { get; set; }
 
     public int IdCausaCal { get; set; }
 
