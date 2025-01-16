@@ -47,7 +47,7 @@ public partial class Reunion
 
     public int IdCausaCal { get; set; }
 
-    public string OrigenCal { get; set; } = null!;
+    public string? OrigenCal { get; set; }
 
     public int IdTipReu { get; set; }
 
