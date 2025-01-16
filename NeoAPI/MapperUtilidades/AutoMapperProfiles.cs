@@ -13,6 +13,7 @@ using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.PNC;
 using NeoAPI.ModelsDOCIng;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
 
 
 namespace NeoAPI.AutoMapper
@@ -195,6 +196,9 @@ namespace NeoAPI.AutoMapper
             .ForMember(dest => dest.Ccfecha, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccfecha))
             .ForMember(dest => dest.Ccestado, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccestado))
             .ForMember(dest => dest.Ccenglish, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccenglish));
+            
+
+            CreateMap<CausaCalidadVDTO, CausaCalidadV>().ReverseMap();
 
 
 

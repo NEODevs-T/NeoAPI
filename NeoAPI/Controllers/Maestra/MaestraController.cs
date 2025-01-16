@@ -696,6 +696,16 @@ namespace NeoAPI.Controllers.Maestras
 
             return Ok(CD);
         }
+
+        [HttpGet("GetCausaCalidad/{Idcausa:int}")]
+        public async Task<ActionResult<List<CausaCalidadVDTO>>> GetCausaCalidad(int Idcausa)
+        {
+            List<CausaCalidadV> data = await this._context.CausaCalidadVs.Where(l => l.Idcausa == Idcausa && l.Estado == true).ToListAsync();
+            return Ok(_mapper.Map<List<CausaCalidadVDTO>>(data));
+        }
+
+
+
     }
 
 }
