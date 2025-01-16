@@ -533,7 +533,7 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpPut("UpdateFechaTrabajo/{id:int}")]
-        public async Task<ActionResult<bool>> UpdateDiscrepancia2(FechaProgDTO d, int id)
+        public async Task<ActionResult<bool>> UpdateFechaTrabajo(FechaProgDTO d, int id)
         {
             if (d?.IdMaster == null)
             {
@@ -551,7 +551,7 @@ namespace NeoAPI.Controllers.Maestras
             // Guardar los cambios sin usar Update
             bool isUpdated = await _context.SaveChangesAsync() > 0;
 
-            return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
+            return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la fecha.");
 
         }
 
