@@ -50,6 +50,8 @@ public partial class ReunionDTO
     public string OrigenCal { get; set; } = null!;
 
     public int IdTipReu { get; set; }
+    
+    public string? RdcodRequi { get; set; }
 
     public string? Ksf {get; set; }
     
