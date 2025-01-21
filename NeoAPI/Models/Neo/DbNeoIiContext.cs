@@ -2134,6 +2134,9 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Reunion", "reu");
 
+            entity.Property(e => e.OrigenCal)
+                .HasMaxLength(100)
+                .IsUnicode(false);
             entity.Property(e => e.Rdarea)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -2150,6 +2153,10 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("RDCodEq");
+            entity.Property(e => e.RdcodRequi)
+                .HasMaxLength(15)
+                .IsUnicode(false)
+                .HasColumnName("RDCodRequi");
             entity.Property(e => e.Rddisc)
                 .HasMaxLength(250)
                 .IsUnicode(false)

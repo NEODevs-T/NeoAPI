@@ -9,11 +9,11 @@ public partial class CambStat
 
     public int IdReuDia { get; set; }
 
-    public DateTime? Cbfecha { get; set; }
+    public DateTime Cbfecha { get; set; }
 
-    public string? Cbstat { get; set; }
+    public string Cbstat { get; set; } = null!;
 
-    public string? Cbuser { get; set; }
+    public string Cbuser { get; set; } = null!;
 
     public virtual Reunion IdReuDiaNavigation { get; set; } = null!;
 }
