@@ -3,12 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using AutoMapper;
 using NeoAPI.DTOs.Maestra;
+using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Models.Neo;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using Microsoft.Data.SqlClient;
 using NeoAPI.Logic.ReunionDia;
 using NeoAPI.Logic.Global;
 using NeoAPI.Interface;
+using NeoAPI.Controllers.Pizarra;
 
 namespace NeoAPI.Controllers.Maestras
 {
@@ -22,6 +24,7 @@ namespace NeoAPI.Controllers.Maestras
         private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
         private readonly DbNeoIiContext _neoVieja;
+        private IReunionDiaLogic logic;
 
         public MaestraController(DbNeoIiContext DbNeo, IMapper maper, DbNeoIiContext neoVieja)
         {
@@ -113,7 +116,7 @@ namespace NeoAPI.Controllers.Maestras
             return Ok(_mapper.Map<List<CentrosVDTO>>(centro));
         }
 
-        
+
         [HttpGet("GetAllCentros/")]
         public async Task<ActionResult<List<CentrosVDTO>>> GetAllCentros()
         {
@@ -458,64 +461,64 @@ namespace NeoAPI.Controllers.Maestras
         }
 
 
-        
-        [HttpGet("GetempresaporIdPais/{IdPais:int}")] 
-        public async Task<ActionResult<List<MaestraVDTO>>> GetempresaporIdPais(int IdPais) 
+
+        [HttpGet("GetempresaporIdPais/{IdPais:int}")]
+        public async Task<ActionResult<List<MaestraVDTO>>> GetempresaporIdPais(int IdPais)
         {
 
             List<MaestraV> data = await this._context.MaestraVs
-                .Where(l => l.IdPais == IdPais) 
+                .Where(l => l.IdPais == IdPais)
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<MaestraVDTO>>(data));
         }
 
-        [HttpGet("GetFechaTrabajo")] 
-        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajo() 
+        [HttpGet("GetFechaTrabajo")]
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajo()
         {
 
             List<FechaProg> data = await this._context.FechaProgs
-                .Where(f=> f.Fpestado == true) 
-                .ToListAsync();
-
-            return Ok(_mapper.Map<List<FechaProgDTO>>(data));
-        }
-        
-        [HttpGet("GetFechaTrabajoXId/{idFechaPr:int}")] 
-        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXId(int idFechaPr) 
-        {
-
-            List<FechaProg> data = await this._context.FechaProgs
-                .Where(f=> f.IdFechaPr == idFechaPr) 
+                .Where(f => f.Fpestado == true)
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
         }
 
-        [HttpGet("GetFechaTrabajoXIdMaster/{IdMaster:int}")] 
-        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXIdMaster(int IdMaster) 
+        [HttpGet("GetFechaTrabajoXId/{idFechaPr:int}")]
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXId(int idFechaPr)
         {
 
             List<FechaProg> data = await this._context.FechaProgs
-                .Where(f=> f.IdMaster == IdMaster && f.Fpestado == true) 
+                .Where(f => f.IdFechaPr == idFechaPr)
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
         }
 
-        [HttpGet("GetFechaTrabajoXFecha/{f1:DateTime}/{f2:DateTime}")] 
-        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXFecha(DateTime f1, DateTime f2) 
+        [HttpGet("GetFechaTrabajoXIdMaster/{IdMaster:int}")]
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXIdMaster(int IdMaster)
         {
 
             List<FechaProg> data = await this._context.FechaProgs
-                .Where(f=> f.Fpprogra >= f1.Date && f.Fpprogra <= f2.AddDays(+1) && f.Fpestado == true) 
+                .Where(f => f.IdMaster == IdMaster && f.Fpestado == true && f.Fpprogra >= DateTime.Now)
+                .ToListAsync();
+
+            return Ok(_mapper.Map<List<FechaProgDTO>>(data));
+        }
+
+        [HttpGet("GetFechaTrabajoXFecha/{f1:DateTime}/{f2:DateTime}/{IdMaster:int}")]
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXFecha(DateTime f1, DateTime f2, int IdMaster)
+        {
+
+            List<FechaProg> data = await this._context.FechaProgs
+                .Where(f => f.IdMaster == IdMaster && f.Fpprogra >= f1.Date && f.Fpprogra <= f2.AddDays(+1) && f.Fpestado == true)
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
         }
 
         [HttpPost("AddFechaTrabajo")]
-        public async Task<ActionResult<bool>>  AddFechaTrabajo(List<FechaProgDTO> newFecha)
+        public async Task<ActionResult<bool>> AddFechaTrabajo(List<FechaProgDTO> newFecha)
         {
             try
             {
@@ -539,6 +542,11 @@ namespace NeoAPI.Controllers.Maestras
             {
                 return BadRequest("la maestra no es válido o no se proporcionó.");
             }
+            // Se cambia la fecha programada en las discrepancia registrada con esta misma fecha
+            logic = new ReunionDiaLogic(_context);
+            List<ReunionDTO> reu = await logic.GetPendientesxFechaProgramada(d.IdMaster, d.Fpprogra);
+            logic.UpdateDiscrepanciaXFechaP(reu, d.Fpprogra);
+
             var entity = await _context.FechaProgs.FirstOrDefaultAsync(sh => sh.IdFechaPr == id);
             if (entity == null)
             {

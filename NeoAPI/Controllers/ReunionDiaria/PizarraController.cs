@@ -337,6 +337,7 @@ public class PizarraController : ControllerBase
         return Ok(_mapper.Map<List<ReunionDTO>>(disc));
 
     }
+
     [HttpGet("GetPendientesQuincenal/{idcentro}/{iddiv}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal(string idcentro, string iddiv)
     {
@@ -346,7 +347,7 @@ public class PizarraController : ControllerBase
         List<CambFec> filt = await getDiv.GetPendientesQuincenal(centrodiv);
         List<Reunion> disc = new List<Reunion>();
 
-        foreach(var iten in filt)
+        foreach (var iten in filt)
         {
             List<Reunion> discs = await _context.Reunions
                 .Include(b => b.IdksfNavigation)
@@ -371,9 +372,9 @@ public class PizarraController : ControllerBase
         string div = centrodiv.Dnombre;
         int reunionDiaria = 1;
 
-List<CambiReuV> disc = await _context.CambiReuVs
-    .Where(h => h.Centro == centro && h.Division == div && h.TipoReunion == reunionDiaria && h.FechaTrabajo.Date >= DateTime.Now.AddMonths(-3) && (h.Estado == "Pendiente" || h.Estado == "Pendiente/Responsable" || h.Estado == "Listo"))
-    .ToListAsync();
+        List<CambiReuV> disc = await _context.CambiReuVs
+            .Where(h => h.Centro == centro && h.Division == div && h.TipoReunion == reunionDiaria && h.FechaTrabajo.Date >= DateTime.Now.AddMonths(-3) && (h.Estado == "Pendiente" || h.Estado == "Pendiente/Responsable" || h.Estado == "Listo"))
+            .ToListAsync();
 
 
         if (disc == null)
@@ -434,7 +435,7 @@ List<CambiReuV> disc = await _context.CambiReuVs
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
-                .ToListAsync(); 
+                .ToListAsync();
 
             }
 
@@ -640,6 +641,7 @@ List<CambiReuV> disc = await _context.CambiReuVs
         return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la discrepancia.");
 
     }
+
     //obtener discrepancia a editar
     [HttpGet("GetDiscrepantacia/{id:int}")]
     public async Task<ActionResult<ReunionDTO>> GetDiscrepantacia(int id)

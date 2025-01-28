@@ -4,6 +4,7 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.Models.Neo;
 using NeoAPI.Interface;
 using NeoAPI.DTOs.ReunionDiaria;
+using AutoMapper;
 
 namespace NeoAPI.Logic.ReunionDia;
 
@@ -11,6 +12,7 @@ public class ReunionDiaLogic : IReunionDiaLogic
 {
     public Master? centrodiscrepancia { get; set; } = new Master();
     private readonly DbNeoIiContext _neocontext;
+    private readonly IMapper _mapper;
 
     public ReunionDiaLogic(DbNeoIiContext DbNeo)
     {
@@ -105,7 +107,7 @@ public class ReunionDiaLogic : IReunionDiaLogic
 
         List<CambFec> result = new List<CambFec>();
 
-        foreach(var iten in discs)
+        foreach (var iten in discs)
         {
             List<CambFec> filt = await _neocontext.CambFecs
                 .Where(h => h.IdReuDia == iten.IdReuDia)
@@ -132,5 +134,45 @@ public class ReunionDiaLogic : IReunionDiaLogic
             Cnom = centrodiscrepancia.IdCentroNavigation.Cnom,
             Dnombre = centrodiscrepancia.IdDivisionNavigation.Dnombre
         };
+    }
+
+    public async Task<List<ReunionDTO>> GetPendientesxFechaProgramada(int idmaster, DateTime FechaP)
+    {
+        List<Reunion> disc = await _neocontext.Reunions
+            .Include(b => b.IdksfNavigation)
+            .Include(b => b.IdResReuNavigation)
+            .Where(h => h.RdcodDis == "2" && h.RdfecReu.Date == FechaP.Date)
+            .ToListAsync();
+        if (disc == null)
+            throw new Exception("not found!");
+
+        return _mapper.Map<List<ReunionDTO>>(disc);
+
+    }
+
+    public async Task<bool> UpdateDiscrepanciaXFechaP(List<ReunionDTO> Reu, DateTime FechaP)
+    {
+        bool isUpdated = false;
+        if (Reu.Count() > 0)
+        {
+            return isUpdated = false;
+        }
+        else
+        {
+            foreach (var d in Reu)
+            {
+                var entity = await _neocontext.Reunions.FirstOrDefaultAsync(sh => sh.IdReuDia == d.IdReuDia);
+                d.RdfecReu = FechaP;
+
+                // Mapeo de los cambios de d a la entidad cargada
+                _mapper.Map(d, entity);
+                await _neocontext.SaveChangesAsync();
+            }
+
+            return isUpdated = true;
+        }
+
+        return isUpdated ? true : false;
+
     }
 }
