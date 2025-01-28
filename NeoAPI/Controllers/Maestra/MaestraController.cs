@@ -535,18 +535,13 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
-        [HttpPut("UpdateFechaTrabajo/{id:int}")]
+                [HttpPut("UpdateFechaTrabajo/{id:int}")]
         public async Task<ActionResult<bool>> UpdateFechaTrabajo(FechaProgDTO d, int id)
         {
             if (d?.IdMaster == null)
             {
                 return BadRequest("la maestra no es válido o no se proporcionó.");
             }
-            // Se cambia la fecha programada en las discrepancia registrada con esta misma fecha
-            logic = new ReunionDiaLogic(_context);
-            List<ReunionDTO> reu = await logic.GetPendientesxFechaProgramada(d.IdMaster, d.Fpprogra);
-            logic.UpdateDiscrepanciaXFechaP(reu, d.Fpprogra);
-
             var entity = await _context.FechaProgs.FirstOrDefaultAsync(sh => sh.IdFechaPr == id);
             if (entity == null)
             {
@@ -562,6 +557,34 @@ namespace NeoAPI.Controllers.Maestras
             return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la fecha.");
 
         }
+
+        // [HttpPut("UpdateFechaTrabajo/{id:int}")]
+        // public async Task<ActionResult<bool>> UpdateFechaTrabajo(FechaProgDTO d, int id)
+        // {
+        //     if (d?.IdMaster == null)
+        //     {
+        //         return BadRequest("la maestra no es válido o no se proporcionó.");
+        //     }
+        //     // Se cambia la fecha programada en las discrepancia registrada con esta misma fecha
+        //     logic = new ReunionDiaLogic(_context);
+        //     List<ReunionDTO> reu = await logic.GetPendientesxFechaProgramada(d.IdMaster, d.Fpprogra);
+        //     logic.UpdateDiscrepanciaXFechaP(reu, d.Fpprogra);
+
+        //     var entity = await _context.FechaProgs.FirstOrDefaultAsync(sh => sh.IdFechaPr == id);
+        //     if (entity == null)
+        //     {
+        //         return NotFound("La entidad no fue encontrada.");
+        //     }
+
+        //     // Mapeo de los cambios de d a la entidad cargada
+        //     _mapper.Map(d, entity);
+
+        //     // Guardar los cambios sin usar Update
+        //     bool isUpdated = await _context.SaveChangesAsync() > 0;
+
+        //     return isUpdated ? Ok(true) : StatusCode(500, "No se pudo actualizar la fecha.");
+
+        // }
 
         [HttpGet("GetHistoricos/{centro}/{division}/{tipo:int}")]
         public async Task<ActionResult<CentroDivisionDTO>> GetCentroDiv(string centro, string division, int tipo)
