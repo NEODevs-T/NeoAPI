@@ -500,7 +500,7 @@ namespace NeoAPI.Controllers.Maestras
         {
 
             List<FechaProg> data = await this._context.FechaProgs
-                .Where(f => f.IdMaster == IdMaster && f.Fpestado == true && f.Fpprogra >= DateTime.Now)
+                .Where(f => f.IdMaster == IdMaster && f.Fpestado == true && f.Fpprogra.Date >= DateTime.Now.Date)
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
@@ -511,7 +511,7 @@ namespace NeoAPI.Controllers.Maestras
         {
 
             List<FechaProg> data = await this._context.FechaProgs
-                .Where(f => f.IdMaster == IdMaster && f.Fpprogra >= f1.Date && f.Fpprogra <= f2.AddDays(+1) && f.Fpestado == true)
+                .Where(f => f.IdMaster == IdMaster && f.Fpprogra >= f1.Date && f.Fpprogra <= f2.Date && f.Fpestado == true)
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
@@ -535,7 +535,7 @@ namespace NeoAPI.Controllers.Maestras
             }
         }
 
-                [HttpPut("UpdateFechaTrabajo/{id:int}")]
+        [HttpPut("UpdateFechaTrabajo/{id:int}")]
         public async Task<ActionResult<bool>> UpdateFechaTrabajo(FechaProgDTO d, int id)
         {
             if (d?.IdMaster == null)
