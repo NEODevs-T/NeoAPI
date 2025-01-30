@@ -116,7 +116,7 @@ public class PizarraController : ControllerBase
 
                 reudiatablas = await _context.Reunions
                 //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1))))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado" && a.Rdstatus != "Rechazada") && (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
@@ -128,7 +128,7 @@ public class PizarraController : ControllerBase
 
                 reudiatablas = await _context.Reunions
                 //.Where(a =>  (a.Div == centro & a.Division==div ) | (a.Div == centro & a.Division == div & (a.Fecha>= f1 & a.Fecha <= f2)))
-                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado") && (a.RdfecReu >= f1.Date && a.RdfecReu <= f2.AddDays(+1))))
+                .Where(a => (a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && (a.Rdstatus != "Listo" && a.Rdstatus != "Cerrado" && a.Rdstatus != "Rechazada") && (a.RdfecReu >= f1.Date && a.RdfecReu <= f2.AddDays(+1))))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
