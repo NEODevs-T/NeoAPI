@@ -14,7 +14,9 @@ public partial class CargoReuDTO
 
     public string Crempresa { get; set; } = null!;
 
-    public string? Crarea { get; set; }
+    public string Crarea { get; set; } = null!;
 
-    public int? Crbloque { get; set; }
+    public int IdTipReu { get; set; }
+
+    public int Crbloque { get; set; }
 }
