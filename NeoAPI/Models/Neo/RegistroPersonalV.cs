@@ -36,4 +36,10 @@ public partial class RegistroPersonalV
     public int? Mescalon { get; set; }
 
     public double? Mmonto { get; set; }
+
+    public string? TipoDeIncidencia { get; set; }
+
+    public string? TipoDeSuplencia { get; set; }
+
+    public string? Suplido { get; set; }
 }

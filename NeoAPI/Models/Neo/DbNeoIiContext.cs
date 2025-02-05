@@ -1170,6 +1170,10 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.Lnfecha)
                 .HasColumnType("datetime")
                 .HasColumnName("LNFecha");
+            entity.Property(e => e.LnfichSupe)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("LNFichSupe");
             entity.Property(e => e.LnfichaRes)
                 .HasMaxLength(10)
                 .IsUnicode(false)
@@ -1982,6 +1986,17 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.Puesto)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+            entity.Property(e => e.Suplido)
+                .HasMaxLength(8)
+                .IsUnicode(false);
+            entity.Property(e => e.TipoDeIncidencia)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Incidencia");
+            entity.Property(e => e.TipoDeSuplencia)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Suplencia");
         });
 
         modelBuilder.Entity<RespoReu>(entity =>

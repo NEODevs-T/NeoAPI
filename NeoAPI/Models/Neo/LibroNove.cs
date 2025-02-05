@@ -39,6 +39,8 @@ public partial class LibroNove
 
     public int IdMaster { get; set; }
 
+    public string? LnfichSupe { get; set; }
+
     public virtual AreaCarga IdAreaCarNavigation { get; set; } = null!;
 
     public virtual ClasifiTpm IdCtpmNavigation { get; set; } = null!;

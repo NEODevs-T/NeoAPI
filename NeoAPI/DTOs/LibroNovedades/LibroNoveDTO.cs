@@ -40,6 +40,8 @@ public class LibroNoveDTO
 
     public int IdMaster { get; set; }
 
+    public string? LnfichSupe { get; set; }
+
     public string? Linea { get; set; } = null!;
 
     public string? AreaCarga { get; set; } = null!;
