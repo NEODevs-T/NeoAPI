@@ -337,6 +337,27 @@ public class PizarraController : ControllerBase
         return Ok(_mapper.Map<List<ReunionDTO>>(disc));
 
     }
+    [HttpGet("GetPendienteslibro/{idcentro}/{iddiv}")]
+    public async Task<ActionResult<List<ReunionDTO>>> GetPendienteslibro(string idcentro, string iddiv)
+    {
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
+        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+        string centro = centrodiv.Cnom;
+        string div = centrodiv.Dnombre;
+        int reunionDiaria = 1;
+
+        List<Reunion> disc = await _context.Reunions
+            .Include(b => b.IdksfNavigation)
+            .Include(b => b.IdResReuNavigation)
+            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionDiaria && h.IdResReu == 11 && h.RdfecReu.Date >= DateTime.Now.AddMonths(-3))
+            .ToListAsync();
+        if (disc == null)
+            throw new Exception("not found!");
+        return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+
+    }
 
     [HttpGet("GetPendientesQuincenal/{idcentro}/{iddiv}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal(string idcentro, string iddiv)
