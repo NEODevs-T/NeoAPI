@@ -690,8 +690,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendienteslibros(string idc
         await _context.SaveChangesAsync();
         return Ok(data.IdReuDia);
     }
-[HttpGet("GetPendienteslibrosKSF/{idcentro}/{iddiv}")]
-public async Task<ActionResult<List<ReunionDTO>>> GetPendienteslibrosKSF(string idcentro, string iddiv)
+[HttpGet("GetPendientesdeTurnoADiaria/{idcentro}/{iddiv}")]
+public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeTurnoADiaria(string idcentro, string iddiv)
 {
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
