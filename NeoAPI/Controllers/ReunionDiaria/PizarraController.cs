@@ -328,26 +328,46 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendienteslibros(string idc
         return Ok(_mapper.Map<List<ReunionDTO>>(disc));
 
     }
-    [HttpGet("GetPendientesQuincenal2/{idcentro}/{iddiv}")]
-    public async Task<ActionResult<List<CambiReuVDTO>>> GetPendientesQuincenal2(string idcentro, string iddiv)
-    {
-        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-        string centro = centrodiv.Cnom;
-        string div = centrodiv.Dnombre;
-        int reunionDiaria = 1;
 
-        List<CambiReuV> disc = await _context.CambiReuVs
-            .Where(h => h.Centro == centro && h.Division == div && h.TipoReunion == reunionDiaria && h.FechaTrabajo.Date >= DateTime.Now.AddMonths(-3) && (h.Estado == "Pendiente" || h.Estado == "Pendiente/Responsable" || h.Estado == "Listo"))
-            .ToListAsync();
+[HttpGet("GetPendientesQuincenal2/{idcentro}/{iddiv}")]
+public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string idcentro, string iddiv)
+{
+    IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+    if (centrodiv == null)
+        return NotFound("Centro o división no encontrados.");
+
+    string centro = centrodiv.Cnom;
+    string div = centrodiv.Dnombre;
+    int reunionDiaria = 1; // Tipo de reunión 1 (diaria/quincenal)
+
+    DateTime fechaInicioReu = DateTime.Now.AddDays(-7); // 1 semana antes
+    DateTime fechaFinReu = DateTime.Now.AddDays(7);  // 1 semana después
+    DateTime fechaInicioTra = DateTime.Now.Date; // Hoy
+    DateTime fechaFinTra = DateTime.Now.AddMonths(3).Date; // Próximos 3 meses
+
+    List<Reunion> reuniones = await _context.Reunions
+        .Include(b => b.IdksfNavigation)
+        .Include(b => b.IdResReuNavigation)
+        .Where(h => h.Rdcentro == centro &&
+                    h.Rddiv == div &&
+                    h.IdTipReu == reunionDiaria &&
+                    h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
+                    h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
+                    h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
+                     h.RdfecTra.Date <= fechaFinTra && // Hasta dentro de 3 meses
+                    (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
+    .ToListAsync();
+
+    if (reuniones == null || reuniones.Count == 0)
+        return NotFound("No hay reuniones pendientes en el período indicado.");
+
+    return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
+}
 
 
-        if (disc == null)
-            throw new Exception("not found!");
-        return Ok(_mapper.Map<List<CambiReuVDTO>>(disc));
 
-    }
 
     [HttpGet("GetPendientesTurnoPrueba/{idcentro}/{iddiv}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetPendientesTurnoPrueba(string idcentro, string iddiv)
@@ -595,15 +615,97 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeTurnoADiaria(st
         .Include(b => b.IdResReuNavigation)
         .Where(h => h.Rdcentro == centro 
                     && h.Rddiv == div 
-                    && h.IdTipReu == reunionTurno   // 🔹 Solo reuniones de Turno (2)
-                    && h.Idksf == 29                // 🔹 Solo donde Idksf == 29
-                    && h.Rdstatus == "Pendiente")   // 🔹 Solo reuniones pendientes
+                    && h.IdTipReu == reunionTurno   //  Solo reuniones de Turno (2)
+                    && h.Idksf == 29                //  Solo donde Idksf == 29
+                    && h.Rdstatus == "Pendiente")   //  Solo reuniones pendientes
         .ToListAsync();
 
     if (disc == null)
         throw new Exception("not found!");
 
     return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+}
+
+[HttpGet("GetPendientesdeDiariaAQuincenal/{idcentro}/{iddiv}")]
+public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeDiariaAQuincenal(string idcentro, string iddiv)
+{
+    IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+    string centro = centrodiv.Cnom;
+    string div = centrodiv.Dnombre;
+    int reunionDiaria = 1;
+
+    List<Reunion> disc = await _context.Reunions
+        .Include(b => b.IdksfNavigation)
+        .Include(b => b.IdResReuNavigation)
+        .Where(h => h.Rdcentro == centro 
+                    && h.Rddiv == div 
+                    && h.IdTipReu == reunionDiaria   //  Solo reuniones Diaria (1)
+                    && h.Idksf == 29               //  Solo donde Idksf == 6
+                    && (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable"))   //  Solo reuniones pendientes
+        .ToListAsync();
+
+    if (disc == null)
+        throw new Exception("not found!");
+
+    return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+}
+
+[HttpGet("GetReunionesTrabajoVencidas/{idcentro}/{iddiv}")]
+public async Task<ActionResult<List<ReunionDTO>>> GetReunionesTrabajoVencidas(string idcentro, string iddiv)
+{
+    IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+    if (centrodiv == null)
+        return NotFound("Centro o división no encontrados.");
+
+    string centro = centrodiv.Cnom;
+    string div = centrodiv.Dnombre;
+    int reunionDiaria = 1; // Solo reuniones con IdTipReu = 1
+
+    DateTime fechaActual = DateTime.Now.Date; // Se usa Date para ignorar la hora
+
+    List<Reunion> reuniones = await _context.Reunions
+        .Include(b => b.IdksfNavigation)
+        .Include(b => b.IdResReuNavigation)
+        .Where(h => h.Rdcentro == centro &&
+                    h.Rddiv == div &&
+                    h.IdTipReu == reunionDiaria &&
+                    h.RdfecTra.Date < fechaActual && // Solo reuniones con fecha de trabajo vencida
+                    (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo" )) // Filtra solo los estados específicos
+        .ToListAsync();
+
+    if (reuniones == null)
+        throw new Exception("not found!");
+
+    return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
+}
+
+[HttpGet("GetReunionesPorCodigodeCompra")]
+public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(string idcentro, string iddiv)
+{
+    DateTime fechaInicioReu = DateTime.Now.AddDays(-7); // 1 semana antes
+    DateTime fechaFinReu = DateTime.Now.AddDays(7);  // 1 semana después
+    DateTime fechaInicioTra = DateTime.Now.Date; // Desde hoy
+    DateTime fechaFinTra = DateTime.Now.AddMonths(1).Date; // Hasta dentro de 1 mes
+
+    List<Reunion> reuniones = await _context.Reunions
+        .Include(b => b.IdksfNavigation)
+        .Include(b => b.IdResReuNavigation)
+        .Where(h => h.RdcodDis == "3" && // Código de disciplina = 3
+                    h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
+                    h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
+                    h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
+                    h.RdfecTra.Date <= fechaFinTra && // Hasta dentro de 1 mes
+                    (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo" )) // Filtra solo los estados específicos
+        .ToListAsync();
+
+    if (reuniones == null || !reuniones.Any())
+        throw new Exception("not found!");
+
+    return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
 }
 
 
