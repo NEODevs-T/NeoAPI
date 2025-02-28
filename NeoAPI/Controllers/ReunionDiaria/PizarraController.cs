@@ -686,6 +686,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
 
     string centro = centrodiv.Cnom;
     string div = centrodiv.Dnombre;
+    int reunionDiaria = 1;
 
     DateTime fechaInicioReu = DateTime.Now.AddDays(-7); // 1 semana antes
     DateTime fechaFinReu = DateTime.Now.AddDays(7);  // 1 semana después
@@ -698,6 +699,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
         .Where(h => h.Rdcentro == centro && // Filtra por centro
                     h.Rddiv == div && // Filtra por división
                     h.RdcodDis == "3" && // Código de disciplina = 3
+                    h.IdTipReu == reunionDiaria &&
                     h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
                     h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
                     h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
