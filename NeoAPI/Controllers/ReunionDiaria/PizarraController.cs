@@ -335,9 +335,6 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
-    if (centrodiv == null)
-        return NotFound("Centro o división no encontrados.");
-
     string centro = centrodiv.Cnom;
     string div = centrodiv.Dnombre;
     int reunionDiaria = 1; // Tipo de reunión 1 (diaria/quincenal)
@@ -360,8 +357,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
     .ToListAsync();
 
-    if (reuniones == null || reuniones.Count == 0)
-        return NotFound("No hay reuniones pendientes en el período indicado.");
+   if (reuniones == null)
+        throw new Exception("not found!");
 
     return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
 }
@@ -658,8 +655,6 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesTrabajoVencidas(st
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
-    if (centrodiv == null)
-        return NotFound("Centro o división no encontrados.");
 
     string centro = centrodiv.Cnom;
     string div = centrodiv.Dnombre;
@@ -683,9 +678,15 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesTrabajoVencidas(st
     return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
 }
 
-[HttpGet("GetReunionesPorCodigodeCompra")]
+[HttpGet("GetReunionesPorCodigodeCompra/{idcentro}/{iddiv}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(string idcentro, string iddiv)
 {
+    IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+
+    string centro = centrodiv.Cnom;
+    string div = centrodiv.Dnombre;
+
     DateTime fechaInicioReu = DateTime.Now.AddDays(-7); // 1 semana antes
     DateTime fechaFinReu = DateTime.Now.AddDays(7);  // 1 semana después
     DateTime fechaInicioTra = DateTime.Now.Date; // Desde hoy
@@ -694,17 +695,20 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
     List<Reunion> reuniones = await _context.Reunions
         .Include(b => b.IdksfNavigation)
         .Include(b => b.IdResReuNavigation)
-        .Where(h => h.RdcodDis == "3" && // Código de disciplina = 3
+        .Where(h => h.Rdcentro == centro && // Filtra por centro
+                    h.Rddiv == div && // Filtra por división
+                    h.RdcodDis == "3" && // Código de disciplina = 3
                     h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
                     h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
                     h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
                     h.RdfecTra.Date <= fechaFinTra && // Hasta dentro de 1 mes
-                    (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo" )) // Filtra solo los estados específicos
+                    (h.Rdstatus == "Pendiente" || 
+                     h.Rdstatus == "Listo" || 
+                     h.Rdstatus == "Pendiente/Responsable")) // Filtra solo los estados específicos
         .ToListAsync();
 
-    if (reuniones == null || !reuniones.Any())
+   if (reuniones == null)
         throw new Exception("not found!");
-
     return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
 }
 
