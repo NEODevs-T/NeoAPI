@@ -639,7 +639,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeDiariaAQuincena
         .Where(h => h.Rdcentro == centro 
                     && h.Rddiv == div 
                     && h.IdTipReu == reunionDiaria   //  Solo reuniones Diaria (1)
-                    && h.Idksf == 29               //  Solo donde Idksf == 6
+                    && h.Idksf == 6               //  Solo donde Idksf == 6
                     && (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable"))   //  Solo reuniones pendientes
         .ToListAsync();
 
