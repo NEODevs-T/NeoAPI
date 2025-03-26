@@ -353,7 +353,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
                     h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
                     h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
                     h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
-                     h.RdfecTra.Date <= fechaFinTra && // Hasta dentro de 3 meses
+                     h.RdfecTra.Date >= fechaFinTra && // Nueva condición: desde dentro de 3 mes en adelante
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
     .ToListAsync();
 
@@ -422,7 +422,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro,
                 .AsNoTracking()
                 .ToListAsync();
         }
-        else if (estado == "Pendiente-Responsable")
+        else if (estado == "Pendiente/Responsable")
         {
             reudiatablas = await _context.Reunions
                 .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
@@ -670,6 +670,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesTrabajoVencidas(st
                     h.IdTipReu == reunionDiaria &&
                     h.RdfecTra.Date < fechaActual && // Solo reuniones con fecha de trabajo vencida
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo" )) // Filtra solo los estados específicos
+                    .OrderBy(h => h.RdfecTra) // Ordena por fecha de trabajo de más viejo a más nuevo
         .ToListAsync();
 
     if (reuniones == null)
@@ -703,7 +704,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
                     h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
                     h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
                     h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
-                    h.RdfecTra.Date <= fechaFinTra && // Hasta dentro de 1 mes
+                    h.RdfecTra.Date >= fechaFinTra && // Nueva condición: desde dentro de 1 mes en adelante
                     (h.Rdstatus == "Pendiente" || 
                      h.Rdstatus == "Listo" || 
                      h.Rdstatus == "Pendiente/Responsable")) // Filtra solo los estados específicos
