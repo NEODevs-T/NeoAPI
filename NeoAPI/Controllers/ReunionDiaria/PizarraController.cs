@@ -388,10 +388,14 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
 
     }
 
-    //historicos
+// históricos
 [HttpGet("GetHistoricos/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
-public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
+public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(
+    string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
 {
+    // 🔥 Decodificar el parámetro estado 🔥
+    estado = Uri.UnescapeDataString(estado);
+
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
     List<Reunion> reudiatablas = new List<Reunion>();
@@ -403,9 +407,9 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro,
         if (estado == "Total Pendiente")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
-                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable") && 
-                            a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) && 
+                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
+                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable") &&
+                            a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) &&
                             a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -415,19 +419,9 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro,
         else if (estado == "Todo")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
-                            a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) && a.Rdstatus != "En Curso")
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .AsNoTracking()
-                .ToListAsync();
-        }
-        else if (estado == "Pendiente/Responsable")
-        {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
-                            a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) && 
-                            a.Rdstatus == "Pendiente/Responsable" && a.Rdstatus != "En Curso")
+                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
+                            a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) &&
+                            a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -436,8 +430,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro,
         else
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
-                            a.Rdstatus == estado && a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) && 
+                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
+                            a.Rdstatus == estado && a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) &&
                             a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -450,9 +444,10 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro,
         if (estado == "Total Pendiente")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
-                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable") && 
-                            a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(1) && a.Rdstatus != "En Curso")
+                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
+                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable") &&
+                            a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(1) &&
+                            a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -461,8 +456,9 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro,
         else if (estado == "Todo")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
-                            a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(1) && a.Rdstatus != "En Curso")
+                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
+                            a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(1) &&
+                            a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .AsNoTracking()
@@ -471,8 +467,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(string idcentro,
         else
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div && 
-                            a.Rdstatus == estado && a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(1) && 
+                .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
+                            a.Rdstatus == estado && a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(1) &&
                             a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
