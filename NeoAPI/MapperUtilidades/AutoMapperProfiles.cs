@@ -183,6 +183,10 @@ namespace NeoAPI.AutoMapper
 
 
 
+            CreateMap<EquipoEamDTO, EquipoEam>().ReverseMap();
+
+
+
             // Reunion De Turno
 
 

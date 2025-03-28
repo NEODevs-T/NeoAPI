@@ -712,4 +712,20 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
 }
 
 
+[HttpGet("GetNombreEquioEam/{idLinea:int}/{ecodEquiEam}")]
+public async Task<ActionResult<string>> GetEnombreEam(int idLinea, string ecodEquiEam)
+{
+    var equipo = await _context.EquipoEams
+        .Where(e => e.IdLinea == idLinea && e.EcodEquiEam == ecodEquiEam)
+        .Select(e => e.EnombreEam) // Aquí seleccionamos solo el string
+        .FirstOrDefaultAsync();
+
+    if (equipo == null)
+        throw new Exception("not found!");
+
+    return Ok(equipo); // Devolvemos directamente el string
+}
+
+
+
 }
