@@ -712,20 +712,28 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
 }
 
 
-[HttpGet("GetNombreEquioEam/{idLinea:int}/{ecodEquiEam}")]
-public async Task<ActionResult<string>> GetNombreEquioEam(int idLinea, string ecodEquiEam)
+[HttpGet("GetNombreEquioEam/{idMaster}/{rdCodEq}")]
+public async Task<ActionResult<string>> GetNombreEquioEam(int idMaster, string rdCodEq)
 {
+    // Buscamos la reunión según idMaster y el código de equipo
+    var reunion = await _context.Reunions
+        .FirstOrDefaultAsync(r => r.IdMaster == idMaster && r.RdcodEq == rdCodEq);
+    if (reunion == null)
+        return NotFound("No se encontró una reunión con esos parámetros");
+
+    // Con el RdcodEq obtenido, buscamos el registro en EquipoEam
     var equipo = await _context.EquipoEams
-        .Where(e => e.IdLinea == idLinea && e.EcodEquiEam == ecodEquiEam)
-        .Select(e => e.EnombreEam)
-        .FirstOrDefaultAsync();
-
+        .FirstOrDefaultAsync(e => e.EcodEquiEam == rdCodEq);
     if (equipo == null)
-        throw new Exception("not found!");
+        return NotFound("No se encontró un equipo con ese código");
 
-    return Ok(equipo); 
+    // Si lo prefieres, puedes mapear el objeto a un DTO (opcional)
+    // var equipoDTO = _mapper.Map<EquipoEamDTO>(equipo);
+    // return Ok(equipoDTO.EnombreEam);
+
+    // De lo contrario, retornamos directamente el nombre del equipo
+    return Ok(equipo.EnombreEam);
 }
-
 
 
 }
