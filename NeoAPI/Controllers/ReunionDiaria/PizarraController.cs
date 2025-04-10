@@ -88,7 +88,7 @@ public class PizarraController : ControllerBase
         }
     }
 
-    [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
+[HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
 {
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
@@ -107,7 +107,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"  // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso"
                          && a.Rdstatus != "Listo" 
                          && a.Rdstatus != "Cerrado" 
                          && a.Rdstatus != "Rechazada"
@@ -125,7 +125,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"  // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso"
                          && a.Rdstatus != "Listo" 
                          && a.Rdstatus != "Cerrado" 
                          && a.Rdstatus != "Rechazada"
@@ -146,7 +146,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"  // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso"
                          && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -159,7 +159,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso") // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .OrderByDescending(b => b.RdfecReu)
@@ -172,7 +172,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"  // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso"
                          && a.Rdstatus == estado)
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -189,7 +189,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"  // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso"
                          && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -202,7 +202,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso") // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .OrderByDescending(b => b.RdfecTra)
@@ -215,7 +215,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                 .Where(a => a.Rdcentro == centro 
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"  // EXCLUYE "En Curso"
+                         && a.Rdstatus != "En Curso"
                          && a.Rdstatus == estado)
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
@@ -225,8 +225,25 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
         }
     }
 
-    return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reudiatablas);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+
+            if (equipo != null)
+            {
+                dto.EnombreEam = equipo.EnombreEam;
+            }
+        }
+    }
+
+    return Ok(reunionDtos);
 }
+
 
     [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}/{reunion:int}")]
     public async Task<ActionResult<List<ReunionDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
