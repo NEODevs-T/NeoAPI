@@ -410,7 +410,6 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
 public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(
     string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
 {
-    // 🔥 Decodificar el parámetro estado 🔥
     estado = Uri.UnescapeDataString(estado);
 
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
@@ -493,8 +492,26 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(
                 .ToListAsync();
         }
     }
-    return (_mapper.Map<List<ReunionDTO>>(reudiatablas));
+
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reudiatablas);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+
+            if (equipo != null)
+            {
+                dto.EnombreEam = equipo.EnombreEam;
+            }
+        }
+    }
+
+    return Ok(reunionDtos);
 }
+
 
     // Update Discrepancia
     [HttpPut("UpdateDiscrepancia/{id:int}")]
