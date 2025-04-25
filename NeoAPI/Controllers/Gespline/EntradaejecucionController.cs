@@ -39,8 +39,9 @@ public class EntradaejecucionController : ControllerBase
         return listaCodigoProceso;
     }
 
-      [HttpGet("MaquinasGesplineActivos2turnoDespues0am")]
-    public async Task<List<string>> MaquinasGesplineActivos2turnoDespues0am(){
+    [HttpGet("MaquinasGesplineActivos2turnoDespues0am")]
+    public async Task<List<string>> MaquinasGesplineActivos2turnoDespues0am()
+    {
         DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);//DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
         DateTime final = DateTime.Today.AddHours(6);//new DateTime(2025,04,22,18,0,0);
         List<string> listaCodigoProceso = new List<string>();
@@ -52,5 +53,41 @@ public class EntradaejecucionController : ControllerBase
         }
         return listaCodigoProceso;
     }
+
+    [HttpGet("MaquinasGesplineActivos2turnoAntes0am")]
+
+    public async Task<List<string>> MaquinasGesplineActivos2turnoAntes0am()
+    {
+        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
+        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+        List<string> listaCodigoProceso = new List<string>();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        
+        foreach (var item in listaEjecucion)
+        {
+            listaCodigoProceso.Add(item.CodigotuplaNavigation.Codigoproceso);
+        }
+
+        return listaCodigoProceso;
+
+    }
+
+    [HttpGet("tiempoPerdidoActual1turno")]
+
+  /*  public async Task<List<string>> tiempoPerdidoActual1turno()
+    {
+        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
+        DateTime final = DateTime.Today.AddHours(18);
+        List<string> listaCodigoProceso = new List<string>();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).ToListAsync();
+
+        foreach (var item in listaEjecucion)
+        {
+            listaCodigoProceso.Add(item.CodigosupervisorNavigation.Codidocargospersonal);
+        }
+
+        return listaCodigoProceso;
+    }*/
+
 
 }   
