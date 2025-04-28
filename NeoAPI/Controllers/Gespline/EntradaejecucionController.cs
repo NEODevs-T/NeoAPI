@@ -26,7 +26,8 @@ public class EntradaejecucionController : ControllerBase
     }
 
     [HttpGet("MaquinasGesplineActivos1turno")]
-    public async Task<List<string>> MaquinasGesplineActivos1turno(){
+    public async Task<List<string>> MaquinasGesplineActivos1turno()
+    {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
         DateTime final = DateTime.Today.AddHours(18);//new DateTime(2025,04,22,18,0,0);
         List<string> listaCodigoProceso = new List<string>();
@@ -73,21 +74,37 @@ public class EntradaejecucionController : ControllerBase
     }
 
     [HttpGet("tiempoPerdidoActual1turno")]
-
-  /*  public async Task<List<string>> tiempoPerdidoActual1turno()
+    public async Task<List<string>> TiempoPerdidoActual1turno()
     {
-        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
+    
+        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(18);
-        List<string> listaCodigoProceso = new List<string>();
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).ToListAsync();
-
+        List<string> listaTiempoPerdido = new List<string>();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        
         foreach (var item in listaEjecucion)
         {
-            listaCodigoProceso.Add(item.CodigosupervisorNavigation.Codidocargospersonal);
+        var codigo = item.CodigotuplaNavigation.Codigoproceso;
+        string tiempo = item.Timespan.ToString();
+        listaTiempoPerdido.Add($"{codigo}: {tiempo}");
         }
+        
+        return listaTiempoPerdido;
+    }
 
-        return listaCodigoProceso;
-    }*/
 
 
-}   
+
+    
+
+
+
+
+}
+
+
+
+
+
+
+
