@@ -78,18 +78,54 @@ public class EntradaejecucionController : ControllerBase
     {
     
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
+        
         DateTime final = DateTime.Today.AddHours(18);
+        
         List<string> listaTiempoPerdido = new List<string>();
+        
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
         
         foreach (var item in listaEjecucion)
         {
-        var codigo = item.CodigotuplaNavigation.Codigoproceso;
-        string tiempo = item.Timespan.ToString();
-        listaTiempoPerdido.Add($"{codigo}: {tiempo}");
+        
+            var codigo = item.CodigotuplaNavigation.Codigoproceso;
+        
+            string tiempo = item.Timespan.ToString();
+        
+            listaTiempoPerdido.Add($"{codigo}: {tiempo}");
+        
         }
         
+        
         return listaTiempoPerdido;
+    }
+
+    [HttpGet("tiempoPerdidoActual2turnoAntes0am")]
+
+    public async Task<List<string>> tiempoPerdidoActual2turnoAntes0am()
+    {
+        
+        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
+        
+        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+        
+        List<string> listaTiempoPerdido = new List<string>();
+        
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+
+        foreach (var item in listaEjecucion)
+        {
+        
+            var codigo = item.CodigotuplaNavigation.Codigoproceso;
+        
+            string tiempo = item.Timespan.ToString();
+        
+            listaTiempoPerdido.Add($"{codigo}: {tiempo}");
+        
+        }
+
+        return listaTiempoPerdido;
+
     }
 
 
