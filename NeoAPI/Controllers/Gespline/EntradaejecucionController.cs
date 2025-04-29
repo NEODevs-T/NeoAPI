@@ -327,6 +327,40 @@ public class EntradaejecucionController : ControllerBase
         
     }
 
+    [HttpGet("getParadasActuales1Turno")]
+
+ /*   public async Task<IActionResult> GetParadasActuales1Turno(string centroCosto)
+    {
+
+        DateTime hoy = DateTime.Today;
+        DateTime fechaInicio = DateTime.Today.AddHours(5).AddMinutes(50);
+        DateTime fechaFin = DateTime.Today.AddHours(18);
+
+        var query = from pe in _context.Paradasejecutadas
+        join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
+        join prt in _context.Partes on p.Codigoparada.Substring(0, 3).ToUpper()
+        equals prt.Codigo into partesGroup from prt in partesGroup.DefaultIfEmpty()
+        select new
+       {
+            CodRegistro = pe.CodigoRegistroSO,
+            // Obtenemos CódigoGrupoParada directamente de la tabla Paradas
+            CodigoGrupoParada = p.CodigoGrupoParada,
+            NombreParada = p.NombreParada,
+            TiempoPerdido = ((float)pe.Timespan - (float)pe.FechaYHoraParada) * 1440,
+            ParteNombre = prt != null ? prt.ParteNombre : string.Empty,
+            Codigo = prt != null ? prt.Codigo : string.Empty
+        };
+
+    var resultList = await query.ToListAsync();
+    return Ok(resultList);*/
+}
+        
+
+
+    }
+
+
+
 }
 
 
