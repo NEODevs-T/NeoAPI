@@ -9,6 +9,7 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.Logic.Global;
 using NeoAPI.Controllers.Maestras;
 using NeoAPI.Interface;
+using Microsoft.EntityFrameworkCore.Metadata.Internal;
 
 namespace NeoAPI.Controllers.Gespline;
 
@@ -274,12 +275,57 @@ public class EntradaejecucionController : ControllerBase
 
     // Retornamos el resultado como una lista de strings.
     return resultado.ToList();
-
     
-}
+    }
 
+    [HttpGet("tiempoTrabajadoActual2turno")]
 
+    public async Task<List<string>> tiempoTrabajadoActual2turno(bool band)
+    {
+        
+        List<string> listaEjecutado;
+        List<string> listaPerdido;
 
+        if (band)
+        {
+            
+            listaEjecutado = await tiempoEjecutadoActual2turnoAntes0am();
+
+            listaPerdido = await tiempoPerdidoActual2turnoAntes0am();
+
+        }
+        else
+        {
+
+            listaEjecutado = await tiempoEjecutadoActual2turnoDespues0am();
+
+            listaPerdido = await tiempoPerdidoActual2turnoDespues0am();
+            
+        }
+
+        var ejecutado = listaEjecutado.Select(e =>
+        {
+
+            var parts = e.Split(":");
+            return new { Key = parts[0].Trim(), Value = float.Parse(parts[1].Trim())};
+
+        }).ToList();
+
+        var perdido = listaPerdido.Select(p =>
+        {
+            
+            var parts = p.Split(":");
+            return new { Key = parts[0].Trim(), Value = float.Parse(parts[1].Trim())};
+
+        }).ToList();
+
+        var resultado = (from ej in ejecutado join p in perdido on ej.Key equals p.Key 
+                        into perdGroup from perd in perdGroup.DefaultIfEmpty() 
+                        select $"{ej.Key}: {ej.Value - (perd != null ? perd.Value : 0f)}").ToList();
+
+        return resultado;    
+        
+    }
 
 }
 
