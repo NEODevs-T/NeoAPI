@@ -29,6 +29,8 @@ public partial class GesplineContext : DbContext
 
     public virtual DbSet<Paradasejecutada> Paradasejecutadas { get; set; }
 
+    public virtual DbSet<Parte> Partes { get; set; }
+
     public virtual DbSet<Personal> Personals { get; set; }
 
     public virtual DbSet<Proceso> Procesos { get; set; }
@@ -53,7 +55,10 @@ public partial class GesplineContext : DbContext
 
     public virtual DbSet<Tuplaejecucion> Tuplaejecucions { get; set; }
 
-    
+    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
+#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
+        => optionsBuilder.UseSqlServer("Data Source=10.20.1.60\\DBVEN01;Initial Catalog=SIPDATABASE;TrustServerCertificate=True;Persist Security Info=True;User ID=portaluser;Password=PORT34erySADF");
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.UseCollation("Modern_Spanish_CI_AS");
@@ -362,6 +367,20 @@ public partial class GesplineContext : DbContext
             entity.HasOne(d => d.CodigopersonalatiendeNavigation).WithMany(p => p.Paradasejecutada)
                 .HasForeignKey(d => d.Codigopersonalatiende)
                 .HasConstraintName("FK__PARADASEJ__CODIG__7A3223E8");
+        });
+
+        modelBuilder.Entity<Parte>(entity =>
+        {
+            entity.HasKey(e => e.PartesId).HasName("PK__Partes__590F666F0804063F");
+
+            entity.Property(e => e.PartesId).HasColumnName("PartesID");
+            entity.Property(e => e.Codigo)
+                .HasMaxLength(2)
+                .IsUnicode(false);
+            entity.Property(e => e.ParteNombre)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("parteNombre");
         });
 
         modelBuilder.Entity<Personal>(entity =>
