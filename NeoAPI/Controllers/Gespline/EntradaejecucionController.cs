@@ -239,6 +239,47 @@ public class EntradaejecucionController : ControllerBase
         
     }
 
+    [HttpGet("tiempoTrabajadoActual1turno")]
+    public async Task<List<string>> TiempoTrabajadoActual1Turno()
+    {
+    // Se obtienen las listas de tiempos ejecutados y tiempos perdidos usando los métodos ya definidos.
+    var listaEjecutado = await tiempoEjecutadoActual1();
+    
+    var listaPerdido = await TiempoPerdidoActual1turno();
+
+    // Convertimos cada elemento de lista en un objeto anónimo con dos propiedades: Key y Value.
+    var ejecutado = listaEjecutado.Select(e => {
+        var parts = e.Split(':');
+        return new 
+        { 
+            Key = parts[0].Trim(), 
+            Value = float.Parse(parts[1].Trim()) 
+        };
+    }).ToList();
+
+    var perdido = listaPerdido.Select(p => {
+        var parts = p.Split(':');
+        return new 
+        { 
+            Key = parts[0].Trim(), 
+            Value = float.Parse(parts[1].Trim()) 
+        };
+    }).ToList();
+
+    // Usamos LINQ para realizar un left join en base a la Key y calcular el tiempo neto trabajado.
+    var resultado = from ej in ejecutado
+                    join p in perdido on ej.Key equals p.Key into perdGroup
+                    from perd in perdGroup.DefaultIfEmpty() // Si no hay coincidencia, perd será null.
+                    select $"{ej.Key}: {ej.Value - (perd != null ? perd.Value : 0f)}";
+
+    // Retornamos el resultado como una lista de strings.
+    return resultado.ToList();
+
+    
+}
+
+
+
 
 }
 
