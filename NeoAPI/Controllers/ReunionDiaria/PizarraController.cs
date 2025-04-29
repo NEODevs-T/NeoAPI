@@ -271,34 +271,52 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
 
         return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
     }
+[HttpGet("GetPendientesTurno/{idcentro}/{iddiv}")]
+public async Task<ActionResult<List<ReunionDTO>>> GetPendientesTurno(string idcentro, string iddiv)
+{
+    IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
-    [HttpGet("GetPendientesTurno/{idcentro}/{iddiv}")]
-    public async Task<ActionResult<List<ReunionDTO>>> GetPendientesTurno(string idcentro, string iddiv)
-    {
-        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+    string centro = centrodiv.Cnom;
+    string div = centrodiv.Dnombre;
+    int reunionTurno = 2;
 
-        string centro = centrodiv.Cnom;
-        string div = centrodiv.Dnombre;
-        int reunionTurno = 2;
+    List<Reunion> disc = await _context.Reunions
+        .Include(b => b.IdksfNavigation)
+        .Include(b => b.IdResReuNavigation)
+        .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno &&
+                    h.Rdstatus == "Pendiente" && h.RdfecReu.Date < DateTime.Now.Date)
+        .AsNoTracking()
+        .ToListAsync();
 
-        List<Reunion> disc = await _context.Reunions
-            .Include(b => b.IdksfNavigation)
-            .Include(b => b.IdResReuNavigation)
-            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" && h.RdfecReu.Date < DateTime.Now.Date)
-            .ToListAsync();
-        if (disc == null)
+    if (disc == null)
             throw new Exception("not found!");
-        return Ok(_mapper.Map<List<ReunionDTO>>(disc));
 
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(disc);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+
+            if (equipo != null)
+            {
+                dto.EnombreEam = equipo.EnombreEam;
+            }
+        }
     }
-    [HttpGet("GetPendienteslibros/{idcentro}/{iddiv}")]
+
+    return Ok(reunionDtos);
+}
+
+
+[HttpGet("GetPendienteslibros/{idcentro}/{iddiv}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetPendienteslibros(string idcentro, string iddiv)
 {
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-    CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-    centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
+    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
     string centro = centrodiv.Cnom;
     string div = centrodiv.Dnombre;
@@ -312,13 +330,30 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendienteslibros(string idc
                     && h.IdTipReu == reunionDiaria 
                     && h.IdResReu == 11 
                     && h.RdfecReu.Date >= DateTime.Now.AddMonths(-3)
-                    && h.Rdstatus == "En Curso")  // 🔹 Asegurar que solo trae pendientes
+                    && h.Rdstatus == "En Curso")
+        .AsNoTracking()
         .ToListAsync();
 
     if (disc == null)
-        throw new Exception("not found!");
+            throw new Exception("not found!");
 
-    return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(disc);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+
+            if (equipo != null)
+            {
+                dto.EnombreEam = equipo.EnombreEam;
+            }
+        }
+    }
+
+    return Ok(reunionDtos);
 }
 
     [HttpGet("GetPendientesQuincenal/{idcentro}/{iddiv}")]
@@ -354,12 +389,12 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
 
     string centro = centrodiv.Cnom;
     string div = centrodiv.Dnombre;
-    int reunionDiaria = 1; // Tipo de reunión 1 (diaria/quincenal)
+    int reunionDiaria = 1;
 
-    DateTime fechaInicioReu = DateTime.Now.AddDays(-7); // 1 semana antes
-    DateTime fechaFinReu = DateTime.Now.AddDays(7);  // 1 semana después
-    DateTime fechaInicioTra = DateTime.Now.Date; // Hoy
-    DateTime fechaFinTra = DateTime.Now.AddMonths(3).Date; // Próximos 3 meses
+    DateTime fechaInicioReu = DateTime.Now.AddDays(-7);
+    DateTime fechaFinReu = DateTime.Now.AddDays(7);
+    DateTime fechaInicioTra = DateTime.Now.Date;
+    DateTime fechaFinTra = DateTime.Now.AddMonths(3).Date;
 
     List<Reunion> reuniones = await _context.Reunions
         .Include(b => b.IdksfNavigation)
@@ -367,18 +402,31 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
         .Where(h => h.Rdcentro == centro &&
                     h.Rddiv == div &&
                     h.IdTipReu == reunionDiaria &&
-                    h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
-                    h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
-                    h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
-                     h.RdfecTra.Date >= fechaFinTra && // Nueva condición: desde dentro de 3 mes en adelante
+                    h.RdfecReu.Date >= fechaInicioReu &&
+                    h.RdfecReu.Date <= fechaFinReu &&
+                    h.RdfecTra.Date >= fechaInicioTra &&
+                    h.RdfecTra.Date >= fechaFinTra &&
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
-    .ToListAsync();
+        .ToListAsync();
 
-   if (reuniones == null)
+    if (reuniones == null)
         throw new Exception("not found!");
 
-    return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reuniones);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams.FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+            if (equipo != null)
+                dto.EnombreEam = equipo.EnombreEam;
+        }
+    }
+
+    return Ok(reunionDtos);
 }
+
 
 
 
@@ -627,6 +675,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(
         await _context.SaveChangesAsync();
         return Ok(data.IdReuDia);
     }
+
 [HttpGet("GetPendientesdeTurnoADiaria/{idcentro}/{iddiv}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeTurnoADiaria(string idcentro, string iddiv)
 {
@@ -642,16 +691,34 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeTurnoADiaria(st
         .Include(b => b.IdResReuNavigation)
         .Where(h => h.Rdcentro == centro 
                     && h.Rddiv == div 
-                    && h.IdTipReu == reunionTurno   //  Solo reuniones de Turno (2)
-                    && h.Idksf == 29                //  Solo donde Idksf == 29
-                    && h.Rdstatus == "Pendiente")   //  Solo reuniones pendientes
+                    && h.IdTipReu == reunionTurno   // Solo reuniones de Turno (2)
+                    && h.Idksf == 29                // Solo donde Idksf == 29
+                    && h.Rdstatus == "Pendiente")   // Solo reuniones pendientes
+        .AsNoTracking()
         .ToListAsync();
 
     if (disc == null)
         throw new Exception("not found!");
 
-    return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(disc);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+
+            if (equipo != null)
+            {
+                dto.EnombreEam = equipo.EnombreEam;
+            }
+        }
+    }
+
+    return Ok(reunionDtos);
 }
+
 
 [HttpGet("GetPendientesdeDiariaAQuincenal/{idcentro}/{iddiv}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeDiariaAQuincenal(string idcentro, string iddiv)
@@ -668,23 +735,36 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesdeDiariaAQuincena
         .Include(b => b.IdResReuNavigation)
         .Where(h => h.Rdcentro == centro 
                     && h.Rddiv == div 
-                    && h.IdTipReu == reunionDiaria   //  Solo reuniones Diaria (1)
-                    && h.Idksf == 6               //  Solo donde Idksf == 6
-                    && (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable"))   //  Solo reuniones pendientes
+                    && h.IdTipReu == reunionDiaria 
+                    && h.Idksf == 6 
+                    && (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable"))
         .ToListAsync();
 
     if (disc == null)
         throw new Exception("not found!");
 
-    return Ok(_mapper.Map<List<ReunionDTO>>(disc));
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(disc);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams.FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+            if (equipo != null)
+                dto.EnombreEam = equipo.EnombreEam;
+        }
+    }
+
+    return Ok(reunionDtos);
 }
+
+
 
 [HttpGet("GetReunionesTrabajoVencidas/{idcentro}/{iddiv}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetReunionesTrabajoVencidas(string idcentro, string iddiv)
 {
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-
 
     string centro = centrodiv.Cnom;
     string div = centrodiv.Dnombre;
@@ -699,14 +779,31 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesTrabajoVencidas(st
                     h.Rddiv == div &&
                     h.IdTipReu == reunionDiaria &&
                     h.RdfecTra.Date < fechaActual && // Solo reuniones con fecha de trabajo vencida
-                    (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo" )) // Filtra solo los estados específicos
-                    .OrderBy(h => h.RdfecTra) // Ordena por fecha de trabajo de más viejo a más nuevo
+                    (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
+        .OrderBy(h => h.RdfecTra) // Ordena por fecha de trabajo de más viejo a más nuevo
+        .AsNoTracking()
         .ToListAsync();
 
     if (reuniones == null)
         throw new Exception("not found!");
 
-    return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reuniones);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+
+            if (equipo != null)
+            {
+                dto.EnombreEam = equipo.EnombreEam;
+            }
+        }
+    }
+
+    return Ok(reunionDtos);
 }
 
 [HttpGet("GetReunionesPorCodigodeCompra/{idcentro}/{iddiv}")]
@@ -719,31 +816,43 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
     string div = centrodiv.Dnombre;
     int reunionDiaria = 1;
 
-    DateTime fechaInicioReu = DateTime.Now.AddDays(-7); // 1 semana antes
-    DateTime fechaFinReu = DateTime.Now.AddDays(7);  // 1 semana después
-    DateTime fechaInicioTra = DateTime.Now.Date; // Desde hoy
-    DateTime fechaFinTra = DateTime.Now.AddMonths(1).Date; // Hasta dentro de 1 mes
+    DateTime fechaInicioReu = DateTime.Now.AddDays(-7);
+    DateTime fechaFinReu = DateTime.Now.AddDays(7);
+    DateTime fechaInicioTra = DateTime.Now.Date;
+    DateTime fechaFinTra = DateTime.Now.AddMonths(1).Date;
 
     List<Reunion> reuniones = await _context.Reunions
         .Include(b => b.IdksfNavigation)
         .Include(b => b.IdResReuNavigation)
-        .Where(h => h.Rdcentro == centro && // Filtra por centro
-                    h.Rddiv == div && // Filtra por división
-                    h.RdcodDis == "3" && // Código de disciplina = 3
+        .Where(h => h.Rdcentro == centro &&
+                    h.Rddiv == div &&
+                    h.RdcodDis == "3" &&
                     h.IdTipReu == reunionDiaria &&
-                    h.RdfecReu.Date >= fechaInicioReu && // Filtro de 1 semana antes
-                    h.RdfecReu.Date <= fechaFinReu &&  // Filtro de 1 semana después
-                    h.RdfecTra.Date >= fechaInicioTra && // Desde hoy
-                    h.RdfecTra.Date >= fechaFinTra && // Nueva condición: desde dentro de 1 mes en adelante
-                    (h.Rdstatus == "Pendiente" || 
-                     h.Rdstatus == "Listo" || 
-                     h.Rdstatus == "Pendiente/Responsable")) // Filtra solo los estados específicos
+                    h.RdfecReu.Date >= fechaInicioReu &&
+                    h.RdfecReu.Date <= fechaFinReu &&
+                    h.RdfecTra.Date >= fechaInicioTra &&
+                    h.RdfecTra.Date >= fechaFinTra &&
+                    (h.Rdstatus == "Pendiente" || h.Rdstatus == "Listo" || h.Rdstatus == "Pendiente/Responsable"))
         .ToListAsync();
 
-   if (reuniones == null)
+    if (reuniones == null)
         throw new Exception("not found!");
-    return Ok(_mapper.Map<List<ReunionDTO>>(reuniones));
+
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reuniones);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams.FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+            if (equipo != null)
+                dto.EnombreEam = equipo.EnombreEam;
+        }
+    }
+
+    return Ok(reunionDtos);
 }
+
 
 
 [HttpGet("GetNombreEquioEam/{idMaster}/{rdCodEq}")]
