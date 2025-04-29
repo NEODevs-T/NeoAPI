@@ -184,6 +184,35 @@ public class EntradaejecucionController : ControllerBase
 
     }
 
+    [HttpGet ("tiempoEjecutadoActual2turnoAntes0am")]
+
+    public async Task<List<string>> tiempoEjecutadoActual2turnoAntes0am()
+    {
+        
+        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
+        
+        DateTime final = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
+
+        List<string> listaTiempoActual = new List<string>();
+
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+
+        foreach (var item in listaEjecucion)
+        {
+            var codigo = item.CodigotuplaNavigation.Codigoproceso;
+
+            string tiempo = item.Horasejecutadas.ToString();
+
+            listaTiempoActual.Add($"{codigo}: {tiempo}");
+            
+        }
+
+        return listaTiempoActual;
+
+
+
+    }
+
 
 }
 
