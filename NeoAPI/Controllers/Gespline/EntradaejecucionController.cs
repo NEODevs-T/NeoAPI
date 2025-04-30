@@ -82,23 +82,51 @@ public class EntradaejecucionController : ControllerBase
         
         DateTime final = DateTime.Today.AddHours(18);
         
-        List<string> listaTiempoPerdido = new List<string>();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
         
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
         
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
+        
+        var tiempoPerdido = await this._context.Paradasejecutadas
+        
+        .Where(e => e.Timespan != null && e.Fechayhoraparada != null 
+        
+        && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
+        
+        && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
+        
+        .GroupBy(p => p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso)
+        
+        .Select(g => new
+        
+        {
+            Codigoproceso = g.Key, 
+        
+            TiempoPerdido = g.Sum(p => (float)((p.Timespan.Value - p.Fechayhoraparada.Value).TotalHours))
+        })
+        
+        .ToListAsync();
+
+        List<string> listaTiempoPerdido = new List<string>();    
+
         foreach (var item in listaEjecucion)
         {
         
             var codigo = item.CodigotuplaNavigation.Codigoproceso;
-        
-            string tiempo = item.Timespan.ToString();
-        
-            listaTiempoPerdido.Add($"{codigo}: {tiempo}");
+            
+            var tiempogrupo = tiempoPerdido.FirstOrDefault(x => x.Codigoproceso == codigo);
+            
+            float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
+
+            listaTiempoPerdido.Add($"{codigo}: Tiempo perdido total {tiempo} horas");
         
         }
         
-        
         return listaTiempoPerdido;
+        
     }
 
     [HttpGet("tiempoPerdidoActual2turnoAntes0am")]
@@ -110,18 +138,46 @@ public class EntradaejecucionController : ControllerBase
         
         DateTime final = DateTime.Today.AddDays(1).AddHours(6);
         
-        List<string> listaTiempoPerdido = new List<string>();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
         
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+        
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
+
+        var tiempoPerdido = await this._context.Paradasejecutadas
+        
+        .Where(e => e.Timespan != null && e.Fechayhoraparada != null 
+        
+        && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
+        
+        && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
+        
+        .GroupBy(p => p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso)
+        
+        .Select(g => new
+        
+        {
+            Codigoproceso = g.Key, 
+        
+            TiempoPerdido = g.Sum(p => (float)((p.Timespan.Value - p.Fechayhoraparada.Value).TotalHours))
+        })
+        
+        .ToListAsync();
+
+        List<string> listaTiempoPerdido = new List<string>();
 
         foreach (var item in listaEjecucion)
         {
         
             var codigo = item.CodigotuplaNavigation.Codigoproceso;
-        
-            string tiempo = item.Timespan.ToString();
-        
-            listaTiempoPerdido.Add($"{codigo}: {tiempo}");
+            
+            var tiempogrupo = tiempoPerdido.FirstOrDefault(x => x.Codigoproceso == codigo);
+            
+            float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
+
+            listaTiempoPerdido.Add($"{codigo}: Tiempo perdido total {tiempo} horas");
         
         }
 
@@ -327,41 +383,11 @@ public class EntradaejecucionController : ControllerBase
         
     }
 
-    [HttpGet("getParadasActuales1Turno")]
-
- /*   public async Task<IActionResult> GetParadasActuales1Turno(string centroCosto)
-    {
-
-        DateTime hoy = DateTime.Today;
-        DateTime fechaInicio = DateTime.Today.AddHours(5).AddMinutes(50);
-        DateTime fechaFin = DateTime.Today.AddHours(18);
-
-        var query = from pe in _context.Paradasejecutadas
-        join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
-        join prt in _context.Partes on p.Codigoparada.Substring(0, 3).ToUpper()
-        equals prt.Codigo into partesGroup from prt in partesGroup.DefaultIfEmpty()
-        select new
-       {
-            CodRegistro = pe.CodigoRegistroSO,
-            // Obtenemos CódigoGrupoParada directamente de la tabla Paradas
-            CodigoGrupoParada = p.CodigoGrupoParada,
-            NombreParada = p.NombreParada,
-            TiempoPerdido = ((float)pe.Timespan - (float)pe.FechaYHoraParada) * 1440,
-            ParteNombre = prt != null ? prt.ParteNombre : string.Empty,
-            Codigo = prt != null ? prt.Codigo : string.Empty
-        };
-
-    var resultList = await query.ToListAsync();
-    return Ok(resultList);*/
-}
         
 
 
-    }
-
-
-
 }
+
 
 
 
