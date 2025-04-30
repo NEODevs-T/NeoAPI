@@ -25,6 +25,8 @@ public class ParadasejecutadaController : ControllerBase
         _context = context;
     }
 
+    [HttpGet("TiempoPerdidoActual1turno")]
+
     public async Task<List<string>> TiempoPerdidoActual1turno()
     {
         // Define el inicio del turno: hoy a las 05:50 AM.

@@ -73,7 +73,7 @@ public class EntradaejecucionController : ControllerBase
         return listaCodigoProceso;
 
     }
-
+    
     [HttpGet ("tiempoEjecutadoActual1")]
 
     public async Task<List<string>> tiempoEjecutadoActual1()
@@ -157,7 +157,7 @@ public class EntradaejecucionController : ControllerBase
         
     }
 
-    [HttpGet("tiempoTrabajadoActual1turno")]
+    /* [HttpGet("tiempoTrabajadoActual1turno")]
     public async Task<List<string>> TiempoTrabajadoActual1Turno()
     {
     // Se obtienen las listas de tiempos ejecutados y tiempos perdidos usando los métodos ya definidos.
@@ -242,7 +242,7 @@ public class EntradaejecucionController : ControllerBase
 
         return resultado;    
         
-    }
+    }*/
 
         
 
