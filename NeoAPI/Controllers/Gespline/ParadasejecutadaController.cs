@@ -64,25 +64,81 @@ public class ParadasejecutadaController : ControllerBase
         // Inicializa una lista de cadenas para almacenar la salida final.
         List<string> listaTiempoPerdido = new List<string>();
 
-    // Recorre cada registro de Entradaejecucion obtenido anteriormente.
-    foreach (var item in listaEjecucion)
-    {
-        // Extrae el código del proceso a partir de la propiedad de navegación.
-        var codigo = item.CodigotuplaNavigation.Codigoproceso;
+        // Recorre cada registro de Entradaejecucion obtenido anteriormente.
+        foreach (var item in listaEjecucion)
+        {
+            // Extrae el código del proceso a partir de la propiedad de navegación.
+            var codigo = item.CodigotuplaNavigation.Codigoproceso;
         
-        // Busca en el resultado agrupado el objeto que tenga el mismo código de proceso.
-        var tiempogrupo = tiempoPerdido.FirstOrDefault(x => x.Codigoproceso == codigo);
+            // Busca en el resultado agrupado el objeto que tenga el mismo código de proceso.
+            var tiempogrupo = tiempoPerdido.FirstOrDefault(x => x.Codigoproceso == codigo);
         
-        // Si se encuentra el grupo se asigna el tiempo perdido, de lo contrario se asigna 0.
-        float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
+            // Si se encuentra el grupo se asigna el tiempo perdido, de lo contrario se asigna 0.
+            float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
         
-        // Agrega a la lista una cadena formateada con el código del proceso y el tiempo perdido total.
-        listaTiempoPerdido.Add($"{codigo}: Tiempo perdido total {tiempo} horas");
-    }
+            // Agrega a la lista una cadena formateada con el código del proceso y el tiempo perdido total.
+            listaTiempoPerdido.Add($"{codigo}: Tiempo perdido total {tiempo} horas");
+        }
     
-    // Retorna la lista de cadenas con el resumen del tiempo perdido para cada proceso.
-    return listaTiempoPerdido;
-}
+        // Retorna la lista de cadenas con el resumen del tiempo perdido para cada proceso.
+        return listaTiempoPerdido;
+    }
+
+    [HttpGet("tiempoPerdidoActual2turnoAntes0am")]
+
+    public async Task<List<string>> tiempoPerdidoActual2turnoAntes0am()
+    {
+        
+        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
+        
+        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+        
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+        
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
+
+        var tiempoPerdido = await this._context.Paradasejecutadas
+        
+        .Where(e => e.Timespan != null && e.Fechayhoraparada != null 
+        
+        && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
+        
+        && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
+        
+        .GroupBy(p => p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso)
+        
+        .Select(g => new
+        
+        {
+            Codigoproceso = g.Key, 
+        
+            TiempoPerdido = g.Sum(p => (float)((p.Timespan.Value - p.Fechayhoraparada.Value).TotalHours))
+        })
+        
+        .ToListAsync();
+
+        List<string> listaTiempoPerdido = new List<string>();
+
+        foreach (var item in listaEjecucion)
+        {
+        
+            var codigo = item.CodigotuplaNavigation.Codigoproceso;
+            
+            var tiempogrupo = tiempoPerdido.FirstOrDefault(x => x.Codigoproceso == codigo);
+            
+            float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
+
+            listaTiempoPerdido.Add($"{codigo}: Tiempo perdido total {tiempo} horas");
+        
+        }
+
+        return listaTiempoPerdido;
+
+    }
 
 
 }   
