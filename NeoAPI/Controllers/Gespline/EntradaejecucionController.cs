@@ -506,8 +506,120 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
     return resultado.ToList();
     }
 
-
+    // Para Paradasejecutadas, que tienen la propiedad Fechaentrada en la entidad de navegación:
+private IQueryable<Paradasejecutada> FiltrarParadasejecutadasPorFecha(IQueryable<Paradasejecutada> query, DateTime inicio, DateTime final)
+{
+    return query.Where(e => e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio &&
+                             e.CodigoentradaejecucionNavigation.Fechaentrada < final);
 }
+
+// Y para Paradas, si aún deseas aplicar algún filtro similar, necesitarás determinar 
+// cuál es la propiedad que te permita filtrar por fecha. Si no la tienen, quizá debas omitir el filtro.
+private IQueryable<Parada> FiltrarParadasPorFecha(IQueryable<Parada> query, DateTime inicio, DateTime final)
+{
+    // Si Paradas no tiene Fechaentrada, quizás puedas filtrar a través de otra relación.
+    // Por ejemplo, si Paradas se relaciona con otra entidad que sí tiene la fecha,
+    // podrías hacer un join o un filtro sobre la propiedad de esa entidad.
+    // Si no, simplemente retorna el query sin filtrar:
+    return query;
+}
+
+
+
+    [HttpGet("ParadasActuales1turno")]
+    public async Task<string> ParadasActuales1turno()
+    {
+        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
+        
+        DateTime final = DateTime.Today.AddHours(18);
+
+        // Consulta para Paradasejecutadas con su filtro
+    List<Paradasejecutada> listaParadaEjecutada = await FiltrarParadasejecutadasPorFecha
+    (_context.Paradasejecutadas, inicio, final)
+    .Include(e => e.Codigoregistrso)
+    .ToListAsync();
+
+    // Consulta para Paradas (si aplica algún filtro, en este caso lo dejamos sin cambiar)
+    List<Parada> listadaParada = await FiltrarParadasPorFecha
+    (_context.Paradas, inicio, final)
+    .Include(e => e.Codigogrupoparada)
+    .Include(e => e.Nombreparada)
+    .ToListAsync();
+
+    }
+
+
+
+
+/*
+
+        // Realizamos la consulta asíncrona usando ToListAsync().
+        var query = await (from pe in _context.Paradasejecutadas
+        
+        join p in _context.Paradas
+        on pe.CodigoParada equals p.CodigoParada
+        join gp in _context.GruposDeParadas 
+        on p.CodigoGrupoParada equals gp.CodigoGrupoParada
+        join part in _context.Partes 
+        on pe.CodigoParada.Substring(0, 3).ToUpper() equals part.Codigo into partJoin
+        from part in partJoin.DefaultIfEmpty()
+        where 
+        pe.FechaEntrada >= DateTime.Today.Add(new TimeSpan(5, 50, 0)) &&
+        pe.FechaEntrada < DateTime.Today.Add(new TimeSpan(18, 0, 0)) &&
+        pe.FechaEntrada.Hour < 17 &&
+        (p.CodigoParada.Length < 4 || p.CodigoParada.Substring(p.CodigoParada.Length - 4, 4) != "0114") &&
+        pe.CodigoProceso == centroCosto
+        orderby ((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440 descending
+        select new
+        {
+            CodRegistro    = pe.CodigoRegistroSO,
+            CodGrupo       = gp.CodigoGrupoParada,
+            NombreParada   = p.NombreParada,
+            TiempoPerdido  = ((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440,
+            ParteNombre    = part != null ? part.ParteNombre : string.Empty,
+            CodigoPart     = part != null ? part.Codigo : string.Empty
+            }).ToListAsync();
+
+    // Extraemos los datos a listas de cadena.
+    List<string> idRegistro = query.Select(r => r.CodRegistro.ToString()).ToList();
+    List<string> codigos    = query.Select(r => r.CodGrupo).ToList();
+    List<string> parada     = query.Select(r => r.NombreParada).ToList();
+    List<string> tiempo     = query.Select(r => r.TiempoPerdido.ToString()).ToList();
+    List<string> idArea     = query.Select(r => r.ParteNombre).ToList();
+    List<string> Area       = query.Select(r => r.CodigoPart).ToList();
+
+    // Agrupamos las listas en una lista de listas.
+    List<List<string>> datos = new List<List<string>>();
+    datos.Add(idRegistro);
+    datos.Add(codigos);
+    datos.Add(parada);
+    datos.Add(tiempo);
+    datos.Add(idArea);
+    datos.Add(Area);
+
+    // Construimos la URI a partir de los datos.
+    StringBuilder sb = new StringBuilder("http://example.com/api?");
+    for (int i = 0; i < datos.Count; i++)
+    {
+        // Une los elementos de cada lista separándolos por comas.
+        string valores = string.Join(",", datos[i]);
+        // Codifica la cadena para que sea segura en la URL.
+        string valorCodificado = Uri.EscapeDataString(valores);
+        sb.Append($"lista{i}={valorCodificado}&");
+    }
+    // Elimina el último carácter '&' y retorna la URI.
+    string uri = sb.ToString().TrimEnd('&');
+    return uri;
+}*/
+
+
+        
+}
+
+
+
+
+
 
 
 
