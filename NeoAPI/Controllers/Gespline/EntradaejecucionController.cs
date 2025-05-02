@@ -331,43 +331,85 @@ public class EntradaejecucionController : ControllerBase
         
     }
 
-    [HttpGet("tiempoTrabajadoActual1turno")]
-    public async Task<List<string>> TiempoTrabajadoActual1Turno()
-    {
-    // Se obtienen las listas de tiempos ejecutados y tiempos perdidos usando los métodos ya definidos.
+[HttpGet("tiempoTrabajadoActual1turno")]
+public async Task<List<string>> TiempoTrabajadoActual1Turno()
+{
+    // Se obtienen las listas de tiempos ejecutados y tiempos perdidos.
     var listaEjecutado = await tiempoEjecutadoActual1();
-    
+
     var listaPerdido = await TiempoPerdidoActual1turno();
 
-    // Convertimos cada elemento de lista en un objeto anónimo con dos propiedades: Key y Value.
-    var ejecutado = listaEjecutado.Select(e => {
+    // Conversión de la listaEjecutado a objetos con Key y Value
+    var ejecutado = listaEjecutado.Select(e => 
+    {
+
         var parts = e.Split(':');
+
         return new 
+
         { 
+
             Key = parts[0].Trim(), 
-            Value = float.Parse(parts[1].Trim()) 
+
+            Value = float.Parse(
+
+                parts[1].Replace("Tiempo ejecutado total", "")
+
+                        .Replace("horas", "")
+
+                        .Trim())
         };
+
     }).ToList();
 
-    var perdido = listaPerdido.Select(p => {
+    // Conversión de la listaPerdido a objetos con Key y Value
+    var perdido = listaPerdido.Select(p => 
+    {
+
         var parts = p.Split(':');
+
         return new 
         { 
+
             Key = parts[0].Trim(), 
-            Value = float.Parse(parts[1].Trim()) 
+
+            Value = float.Parse(
+
+                parts[1].Replace("Tiempo perdido total", "")
+
+                        .Replace("horas", "")
+
+                        .Trim())
         };
     }).ToList();
 
-    // Usamos LINQ para realizar un left join en base a la Key y calcular el tiempo neto trabajado.
+    // Left Join usando LINQ y cálculo del tiempo neto con mensaje dinámico
     var resultado = from ej in ejecutado
+                    
                     join p in perdido on ej.Key equals p.Key into perdGroup
+                    
                     from perd in perdGroup.DefaultIfEmpty() // Si no hay coincidencia, perd será null.
-                    select $"{ej.Key}: {ej.Value - (perd != null ? perd.Value : 0f)}";
-
+                    
+                    let tiempoEjecutado = ej.Value
+                    
+                    let tiempoPerdido = perd != null ? perd.Value : 0f
+                    
+                    let tiempoNeto = tiempoEjecutado - tiempoPerdido
+                    
+                    let comentario = tiempoNeto switch
+                    
+                    {
+                    
+                        var t when t >= 10f  => "¡Excelente rendimiento!",
+                    
+                        _                  => "Rendimiento aceptable."
+                    }
+                    
+                    select $"Código {ej.Key} -> Tiempo Ejecutado: {tiempoEjecutado} h, Tiempo Perdido: {tiempoPerdido} h, Tiempo Neto: {tiempoNeto} h. {comentario}";
     // Retornamos el resultado como una lista de strings.
     return resultado.ToList();
-    
-    }
+
+}
 
     [HttpGet("tiempoTrabajadoActual2turno")]
 
@@ -393,32 +435,76 @@ public class EntradaejecucionController : ControllerBase
             listaPerdido = await tiempoPerdidoActual2turnoDespues0am();
             
         }
+   // Conversión de la listaEjecutado a objetos con Key y Value
+    var ejecutado = listaEjecutado.Select(e => 
+    {
 
-        var ejecutado = listaEjecutado.Select(e =>
-        {
+        var parts = e.Split(':');
 
-            var parts = e.Split(":");
-            return new { Key = parts[0].Trim(), Value = float.Parse(parts[1].Trim())};
+        return new 
 
-        }).ToList();
+        { 
 
-        var perdido = listaPerdido.Select(p =>
-        {
-            
-            var parts = p.Split(":");
-            return new { Key = parts[0].Trim(), Value = float.Parse(parts[1].Trim())};
+            Key = parts[0].Trim(), 
 
-        }).ToList();
+            Value = float.Parse(
 
-        var resultado = (from ej in ejecutado join p in perdido on ej.Key equals p.Key 
-                        into perdGroup from perd in perdGroup.DefaultIfEmpty() 
-                        select $"{ej.Key}: {ej.Value - (perd != null ? perd.Value : 0f)}").ToList();
+                parts[1].Replace("Tiempo ejecutado total", "")
 
-        return resultado;    
-        
+                        .Replace("horas", "")
+
+                        .Trim())
+        };
+
+    }).ToList();
+
+    // Conversión de la listaPerdido a objetos con Key y Value
+    var perdido = listaPerdido.Select(p => 
+    {
+
+        var parts = p.Split(':');
+
+        return new 
+        { 
+
+            Key = parts[0].Trim(), 
+
+            Value = float.Parse(
+
+                parts[1].Replace("Tiempo perdido total", "")
+
+                        .Replace("horas", "")
+
+                        .Trim())
+        };
+    }).ToList();
+
+    // Left Join usando LINQ y cálculo del tiempo neto con mensaje dinámico
+    var resultado = from ej in ejecutado
+                    
+                    join p in perdido on ej.Key equals p.Key into perdGroup
+                    
+                    from perd in perdGroup.DefaultIfEmpty() // Si no hay coincidencia, perd será null.
+                    
+                    let tiempoEjecutado = ej.Value
+                    
+                    let tiempoPerdido = perd != null ? perd.Value : 0f
+                    
+                    let tiempoNeto = tiempoEjecutado - tiempoPerdido
+                    
+                    let comentario = tiempoNeto switch
+                    
+                    {
+                    
+                        var t when t >= 10f  => "¡Excelente rendimiento!",
+                    
+                        _                  => "Rendimiento aceptable."
+                    }
+                    
+                    select $"Código {ej.Key} -> Tiempo Ejecutado: {tiempoEjecutado} h, Tiempo Perdido: {tiempoPerdido} h, Tiempo Neto: {tiempoNeto} h. {comentario}";
+    // Retornamos el resultado como una lista de strings.
+    return resultado.ToList();
     }
-
-        
 
 
 }
