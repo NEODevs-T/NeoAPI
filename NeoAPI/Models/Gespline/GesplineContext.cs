@@ -21,6 +21,8 @@ public partial class GesplineContext : DbContext
 
     public virtual DbSet<Entradaejecucion> Entradaejecucions { get; set; }
 
+    public virtual DbSet<Gruposdeparada> Gruposdeparadas { get; set; }
+
     public virtual DbSet<OrdenesDeProduccion> OrdenesDeProduccions { get; set; }
 
     public virtual DbSet<Ordenproduccionxproducto> Ordenproduccionxproductos { get; set; }
@@ -191,6 +193,34 @@ public partial class GesplineContext : DbContext
                 .HasConstraintName("FK_ENTRADAE_REFERENCE_TIPOSDET");
         });
 
+        modelBuilder.Entity<Gruposdeparada>(entity =>
+        {
+            entity.HasKey(e => e.Codigogrupoparada);
+
+            entity.ToTable("GRUPOSDEPARADAS", tb => tb.HasTrigger("TR_GRUPOSDEPARADAS"));
+
+            entity.Property(e => e.Codigogrupoparada)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CODIGOGRUPOPARADA");
+            entity.Property(e => e.Codigoegp)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CODIGOEGP");
+            entity.Property(e => e.Descripcion)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("DESCRIPCION");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("NOMBRE");
+            entity.Property(e => e.Timespan)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("TIMESPAN");
+        });
+
         modelBuilder.Entity<OrdenesDeProduccion>(entity =>
         {
             entity.HasKey(e => e.Codigoordenproduccion);
@@ -318,6 +348,10 @@ public partial class GesplineContext : DbContext
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
                 .HasColumnName("TIMESPAN");
+
+            entity.HasOne(d => d.CodigogrupoparadaNavigation).WithMany(p => p.Parada)
+                .HasForeignKey(d => d.Codigogrupoparada)
+                .HasConstraintName("FK_PARADAS_REFERENCE_GRUPOSDE");
         });
 
         modelBuilder.Entity<Paradasejecutada>(entity =>

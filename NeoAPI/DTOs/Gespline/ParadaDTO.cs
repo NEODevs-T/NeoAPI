@@ -20,3 +20,13 @@ public partial class ParadaDTO
     public string? Codigoegp { get; set; }
     
 }
+
+public class ParadaActualDto
+{
+    public string CodRegistro { get; set; }
+    public string CodigoGrupo { get; set; }
+    public string NombreParada { get; set; }
+    public string TiempoPerdido { get; set; }
+    public string ParteNombre { get; set; }
+    public string CodigoParte { get; set; }
+}

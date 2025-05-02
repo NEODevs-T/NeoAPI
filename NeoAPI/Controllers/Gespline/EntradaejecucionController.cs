@@ -10,6 +10,7 @@ using NeoAPI.Logic.Global;
 using NeoAPI.Controllers.Maestras;
 using NeoAPI.Interface;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
+using NeoAPI.DTOs.Gespline;
 
 namespace NeoAPI.Controllers.Gespline;
 
@@ -506,47 +507,47 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
     return resultado.ToList();
     }
 
-    // Para Paradasejecutadas, que tienen la propiedad Fechaentrada en la entidad de navegación:
-private IQueryable<Paradasejecutada> FiltrarParadasejecutadasPorFecha(IQueryable<Paradasejecutada> query, DateTime inicio, DateTime final)
+
+/*[HttpGet("ParadasActuales1turno")]
+public async Task<List<ParadaDTO>> ParadasActuales1turno(string centroCosto)
 {
-    return query.Where(e => e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio &&
-                             e.CodigoentradaejecucionNavigation.Fechaentrada < final);
+    // Definir rangos de fechas para el filtro basado en Entradaejecucions.FechaEntrada
+    DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
+    DateTime final = DateTime.Today.AddHours(18);
+
+    var query = from pe in _context.Paradasejecutadas
+                // Asumiendo que 'CodigoEntradaEjecucion' es la clave que relaciona ambas tablas
+                join ee in _context.Entradaejecucions 
+                    on pe.CodigoentradaejecucionNavigation equals ee.Codigoentradaejecucion
+                join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
+                join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
+                // Left join con Partes, usando la transformación de Codigoparada
+                join part in _context.Partes
+                    on (pe.Codigoparada.Length >= 3 ? pe.Codigoparada.Substring(0, 3).ToUpper() : String.Empty)
+                    equals part.Codigo into partesJoin
+                from part in partesJoin.DefaultIfEmpty()
+                where ee.FechaEntrada >= inicio &&
+                    ee.FechaEntrada < final &&
+                    ee.FechaEntrada.Hour < 17 &&
+                    (p.CodigoParada.Length < 4 ||
+                    p.CodigoParada.Substring(p.CodigoParada.Length - 4, 4) != "0114") &&
+                    pe.CodigoProceso == centroCosto
+                orderby (((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440) descending
+                select new ParadaActualDto
+                {
+                    CodRegistro  = pe.Codigoregistrso,
+                    CodigoGrupo  = gp.CodigoGrupoParada,
+                    NombreParada = p.NombreParada,
+                    TiempoPerdido = (((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440).ToString(),
+                    ParteNombre  = part != null ? part.parteNombre : "",
+                    CodigoParte  = part != null ? part.Codigo : ""
+                };
+
+    return await query.ToListAsync();
+}*/
+
 }
 
-// Y para Paradas, si aún deseas aplicar algún filtro similar, necesitarás determinar 
-// cuál es la propiedad que te permita filtrar por fecha. Si no la tienen, quizá debas omitir el filtro.
-private IQueryable<Parada> FiltrarParadasPorFecha(IQueryable<Parada> query, DateTime inicio, DateTime final)
-{
-    // Si Paradas no tiene Fechaentrada, quizás puedas filtrar a través de otra relación.
-    // Por ejemplo, si Paradas se relaciona con otra entidad que sí tiene la fecha,
-    // podrías hacer un join o un filtro sobre la propiedad de esa entidad.
-    // Si no, simplemente retorna el query sin filtrar:
-    return query;
-}
-
-
-
-    [HttpGet("ParadasActuales1turno")]
-    public async Task<string> ParadasActuales1turno()
-    {
-        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
-        
-        DateTime final = DateTime.Today.AddHours(18);
-
-        // Consulta para Paradasejecutadas con su filtro
-    List<Paradasejecutada> listaParadaEjecutada = await FiltrarParadasejecutadasPorFecha
-    (_context.Paradasejecutadas, inicio, final)
-    .Include(e => e.Codigoregistrso)
-    .ToListAsync();
-
-    // Consulta para Paradas (si aplica algún filtro, en este caso lo dejamos sin cambiar)
-    List<Parada> listadaParada = await FiltrarParadasPorFecha
-    (_context.Paradas, inicio, final)
-    .Include(e => e.Codigogrupoparada)
-    .Include(e => e.Nombreparada)
-    .ToListAsync();
-
-    }
 
 
 
@@ -613,8 +614,6 @@ private IQueryable<Parada> FiltrarParadasPorFecha(IQueryable<Parada> query, Date
 }*/
 
 
-        
-}
 
 
 

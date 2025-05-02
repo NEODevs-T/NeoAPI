@@ -19,6 +19,8 @@ public partial class Parada
 
     public string? Codigoegp { get; set; }
 
+    public virtual Gruposdeparada? CodigogrupoparadaNavigation { get; set; }
+
     public virtual ICollection<Paradasejecutada> Paradasejecutada { get; set; } = new List<Paradasejecutada>();
 
     public virtual ICollection<Standarparada> Standarparada { get; set; } = new List<Standarparada>();
