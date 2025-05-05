@@ -506,124 +506,78 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
     // Retornamos el resultado como una lista de strings.
     return resultado.ToList();
     }
-
-
-/*[HttpGet("ParadasActuales1turno")]
-public async Task<List<ParadaDTO>> ParadasActuales1turno(string centroCosto)
-{
-    // Definir rangos de fechas para el filtro basado en Entradaejecucions.FechaEntrada
-    DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
-    DateTime final = DateTime.Today.AddHours(18);
-
-    var query = from pe in _context.Paradasejecutadas
-                // Asumiendo que 'CodigoEntradaEjecucion' es la clave que relaciona ambas tablas
-                join ee in _context.Entradaejecucions 
-                    on pe.CodigoentradaejecucionNavigation equals ee.Codigoentradaejecucion
-                join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
-                join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
-                // Left join con Partes, usando la transformación de Codigoparada
-                join part in _context.Partes
-                    on (pe.Codigoparada.Length >= 3 ? pe.Codigoparada.Substring(0, 3).ToUpper() : String.Empty)
-                    equals part.Codigo into partesJoin
-                from part in partesJoin.DefaultIfEmpty()
-                where ee.FechaEntrada >= inicio &&
-                    ee.FechaEntrada < final &&
-                    ee.FechaEntrada.Hour < 17 &&
-                    (p.CodigoParada.Length < 4 ||
-                    p.CodigoParada.Substring(p.CodigoParada.Length - 4, 4) != "0114") &&
-                    pe.CodigoProceso == centroCosto
-                orderby (((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440) descending
-                select new ParadaActualDto
-                {
-                    CodRegistro  = pe.Codigoregistrso,
-                    CodigoGrupo  = gp.CodigoGrupoParada,
-                    NombreParada = p.NombreParada,
-                    TiempoPerdido = (((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440).ToString(),
-                    ParteNombre  = part != null ? part.parteNombre : "",
-                    CodigoParte  = part != null ? part.Codigo : ""
-                };
-
-    return await query.ToListAsync();
-}*/
-
+    
+    [HttpGet("GetParadasActuales1Turno")]
+    public async Task<List<ParadasejecutadaDTO>> GetParadasActuales1Turno(string centroCosto)
+    {
+        
+        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);  
+        
+        DateTime final  = DateTime.Today.AddHours(16);                 
+        
+        var query =
+        
+        from pe in _context.Paradasejecutadas
+        
+        join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
+        
+        join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
+        
+        join part in _context.Partes
+        
+            on pe.Codigoparada.Substring(0, 3).ToUpper() equals part.Codigo into partJoin
+        
+        from pa in partJoin.DefaultIfEmpty() // left join, para Parte (opcional)
+        // AÑADIMOS EL JOIN CON LA ENTIDAD PROCESO:
+        
+        join pr in _context.Procesos 
+        
+            on pe.CodigoentradaejecucionNavigation.Codigoentradaejecucion.ToString() equals pr.Codigoproceso
+        
+        where pe.Codigoregistrso != null &&
+        
+            p.Nombreparada != null &&
+        
+            gp.Codigogrupoparada != null &&
+              // Filtrar por Fechaentrada (de Entradaejecucion)
+            pe.CodigoentradaejecucionNavigation.Fechaentrada >= inicio &&
+        
+            pe.CodigoentradaejecucionNavigation.Fechaentrada < final &&
+        
+            pe.CodigoentradaejecucionNavigation.Fechaentrada.HasValue &&
+        
+            pe.CodigoentradaejecucionNavigation.Fechaentrada.Value.Hour < 17 &&
+        
+            !p.Codigoparada.EndsWith("0114") &&
+              // Filtro del centro de costo usando la entidad proceso:
+        
+            pr.Codigoproceso == centroCosto
+        
+        orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
+        
+        select new ParadasejecutadaDTO
+        {
+        
+            CodigoRegistro = pe.Codigoregistrso.ToString(),
+        
+            CodigoGrupoParada = gp.Codigogrupoparada,
+        
+            NombreParada = p.Nombreparada,
+        
+            TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0,
+        
+            ParteNombre = pa != null ? pa.ParteNombre : null,
+        
+            CodigoParte = pa != null ? pa.Codigo : null
+        };
+        
+    var resultado = await query.ToListAsync();
+    
+    return resultado;
 }
 
 
 
 
 
-/*
-
-        // Realizamos la consulta asíncrona usando ToListAsync().
-        var query = await (from pe in _context.Paradasejecutadas
-        
-        join p in _context.Paradas
-        on pe.CodigoParada equals p.CodigoParada
-        join gp in _context.GruposDeParadas 
-        on p.CodigoGrupoParada equals gp.CodigoGrupoParada
-        join part in _context.Partes 
-        on pe.CodigoParada.Substring(0, 3).ToUpper() equals part.Codigo into partJoin
-        from part in partJoin.DefaultIfEmpty()
-        where 
-        pe.FechaEntrada >= DateTime.Today.Add(new TimeSpan(5, 50, 0)) &&
-        pe.FechaEntrada < DateTime.Today.Add(new TimeSpan(18, 0, 0)) &&
-        pe.FechaEntrada.Hour < 17 &&
-        (p.CodigoParada.Length < 4 || p.CodigoParada.Substring(p.CodigoParada.Length - 4, 4) != "0114") &&
-        pe.CodigoProceso == centroCosto
-        orderby ((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440 descending
-        select new
-        {
-            CodRegistro    = pe.CodigoRegistroSO,
-            CodGrupo       = gp.CodigoGrupoParada,
-            NombreParada   = p.NombreParada,
-            TiempoPerdido  = ((double)pe.TIMESPAN - (double)pe.FECHAYHORAPARADA) * 1440,
-            ParteNombre    = part != null ? part.ParteNombre : string.Empty,
-            CodigoPart     = part != null ? part.Codigo : string.Empty
-            }).ToListAsync();
-
-    // Extraemos los datos a listas de cadena.
-    List<string> idRegistro = query.Select(r => r.CodRegistro.ToString()).ToList();
-    List<string> codigos    = query.Select(r => r.CodGrupo).ToList();
-    List<string> parada     = query.Select(r => r.NombreParada).ToList();
-    List<string> tiempo     = query.Select(r => r.TiempoPerdido.ToString()).ToList();
-    List<string> idArea     = query.Select(r => r.ParteNombre).ToList();
-    List<string> Area       = query.Select(r => r.CodigoPart).ToList();
-
-    // Agrupamos las listas en una lista de listas.
-    List<List<string>> datos = new List<List<string>>();
-    datos.Add(idRegistro);
-    datos.Add(codigos);
-    datos.Add(parada);
-    datos.Add(tiempo);
-    datos.Add(idArea);
-    datos.Add(Area);
-
-    // Construimos la URI a partir de los datos.
-    StringBuilder sb = new StringBuilder("http://example.com/api?");
-    for (int i = 0; i < datos.Count; i++)
-    {
-        // Une los elementos de cada lista separándolos por comas.
-        string valores = string.Join(",", datos[i]);
-        // Codifica la cadena para que sea segura en la URL.
-        string valorCodificado = Uri.EscapeDataString(valores);
-        sb.Append($"lista{i}={valorCodificado}&");
-    }
-    // Elimina el último carácter '&' y retorna la URI.
-    string uri = sb.ToString().TrimEnd('&');
-    return uri;
-}*/
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}

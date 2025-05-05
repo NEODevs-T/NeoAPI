@@ -5,24 +5,10 @@ namespace NeoAPI.DTOs.Gespline;
 
 public partial class ParadasejecutadaDTO
 {
-    public int Codigoregistrso { get; set; }
-
-    public int? Codigoentradaejecucion { get; set; }
-
-    public string? Codigoparada { get; set; }
-
-    public string? Codigopersonalatiende { get; set; }
-
-    public DateTime? Fechayhoraparada { get; set; }
-
-    public double? Demoraparada { get; set; }
-
-    public string? Diurnaonocturnaofestiva { get; set; }
-
-    public double? Estandarprogramadas { get; set; }
-
-    public string? Comentario { get; set; }
-
-    public DateTime? Timespan { get; set; }
-
+    public string CodigoRegistro { get; set; }
+    public string CodigoGrupoParada { get; set; }
+    public string NombreParada { get; set; }
+    public int TiempoPerdido { get; set; }
+    public string? ParteNombre { get; set; }
+    public string? CodigoParte { get; set; }
 }
