@@ -21,12 +21,29 @@ public partial class ParadaDTO
     
 }
 
-public class ParadaActualDto
+public class ParadaActual1TurnoDTO
 {
-    public string CodRegistro { get; set; }
-    public string CodigoGrupo { get; set; }
+    public string CodigoRegistro { get; set; }
+    public string CodigoGrupoParada { get; set; }
     public string NombreParada { get; set; }
     public string TiempoPerdido { get; set; }
     public string ParteNombre { get; set; }
     public string CodigoParte { get; set; }
+}
+
+public class ParadaActual1TurnoAgrupadoDTO
+{
+    
+    public string CodigoParada { get; set; }
+
+    public string CodigoGrupoParada { get; set; }
+
+    public string ACodGes { get; set; }
+
+    public string NombreParada { get; set; }
+
+    public string Aparte { get; set; }
+
+    public string TiempoPerdido { get; set; }
+
 }
