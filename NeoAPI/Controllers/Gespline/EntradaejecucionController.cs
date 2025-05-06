@@ -1003,5 +1003,6 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         
         return resultado;
         
-        }
+    }
+
 }
