@@ -723,7 +723,7 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
         pe.CodigoentradaejecucionNavigation.Fechaentrada.HasValue &&
 
-        pe.CodigoentradaejecucionNavigation.Fechaentrada.Value.Hour < 17 &&
+        pe.CodigoentradaejecucionNavigation.Fechaentrada.Value.Hour >= 17 &&
 
         !p.Codigoparada.EndsWith("0114") &&
 
@@ -750,6 +750,72 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
         return resultado; 
 
+    }
+
+    [HttpGet ("GetParadasActuales2turnoDespuesDeLas0am")]
+
+    public async Task<List<ParadasActuales2turnoDespuesDeLas0amDTO>> GetParadasActuales2turnoDespuesDeLas0am(string centroCosto)
+    {
+        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(18);
+
+        DateTime final = DateTime.Today.AddHours(6);
+
+        var query =
+
+        from pe in _context.Paradasejecutadas
+
+        join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
+
+        join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
+
+        join part in _context.Partes on pe.Codigoparada.Substring(0, 3).ToUpper() equals part.Codigo into partJoin
+
+        from pa in partJoin.DefaultIfEmpty()
+
+        join pr in _context.Procesos on pe.CodigoentradaejecucionNavigation.Codigoentradaejecucion.ToString() equals pr.Codigoproceso
+
+        where 
+
+        pe.Codigoregistrso != null &&
+
+        p.Nombreparada != null &&
+
+        gp.Codigogrupoparada != null &&
+
+        pe.CodigoentradaejecucionNavigation.Fechaentrada >= inicio &&
+
+        pe.CodigoentradaejecucionNavigation.Fechaentrada < final &&
+
+        pe.CodigoentradaejecucionNavigation.Fechaentrada.HasValue &&
+
+        pe.CodigoentradaejecucionNavigation.Fechaentrada.Value.Hour >= 17 &&
+
+        !p.Codigoparada.EndsWith("0114") &&
+
+        pr.Codigoproceso == centroCosto
+
+        orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
+
+        select new ParadasActuales2turnoDespuesDeLas0amDTO
+        {
+
+            CodigoRegistro = pe.Codigoregistrso.ToString(),
+
+            CodigoGrupoParada = gp.Codigogrupoparada,
+
+            NombreParada = p.Nombreparada,
+
+            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0).ToString(),
+
+            ParteNombre = pa != null ? pa.ParteNombre : null,
+
+            CodigoParte = pa != null ? pa.Codigo : null,
+
+        };
+
+        var resultado = await query.ToListAsync();
+
+        return resultado;
     }
 
 
