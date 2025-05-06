@@ -687,6 +687,77 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         return await query.ToListAsync();
     }
 
+    [HttpGet("GetParadasActuales2turnoAntesDeLas0amAgrupadas")]
+
+    public async Task<List<ParadasActuales2turnoAntesDeLas0amAgrupadasDTO>> GetParadasActuales2TurnoAntesDeLas0AmAgrupadas(string centroCosto)
+    {
+        
+        DateTime inicio = DateTime.Today.AddHours(18);
+
+        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+
+        var query =
+
+        from en in _context.Entradaejecucions
+
+        where en.Fechaentrada >= inicio && en.Fechaentrada < final 
+
+        let tupla = en.CodigotuplaNavigation
+
+        from pe in _context.Paradasejecutadas.Where(pe => pe.Codigoentradaejecucion == en.Codigoentradaejecucion)
+
+        join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
+
+        join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
+
+        join a in _context.Areas on p.Codigoparada equals a.AcodGes
+
+        where p.Codigoparada.Length >= 4 &&
+
+            p.Codigoparada.Substring(p.Codigoparada.Length - 4, 4) != "0114" &&
+            
+            tupla.Codigoproceso == centroCosto
+        
+        group new {pe, p, gp, a} by new
+        {
+            
+            p.Codigoparada,
+
+            gp.Codigogrupoparada,
+
+            a.AcodGes,
+
+            p.Nombreparada,
+
+            a.Aparte
+
+        }into grp select new ParadasActuales2turnoAntesDeLas0amAgrupadasDTO{
+
+            CodigoParada = grp.Key.Codigoparada,
+
+            CodigoGrupoParada = grp.Key.Codigogrupoparada,
+
+            ACodGes = grp.Key.AcodGes,
+
+            NombreParada = grp.Key.Nombreparada,
+
+            Aparte = grp.Key.Aparte,
+
+            TiempoPerdido = (grp.Sum(x => (x.pe.Timespan.HasValue && x.pe.Fechayhoraparada.HasValue)
+
+            ? (x.pe.Timespan.Value - x.pe.Fechayhoraparada.Value).TotalDays
+            
+            : 0) * 1440).ToString()
+
+        };
+
+        query = query.OrderByDescending(x => x.TiempoPerdido);
+
+        return await query.ToListAsync();
+
+    }
+
+
     [HttpGet("GetParadasActuales2turnoAntesDeLas0am")]
 
     public async Task<List<ParadasActuales2turnoAntesDeLas0amDTO>> GetParadasActuales2TurnoAntesDeLas0s(string centroCosto)
