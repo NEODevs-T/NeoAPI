@@ -47,3 +47,8 @@ public class ParadaActual1TurnoAgrupadoDTO
     public string TiempoPerdido { get; set; }
 
 }
+
+public class ParadasActuales2turnoAntesDeLas0amDTO
+{
+    
+}
