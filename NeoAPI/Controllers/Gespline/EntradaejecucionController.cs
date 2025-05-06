@@ -828,7 +828,7 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
     [HttpGet("GetParadasActuales2turnoAntesDeLas0am")]
 
-    public async Task<List<ParadasActuales2turnoAntesDeLas0amDTO>> GetParadasActuales2TurnoAntesDeLas0s(string centroCosto)
+    public async Task<List<ParadasActuales2turnoAntesDeLas0amDTO>> GetParadasActuales2turnoAntesDeLas0am(string centroCosto)
     {
         DateTime inicio = DateTime.Today.AddHours(18);
         
@@ -957,6 +957,51 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         return resultado;
     }
 
-
-
+    [HttpGet("GetParadasActuales2turno")]
+    public async Task<List<List<string>>> GetParadasActuales2turno(string centroCosto)
+    {
+        DateTime hoy = DateTime.Now;
+        
+        var resultado = hoy.Hour < 6 
+        
+        ? (await this.GetParadasActuales2turnoAntesDeLas0am(centroCosto))
+        
+        .Select(dto => new List<string>
+        {
+        
+            dto.CodigoRegistro, 
+        
+            dto.CodigoGrupoParada,
+        
+            dto.NombreParada,
+        
+            dto.TiempoPerdido,
+        
+            dto.ParteNombre,
+        
+            dto.CodigoParte
+        
+        }).ToList()
+        
+        : (await this.GetParadasActuales2turnoDespuesDeLas0am(centroCosto))
+        .Select(dto => new List<string>
+        {
+        
+            dto.CodigoRegistro, 
+        
+            dto.CodigoGrupoParada,
+        
+            dto.NombreParada,
+        
+            dto.TiempoPerdido,
+        
+            dto.ParteNombre,
+        
+            dto.CodigoParte
+        
+        }).ToList();
+        
+        return resultado;
+        
+        }
 }

@@ -83,3 +83,19 @@ public class ParadasActuales2turnoAntesDeLas0amAgrupadasDTO
     public string TiempoPerdido { get; set; }
 
 }
+
+public class ParadasActuales2turnoDespuesDeLas0amAgrupadasDTO
+{
+    public string CodigoParada { get; set; }
+
+    public string CodigoGrupoParada { get; set; }
+
+    public string ACodGes { get; set; }
+
+    public string NombreParada { get; set; }
+
+    public string Aparte { get; set; }
+
+    public string TiempoPerdido { get; set; }
+
+}
