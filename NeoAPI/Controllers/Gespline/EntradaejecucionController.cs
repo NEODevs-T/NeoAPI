@@ -1103,7 +1103,7 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
             if (paradas == null || !paradas.Any())
             {
-                return NotFound("No se encontraron paradas para el centro de costo espeficado.");
+                return NotFound("No se encontraron paradas para el centro de costo especificado.");
             }
 
             return Ok(paradas);
@@ -1130,7 +1130,7 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
             if (paradas == null || !paradas.Any())
             {
-                return NotFound("No se encontraron paradas para el centro de costo espeficado.");
+                return NotFound("No se encontraron paradas para el centro de costo especificado.");
             }
 
             return Ok(paradas);
@@ -1157,13 +1157,41 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
             if (paradas == null || !paradas.Any())
             {
-                return NotFound("No se encontraron paradas para el centro de costo espeficado.");
+                return NotFound("No se encontraron paradas para el centro de costo especificado.");
             }
 
             return Ok(paradas);
         }
 
         catch(Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor");
+        }
+    }
+
+    [HttpGet("GetParadasGesplienActualesAgrupados2turnoDespuesDeLas0am/{centroCosto}")]
+
+    public async Task<IActionResult> GetParadasGesplienActualesAgrupados2turnoDespuesDeLas0am(string centroCosto)
+    {
+        if (string.IsNullOrWhiteSpace(centroCosto))
+        {
+            return BadRequest("El centro de costo es obligatorio.");            
+        }
+
+        try
+        {
+            var paradas = await GetParadasActuales2turnoDespuesDeLas0amAgrupadas(centroCosto);
+
+            if (paradas == null || !paradas.Any())
+            {
+                return NotFound("No se encontraron paradas para el centro de costo especificado.");
+            }
+
+            return Ok(paradas);
+        }
+
+        catch (Exception ex)
+        
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor");
         }
