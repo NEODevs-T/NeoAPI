@@ -1115,5 +1115,32 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         }
     }
 
+    [HttpGet("GetParadasGesplienActualesAgrupados1turno/{centroCosto}")]
+
+    public async Task<IActionResult> GetParadasGesplienActualesAgrupados1turno(string centroCosto)
+    {
+        if (string.IsNullOrWhiteSpace(centroCosto))
+        {
+            return BadRequest("El centro de costo es obligatorio.");
+        }
+
+        try
+        {
+            var paradas = await GetParadasActuales1TurnoAgrupados(centroCosto);
+
+            if (paradas == null || !paradas.Any())
+            {
+                return NotFound("No se encontraron paradas para el centro de costo espeficado.");
+            }
+
+            return Ok(paradas);
+        }
+
+        catch(Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+        }
+    }
+
     
 }
