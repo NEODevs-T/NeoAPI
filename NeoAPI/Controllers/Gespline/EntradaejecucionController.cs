@@ -891,6 +891,7 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
     }
 
+
     [HttpGet ("GetParadasActuales2turnoDespuesDeLas0am")]
 
     public async Task<List<ParadasActuales2turnoDespuesDeLas0amDTO>> GetParadasActuales2turnoDespuesDeLas0am(string centroCosto)
@@ -1005,4 +1006,49 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         
     }
 
+    [HttpGet("GetPrimeraParadaporLinea")]
+
+    public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea()
+    {
+        DateTime today = DateTime.Now;
+        List<string> maquinas;
+
+        if (today.Hour >= 6 && today.Hour < 18)
+        {
+            maquinas = await this.MaquinasGesplineActivos1turno();
+        }
+        else if (today.Hour >= 18 && today.Hour < 24)
+        {
+            maquinas = await this.MaquinasGesplineActivos2turnoAntes0am();
+        }
+        else
+        {
+            maquinas = await this.MaquinasGesplineActivos2turnoDespues0am();
+        }
+
+        foreach (string maquina in maquinas)
+        {
+            var query = await _context.Paradasejecutadas
+            .Where(p => p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso == maquina)
+            .OrderBy(p => p.Fechayhoraparada)
+            .Select(p => new PrimeraParadaporLineaDTO
+            {
+                CodigoProceso = p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso,
+                FechaYHoraParada = p.Fechayhoraparada,
+                Timespan = p.Timespan
+
+            })
+            .FirstOrDefaultAsync();
+
+        if(query != null)
+        {
+            return Ok(query);
+        }
+
+        }
+
+        return NotFound("No se encontró información para ninguna máquina");
+    }
+
+    
 }

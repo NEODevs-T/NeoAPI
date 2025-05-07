@@ -99,3 +99,12 @@ public class ParadasActuales2turnoDespuesDeLas0amAgrupadasDTO
     public string TiempoPerdido { get; set; }
 
 }
+
+public class PrimeraParadaporLineaDTO
+{
+    public string CodigoProceso {get; set;}
+
+    public DateTime? FechaYHoraParada {get; set;}
+
+    public DateTime? Timespan {get; set;}
+}
