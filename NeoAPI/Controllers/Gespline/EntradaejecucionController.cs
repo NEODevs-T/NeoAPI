@@ -12,6 +12,9 @@ using NeoAPI.Interface;
 using Microsoft.EntityFrameworkCore.Metadata.Internal;
 using NeoAPI.DTOs.Gespline;
 using System.Text.RegularExpressions;
+using Microsoft.AspNetCore.Mvc.Infrastructure;
+using Microsoft.AspNetCore.Mvc.ApiExplorer;
+using Microsoft.AspNetCore.Http.HttpResults;
 
 namespace NeoAPI.Controllers.Gespline;
 
@@ -1004,6 +1007,41 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         
         return resultado;
         
+    }
+
+    [HttpGet("GetParadasActualesConFiltro")]
+
+    public ActionResult<List<List<string>>> GetParadasActualesConFiltro([FromBody] List<List<string>> datos, [FromQuery] string cadenaIdRegistros){
+        
+        if (datos == null || datos.Count < 6)
+        {
+            return BadRequest("El formato de 'datos' no es correcto o no contiene las columnas requeridas.");
+        }
+
+        string[] filtros = cadenaIdRegistros
+        .Replace("[", "")
+        .Replace("]","")
+        .Split(",", StringSplitOptions.RemoveEmptyEntries)
+        .Select(s => s.Trim())
+        .ToArray();
+
+    foreach (var filtro in filtros)
+    {
+        int index = datos[0].FindIndex(d => d.Contains(filtro));
+
+        if (index >= 0)
+        {
+            for (int i = 0; i < datos.Count; i++)
+            {
+                if (index < datos[i].Count)
+                datos[i].RemoveAt(index);
+            }
+        }
+        
+    }
+
+    return Ok(datos);
+
     }
 
     [HttpGet("GetPrimeraParadaporLinea")]
