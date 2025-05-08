@@ -26,10 +26,14 @@ public class EntradaejecucionController : ControllerBase
 {
     private readonly GesplineContext _context;
 
-    public EntradaejecucionController(GesplineContext context)
+    private readonly IParadasService _paradasService;
+
+    public EntradaejecucionController(GesplineContext context, IParadasService paradasService)
     {
         _context = context;
+        _paradasService = paradasService;
     }
+
 
     [HttpGet("MaquinasGesplineActivos1turno")]
     public async Task<List<string>> MaquinasGesplineActivos1turno()
@@ -1009,40 +1013,40 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         
     }
 
-    [HttpGet("GetParadasActualesConFiltro")]
+    public interface IParadasService
+{
+    List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros);
+}
 
-    public ActionResult<List<List<string>>> GetParadasActualesConFiltro([FromBody] List<List<string>> datos, [FromQuery] string cadenaIdRegistros){
-        
-        if (datos == null || datos.Count < 6)
-        {
-            return BadRequest("El formato de 'datos' no es correcto o no contiene las columnas requeridas.");
-        }
 
-        string[] filtros = cadenaIdRegistros
-        .Replace("[", "")
-        .Replace("]","")
-        .Split(",", StringSplitOptions.RemoveEmptyEntries)
-        .Select(s => s.Trim())
-        .ToArray();
 
-    foreach (var filtro in filtros)
+public class ParadasService : IParadasService
+{
+    public List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros)
     {
-        int index = datos[0].FindIndex(d => d.Contains(filtro));
+        string[] filtros = cadenaIdRegistros
+            .Replace("[", "")
+            .Replace("]", "")
+            .Split(",", StringSplitOptions.RemoveEmptyEntries)
+            .Select(s => s.Trim())
+            .ToArray();
 
-        if (index >= 0)
+        foreach (var filtro in filtros)
         {
-            for (int i = 0; i < datos.Count; i++)
+            int index = datos[0].FindIndex(d => d.Contains(filtro));
+            if (index >= 0)
             {
-                if (index < datos[i].Count)
-                datos[i].RemoveAt(index);
+                for (int i = 0; i < datos.Count; i++)
+                {
+                    if (index < datos[i].Count)
+                        datos[i].RemoveAt(index);
+                }
             }
         }
-        
+        return datos;
     }
+}
 
-    return Ok(datos);
-
-    }
 
     [HttpGet("GetPrimeraParadaporLinea")]
 
@@ -1247,33 +1251,44 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         }
     }
 
-/* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}/{cadenas}")]
-
-    public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto, string cadenas)
+[HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}/{cadenas}")]
+public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto, string cadenas)
+{
+    // Validamos que ambos parámetros tengan contenido
+    if (string.IsNullOrWhiteSpace(centroCosto) || string.IsNullOrWhiteSpace(cadenas))
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) && string.IsNullOrWhiteSpace(cadenas))
+        return BadRequest("El centro de costo y la cadena son obligatorios.");
+    }
+
+    try
+    {
+        // 1. Obtenemos la información sin filtrar para el centro de costo (segundo turno)
+        var paradasSinFiltro = await Task.Run(() => GetParadasActuales2turno(centroCosto));
+        if (paradasSinFiltro == null || !paradasSinFiltro.Any())
         {
-            return BadRequest("El centro de costo y la cadena son obligatorios.");
+            return NotFound("No se encontraron paradas para el centro de costo especificado.");
         }
 
-        try
+        // 2. Aplicamos el filtrado sobre la información obtenida utilizando el servicio inyectado
+        var paradasFiltradas = await Task.Run(() => _paradasService.FiltrarDatos(paradasSinFiltro, cadenas));
+        if (paradasFiltradas == null || !paradasFiltradas.Any())
         {
-            var paradas = await GetParadasActualesConFiltro(centroCosto, cadenas);
-
-            if (paradas == null || !paradas.Any())
-            {
-                return NotFound("No se encontraron paradas para el centro de costo especificado.");
-            }
-
-            return Ok(paradas);
+            return NotFound("No se encontraron paradas filtradas para el centro de costo especificado.");
         }
 
-        catch (Exception ex)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
-        }
+        // 3. Retornamos el resultado usando Ok() para que ASP.NET Core se encargue de la serialización a JSON
+        return Ok(paradasFiltradas);
+    }
+    catch (Exception ex)
+    {
+        // Aquí podrías registrar la excepción en un logger
+        return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+    }
+}
 
-        
-    }*/
+
+
     
+
+
 }
