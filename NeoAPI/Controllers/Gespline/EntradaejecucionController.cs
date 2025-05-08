@@ -1250,45 +1250,60 @@ public class ParadasService : IParadasService
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
     }
-
-[HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}/{cadenas}")]
-public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto, string cadenas)
-{
-    // Validamos que ambos parámetros tengan contenido
-    if (string.IsNullOrWhiteSpace(centroCosto) || string.IsNullOrWhiteSpace(cadenas))
-    {
-        return BadRequest("El centro de costo y la cadena son obligatorios.");
-    }
-
-    try
-    {
-        // 1. Obtenemos la información sin filtrar para el centro de costo (segundo turno)
-        var paradasSinFiltro = await Task.Run(() => GetParadasActuales2turno(centroCosto));
-        if (paradasSinFiltro == null || !paradasSinFiltro.Any())
-        {
-            return NotFound("No se encontraron paradas para el centro de costo especificado.");
-        }
-
-        // 2. Aplicamos el filtrado sobre la información obtenida utilizando el servicio inyectado
-        var paradasFiltradas = await Task.Run(() => _paradasService.FiltrarDatos(paradasSinFiltro, cadenas));
-        if (paradasFiltradas == null || !paradasFiltradas.Any())
-        {
-            return NotFound("No se encontraron paradas filtradas para el centro de costo especificado.");
-        }
-
-        // 3. Retornamos el resultado usando Ok() para que ASP.NET Core se encargue de la serialización a JSON
-        return Ok(paradasFiltradas);
-    }
-    catch (Exception ex)
-    {
-        // Aquí podrías registrar la excepción en un logger
-        return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
-    }
-}
-
-
-
     
+    [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}/{cadenas}")]
+    public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto, string cadenas)
+    {
+        if (string.IsNullOrWhiteSpace(centroCosto) || string.IsNullOrWhiteSpace(cadenas))
+        {
+            return BadRequest("El centro de costo y la cadena son obligatorios.");
+        }        
+        try
+        
+        {
+            var paradasSinFiltro = await Task.Run(() => GetParadasActuales2turno(centroCosto));
+            if (paradasSinFiltro == null || !paradasSinFiltro.Any())
+            {
+                return NotFound("No se encontraron paradas para el centro de costo especificado.");
+            }
 
+        
+            var paradasFiltradas = await Task.Run(() => _paradasService.FiltrarDatos(paradasSinFiltro, cadenas));
+            if (paradasFiltradas == null || !paradasFiltradas.Any())
+            {
+                return NotFound("No se encontraron paradas filtradas para el centro de costo especificado.");
+            }
+            
+            return Ok(paradasFiltradas);
+            }
+            catch (Exception ex)
+            {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+        }
+    }
+    
+    [HttpGet("GetParadasPrimerTurnoPorMaquina/{centroCosto}/{cadenas}")]
+
+    public async Task<IActionResult> GetParadasPrimerTurnoPorMaquina(string centroCosto, string cadenas)
+    {
+        if(string.IsNullOrWhiteSpace(centroCosto) || string.IsNullOrWhiteSpace(cadenas))
+        {
+            return BadRequest("El centro de costo y la cadena son obligaotirios.");
+        }
+        try
+        {
+            var paradasFiltradas = await Task.Run(() => GetParadasActuales1Turno(centroCosto));
+            if (paradasFiltradas == null || !paradasFiltradas.Any())
+            {
+                return NotFound("No se encontraron paradas filtradas para el centro de costo especificado.");
+            }
+
+            return Ok(paradasFiltradas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+            }
+    }
 
 }
