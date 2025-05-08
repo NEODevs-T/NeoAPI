@@ -1165,7 +1165,7 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
 
         catch(Exception ex)
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
     }
 
@@ -1193,9 +1193,64 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         catch (Exception ex)
         
         {
-            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor");
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
     }
 
+    [HttpGet("GetParadasActuales1turnoPorLinea/{centroCosto}")]
+
+    public async Task<IActionResult> GetParadasActuales1turnoPorLinea(string centroCosto)
+    {
+        if (string.IsNullOrWhiteSpace(centroCosto))
+        {
+            return BadRequest("El centro de costo es obligatorio.");
+        }
+
+        try 
+        {
+            var paradas = await GetParadasActuales1Turno(centroCosto);
+            
+            if (paradas == null || !paradas.Any())
+            {
+                return NotFound("No se encontraron paradas para el centro de costo especificado.");
+            }
+
+            return Ok(paradas);
+        }
+
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+        }
+    }
+
+/* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}/{cadenas}")]
+
+    public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto, string cadenas)
+    {
+        if (string.IsNullOrWhiteSpace(centroCosto) && string.IsNullOrWhiteSpace(cadenas))
+        {
+            return BadRequest("El centro de costo y la cadena son obligatorios.");
+        }
+
+        try
+        {
+            var paradas = await GetParadasActualesConFiltro(centroCosto, cadenas);
+
+            if (paradas == null || !paradas.Any())
+            {
+                return NotFound("No se encontraron paradas para el centro de costo especificado.");
+            }
+
+            return Ok(paradas);
+        }
+
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+        }
+
+        
+    }*/
     
 }
