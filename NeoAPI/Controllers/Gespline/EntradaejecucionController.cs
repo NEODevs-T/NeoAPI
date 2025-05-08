@@ -1224,6 +1224,29 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
         }
     }
 
+    [HttpGet("GetLaPrimeraParadaPorLinea")]
+
+    public async Task<IActionResult> GetLaPrimeraParadaPorLinea()
+    {
+        try
+        {
+            var resultado = await Task.Run(() => GetLaPrimeraParadaPorLinea());
+
+            if (resultado == null)
+            {
+                return NotFound("No se encontró la información solicitada.");
+            }
+
+            return Ok(resultado);
+
+        }
+
+        catch (Exception ex)
+        {
+            return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+        }
+    }
+
 /* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}/{cadenas}")]
 
     public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto, string cadenas)
