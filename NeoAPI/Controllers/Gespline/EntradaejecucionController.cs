@@ -39,14 +39,26 @@ public class EntradaejecucionController : ControllerBase
     public async Task<List<string>> MaquinasGesplineActivos1turno()
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
+        
         DateTime final = DateTime.Today.AddHours(18);//new DateTime(2025,04,22,18,0,0);
+        
         List<string> listaCodigoProceso = new List<string>();
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        
+        .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
+        
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
-            listaCodigoProceso.Add(item.CodigotuplaNavigation.Codigoproceso);
+            listaCodigoProceso
+        
+            .Add(item.CodigotuplaNavigation.Codigoproceso);
         }
+        
         return listaCodigoProceso;
     }
 
@@ -55,14 +67,26 @@ public class EntradaejecucionController : ControllerBase
     public async Task<List<string>> MaquinasGesplineActivos2turnoDespues0am()
     {
         DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);//DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
+        
         DateTime final = DateTime.Today.AddHours(6);//new DateTime(2025,04,22,18,0,0);
+        
         List<string> listaCodigoProceso = new List<string>();
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        
+        .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
+        
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
-            listaCodigoProceso.Add(item.CodigotuplaNavigation.Codigoproceso);
+            listaCodigoProceso
+        
+            .Add(item.CodigotuplaNavigation.Codigoproceso);
         }
+        
         return listaCodigoProceso;
     }
 
@@ -71,34 +95,46 @@ public class EntradaejecucionController : ControllerBase
     public async Task<List<string>> MaquinasGesplineActivos2turnoAntes0am()
     {
         DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
+        
         DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+        
         List<string> listaCodigoProceso = new List<string>();
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+        
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
         
         foreach (var item in listaEjecucion)
         {
-            listaCodigoProceso.Add(item.CodigotuplaNavigation.Codigoproceso);
+            listaCodigoProceso
+        
+            .Add(item.CodigotuplaNavigation.Codigoproceso);
         }
-
+        
         return listaCodigoProceso;
 
     }
 
-        [HttpGet("TiempoPerdidoActual1turno")]
+    [HttpGet("TiempoPerdidoActual1turno")]
 
     public async Task<List<string>> TiempoPerdidoActual1turno()
     {
         // Define el inicio del turno: hoy a las 05:50 AM.
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
-    
         // Define el final del turno: hoy a las 06:00 PM (18:00).
         DateTime final = DateTime.Today.AddHours(18);
-    
         // Obtiene la lista de registros de Entradaejecucion cuyo campo Fechaentrada se encuentre dentro del rango [inicio, final).
         // Se incluye la propiedad de navegación CodigotuplaNavigation para poder acceder a los datos del proceso.
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+    
         .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+    
         .Include(e => e.CodigotuplaNavigation)
+    
         .ToListAsync();
     
             // Consulta la tabla Paradasejecutadas:
@@ -106,8 +142,11 @@ public class EntradaejecucionController : ControllerBase
             // - Además, filtra aquellos registros cuyos registros de Entradaejecucion asociados (a través de CodigoentradaejecucionNavigation) 
             //   tienen un Fechaentrada dentro del mismo rango [inicio, final).
         var tiempoPerdido = await this._context.Paradasejecutadas
+    
             .Where(e => e.Timespan != null && e.Fechayhoraparada != null 
+    
                     && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
+    
                     && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
             // Agrupa los registros por el código del proceso, accediendo a él desde la relación: 
             // CodigoentradaejecucionNavigation → CodigotuplaNavigation → Codigoproceso.
@@ -118,6 +157,7 @@ public class EntradaejecucionController : ControllerBase
             .Select(g => new
             {
                 Codigoproceso = g.Key, 
+    
                 TiempoPerdido = g.Sum(p => (float)((p.Timespan.Value - p.Fechayhoraparada.Value).TotalHours))
             })
             .ToListAsync();
@@ -132,13 +172,17 @@ public class EntradaejecucionController : ControllerBase
             var codigo = item.CodigotuplaNavigation.Codigoproceso;
         
             // Busca en el resultado agrupado el objeto que tenga el mismo código de proceso.
-            var tiempogrupo = tiempoPerdido.FirstOrDefault(x => x.Codigoproceso == codigo);
+            var tiempogrupo = tiempoPerdido
+    
+            .FirstOrDefault(x => x.Codigoproceso == codigo);
         
             // Si se encuentra el grupo se asigna el tiempo perdido, de lo contrario se asigna 0.
             float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
         
             // Agrega a la lista una cadena formateada con el código del proceso y el tiempo perdido total.
-            listaTiempoPerdido.Add($"{codigo}: Tiempo perdido total {tiempo} horas");
+            listaTiempoPerdido
+    
+            .Add($"{codigo}: Tiempo perdido total {tiempo} horas");
         }
     
         // Retorna la lista de cadenas con el resumen del tiempo perdido para cada proceso.
@@ -268,7 +312,9 @@ public class EntradaejecucionController : ControllerBase
 
         List<string> listaTiempoActual = new List<string>();
 
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
@@ -296,7 +342,13 @@ public class EntradaejecucionController : ControllerBase
 
         List<string> listaTiempoActual = new List<string>();
 
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+        
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
@@ -323,7 +375,13 @@ public class EntradaejecucionController : ControllerBase
 
         List<string> listaTiempoActual = new List<string>();
 
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions.Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+        
+        .Include(e => e.CodigotuplaNavigation)
+        
+        .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
@@ -339,17 +397,18 @@ public class EntradaejecucionController : ControllerBase
         return listaTiempoActual;
         
     }
+    
+    [HttpGet("tiempoTrabajadoActual1turno")]
+    
+    public async Task<List<string>> TiempoTrabajadoActual1Turno()
+    {
+        // Se obtienen las listas de tiempos ejecutados y tiempos perdidos.
+        var listaEjecutado = await tiempoEjecutadoActual1();
 
-[HttpGet("tiempoTrabajadoActual1turno")]
-public async Task<List<string>> TiempoTrabajadoActual1Turno()
-{
-    // Se obtienen las listas de tiempos ejecutados y tiempos perdidos.
-    var listaEjecutado = await tiempoEjecutadoActual1();
+        var listaPerdido = await TiempoPerdidoActual1turno();
 
-    var listaPerdido = await TiempoPerdidoActual1turno();
-
-    // Conversión de la listaEjecutado a objetos con Key y Value
-    var ejecutado = listaEjecutado.Select(e => 
+        // Conversión de la listaEjecutado a objetos con Key y Value
+        var ejecutado = listaEjecutado.Select(e => 
     {
 
         var parts = e.Split(':');
@@ -418,7 +477,7 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
     // Retornamos el resultado como una lista de strings.
     return resultado.ToList();
 
-}
+    }
 
     [HttpGet("tiempoTrabajadoActual2turno")]
 
@@ -1014,14 +1073,14 @@ public async Task<List<string>> TiempoTrabajadoActual1Turno()
     }
 
     public interface IParadasService
-{
+    {   
     List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros);
-}
+    }
 
 
 
-public class ParadasService : IParadasService
-{
+    public class ParadasService : IParadasService
+    {
     public List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros)
     {
         string[] filtros = cadenaIdRegistros
@@ -1045,7 +1104,7 @@ public class ParadasService : IParadasService
         }
         return datos;
     }
-}
+    }
 
 
     [HttpGet("GetPrimeraParadaporLinea")]
