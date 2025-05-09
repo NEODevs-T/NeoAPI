@@ -193,20 +193,18 @@ public class EntradaejecucionController : ControllerBase
     }
 
 
-    [HttpGet ("tiempoEjecutadoActual1")]
+    [HttpGet ("GetTiempoEjecutadoActual1Turno")]
 
-    public async Task<List<string>> tiempoEjecutadoActual1()
+    public async Task<ActionResult<List<string>>> GetTiempoEjecutadoActual1Turno()
     {
-
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
-
         DateTime final = DateTime.Today.AddHours(18);
-
         List<string> listaTiempoActual = new List<string>();
-
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        
-        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final).Include(e => e.CodigotuplaNavigation).ToListAsync();
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+        .Include(e => e.CodigotuplaNavigation)
+        .OrderBy(e => e.CodigotuplaNavigation.Codigoproceso)
+        .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
@@ -215,11 +213,11 @@ public class EntradaejecucionController : ControllerBase
 
             string tiempo = item.Horasejecutadas.ToString();
 
-            listaTiempoActual.Add($"{codigo}: Tiempo ejecutado total {tiempo} horas");
+            listaTiempoActual.Add($"{codigo}: {tiempo}");
 
         }
 
-        return listaTiempoActual;
+        return Ok(listaTiempoActual);
 
     }
 
@@ -256,41 +254,28 @@ public class EntradaejecucionController : ControllerBase
 
     }
 
-    [HttpGet ("tiempoEjecutadoActual2turnoDespues0am")]
-
-    public async Task<List<string>> tiempoEjecutadoActual2turnoDespues0am()
+    [HttpGet ("GetTiempoEjecutadoActual2turnoDespues0am")]
+    public async Task<ActionResult<List<string>>> GetTiempoEjecutadoActual2turnoDespues0am()
     {
-
         DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
-
         DateTime final = DateTime.Today.AddHours(5).AddMinutes(50);
-
         List<string> listaTiempoActual = new List<string>();
-
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        
-        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
-        
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)        
         .Include(e => e.CodigotuplaNavigation)
-        
         .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
-            
             var codigo = item.CodigotuplaNavigation.Codigoproceso;
-
             string tiempo = item.Horasejecutadas.ToString();
-
-            listaTiempoActual.Add($"{codigo}: Tiempo ejecutado total {tiempo} horas");
-            
+            listaTiempoActual.Add($"{codigo}:{tiempo}");
         }
 
-        return listaTiempoActual;
-        
+        return Ok(listaTiempoActual);
     }
     
-   /* [HttpGet("tiempoTrabajadoActual1turno")]
+    /* [HttpGet("tiempoTrabajadoActual1turno")]
     
     public async Task<List<string>> TiempoTrabajadoActual1Turno()
     {
