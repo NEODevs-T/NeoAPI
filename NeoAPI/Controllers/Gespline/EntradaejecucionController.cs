@@ -33,29 +33,23 @@ public class EntradaejecucionController : ControllerBase
     }
 
 
-    [HttpGet("MaquinasGesplineActivos1turno")]
-    public async Task<ActionResult<List<string>>> MaquinasGesplineActivos1turno()
+    [HttpGet("GetMaquinasGesplineActivos1turno")]
+    public async Task<ActionResult<List<string>>> GetMaquinasGesplineActivos1turno()
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
-        
         DateTime final = DateTime.Today.AddHours(18);//new DateTime(2025,04,22,18,0,0);
-        
         List<string> listaCodigoProceso = new List<string>();
-        
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        
         .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
-        
         .Include(e => e.CodigotuplaNavigation)
-        
         .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
             listaCodigoProceso
-        
             .Add(item.CodigotuplaNavigation.Codigoproceso);
         }
+
         listaCodigoProceso = listaCodigoProceso.OrderBy(l => l).ToList();
         return Ok(listaCodigoProceso);
     }
@@ -1090,7 +1084,7 @@ public class EntradaejecucionController : ControllerBase
     }
 
 
-    [HttpGet("GetPrimeraParadaporLinea")]
+/*   [HttpGet("GetPrimeraParadaporLinea")]
 
     public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea()
     {
@@ -1099,7 +1093,7 @@ public class EntradaejecucionController : ControllerBase
 
         if (today.Hour >= 6 && today.Hour < 18)
         {
-            maquinas = await this.MaquinasGesplineActivos1turno();
+           // maquinas = await this.MaquinasGesplineActivos1turno();
         }
         else if (today.Hour >= 18 && today.Hour < 24)
         {
@@ -1132,7 +1126,7 @@ public class EntradaejecucionController : ControllerBase
         }
 
         return NotFound("No se encontró información para ninguna máquina");
-    }
+    }*/
 
     [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}")]
 
