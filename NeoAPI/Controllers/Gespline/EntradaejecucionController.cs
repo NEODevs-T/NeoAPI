@@ -127,60 +127,35 @@ public class EntradaejecucionController : ControllerBase
         return Ok(listaTiempoPerdido);
     }
 
-    [HttpGet("tiempoPerdidoActual2turnoAntes0am")]
-
-    public async Task<List<string>> tiempoPerdidoActual2turnoAntes0am()
+    [HttpGet("GetTiempoPerdidoActual2turnoAntes0am")]
+    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual2turnoAntes0am()
     {
-        
         DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
-        
         DateTime final = DateTime.Today.AddDays(1).AddHours(6);
-        
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        
         .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
-        
         .Include(e => e.CodigotuplaNavigation)
-        
         .ToListAsync();
 
         var tiempoPerdido = await this._context.Paradasejecutadas
-        
         .Where(e => e.Timespan != null && e.Fechayhoraparada != null 
-        
-        && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
-        
-        && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
-        
+                && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
+                && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
         .GroupBy(p => p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso)
-        
         .Select(g => new
-        
         {
             Codigoproceso = g.Key, 
         
-            TiempoPerdido = g.Sum(p => (float)((p.Timespan.Value - p.Fechayhoraparada.Value).TotalHours))
+            TiempoPerdido = g.Sum(p => EF.Functions.DateDiffMinute(p.Fechayhoraparada.Value, p.Timespan.Value)) / 60.0f
         })
-        
         .ToListAsync();
 
-        List<string> listaTiempoPerdido = new List<string>();
+        List<string> listaTiempoPerdido = tiempoPerdido
+        .OrderBy(tp => tp.Codigoproceso)
+        .Select(tp =>$"{tp.Codigoproceso}: {tp.TiempoPerdido}")
+        .ToList();
 
-        foreach (var item in listaEjecucion)
-        {
-        
-            var codigo = item.CodigotuplaNavigation.Codigoproceso;
-            
-            var tiempogrupo = tiempoPerdido.FirstOrDefault(x => x.Codigoproceso == codigo);
-            
-            float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
-
-            listaTiempoPerdido.Add($"{codigo}: Tiempo perdido total {tiempo} horas");
-        
-        }
-
-        return listaTiempoPerdido;
-
+        return Ok(listaTiempoPerdido);
     }
 
     [HttpGet("tiempoPerdidoActual2turnoDespues0am")]
@@ -417,7 +392,7 @@ public class EntradaejecucionController : ControllerBase
 
     }*/
 
-    [HttpGet("tiempoTrabajadoActual2turno")]
+ /*   [HttpGet("tiempoTrabajadoActual2turno")]
 
     public async Task<List<string>> tiempoTrabajadoActual2turno(bool band)
     {
@@ -430,7 +405,8 @@ public class EntradaejecucionController : ControllerBase
             
             listaEjecutado = await tiempoEjecutadoActual2turnoAntes0am();
 
-            listaPerdido = await tiempoPerdidoActual2turnoAntes0am();
+            listaPerdido = await GetTiempoPerdidoActual2turnoAntes0am();
+
 
         }
         else
@@ -510,7 +486,7 @@ public class EntradaejecucionController : ControllerBase
                     select $"Código {ej.Key} -> Tiempo Ejecutado: {tiempoEjecutado} h, Tiempo Perdido: {tiempoPerdido} h, Tiempo Neto: {tiempoNeto} h. {comentario}";
     // Retornamos el resultado como una lista de strings.
     return resultado.ToList();
-    }
+    }*/
     
     [HttpGet("GetParadasActuales1Turno")]
     // Este atributo indica que el método responderá a solicitudes HTTP GET en la ruta "GetParadasActuales1Turno".
