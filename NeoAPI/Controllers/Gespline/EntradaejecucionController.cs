@@ -164,29 +164,27 @@ public class EntradaejecucionController : ControllerBase
         DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(6);
         
-        var registros = await _context.Paradasejecutadas
-        .Include(p => p.CodigoentradaejecucionNavigation)
-        .ThenInclude(c => c.CodigotuplaNavigation)
-        .Where(e => e.Timespan != null 
-                && e.Fechayhoraparada != null 
-                && e.CodigoentradaejecucionNavigation != null
-                && e.CodigoentradaejecucionNavigation.CodigotuplaNavigation != null
-                && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
-                && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
+                List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
+        .Include(e => e.CodigotuplaNavigation)
         .ToListAsync();
 
-        var tiempoPerdido = registros
+        var tiempoPerdido = await this._context.Paradasejecutadas
+        .Where(e => e.Timespan != null && e.Fechayhoraparada != null 
+                && e.CodigoentradaejecucionNavigation.Fechaentrada >= inicio 
+                && e.CodigoentradaejecucionNavigation.Fechaentrada < final)
         .GroupBy(p => p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso)
         .Select(g => new
         {
-            Codigoproceso = g.Key,
-            TiempoPerdido = g.Sum(p => (float)(p.Timespan.Value - p.Fechayhoraparada.Value).TotalHours)
+            Codigoproceso = g.Key, 
+        
+            TiempoPerdido = g.Sum(p => EF.Functions.DateDiffMinute(p.Fechayhoraparada.Value, p.Timespan.Value)) / 60.0f
         })
-        .OrderBy(x => x.Codigoproceso)
-        .ToList();
+        .ToListAsync();
 
         List<string> listaTiempoPerdido = tiempoPerdido
-        .Select(tp => $"{tp.Codigoproceso}: {tp.TiempoPerdido}")
+        .OrderBy(tp => tp.Codigoproceso)
+        .Select(tp =>$"{tp.Codigoproceso}: {tp.TiempoPerdido}")
         .ToList();
 
         return Ok(listaTiempoPerdido);
@@ -250,6 +248,7 @@ public class EntradaejecucionController : ControllerBase
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
         .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)        
         .Include(e => e.CodigotuplaNavigation)
+        .OrderBy(e => e.CodigotuplaNavigation.Codigoproceso)
         .ToListAsync();
 
         foreach (var item in listaEjecucion)
