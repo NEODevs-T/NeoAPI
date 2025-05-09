@@ -208,49 +208,36 @@ public class EntradaejecucionController : ControllerBase
 
         foreach (var item in listaEjecucion)
         {
-            
             var codigo = item.CodigotuplaNavigation.Codigoproceso;
-
             string tiempo = item.Horasejecutadas.ToString();
-
             listaTiempoActual.Add($"{codigo}: {tiempo}");
-
         }
 
         return Ok(listaTiempoActual);
 
     }
 
-    [HttpGet ("tiempoEjecutadoActual2turnoAntes0am")]
-
-    public async Task<List<string>> tiempoEjecutadoActual2turnoAntes0am()
+    [HttpGet ("GetTiempoEjecutadoActual2turnoAntes0am")]
+    public async Task<ActionResult<List<string>>> GetTiempoEjecutadoActual2turnoAntes0am()
     {
-        
-        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
-        
+        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);        
         DateTime final = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
-
         List<string> listaTiempoActual = new List<string>();
-
         List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        
         .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
-        
         .Include(e => e.CodigotuplaNavigation)
-        
+        .OrderBy(e => e.CodigotuplaNavigation.Codigoproceso)
         .ToListAsync();
 
         foreach (var item in listaEjecucion)
         {
             var codigo = item.CodigotuplaNavigation.Codigoproceso;
-
             string tiempo = item.Horasejecutadas.ToString();
-
-            listaTiempoActual.Add($"{codigo}: Tiempo ejecutado total {tiempo} horas");
+            listaTiempoActual.Add($"{codigo}: {tiempo}");
             
         }
 
-        return listaTiempoActual;
+        return Ok(listaTiempoActual);
 
     }
 
