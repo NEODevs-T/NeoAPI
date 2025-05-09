@@ -26,17 +26,15 @@ public class EntradaejecucionController : ControllerBase
 {
     private readonly GesplineContext _context;
 
-    private readonly IParadasService _paradasService;
 
-    public EntradaejecucionController(GesplineContext context, IParadasService paradasService)
+    public EntradaejecucionController(GesplineContext context)
     {
         _context = context;
-        _paradasService = paradasService;
     }
 
 
     [HttpGet("MaquinasGesplineActivos1turno")]
-    public async Task<List<string>> MaquinasGesplineActivos1turno()
+    public async Task<ActionResult<List<string>>> MaquinasGesplineActivos1turno()
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
         
@@ -58,8 +56,8 @@ public class EntradaejecucionController : ControllerBase
         
             .Add(item.CodigotuplaNavigation.Codigoproceso);
         }
-        
-        return listaCodigoProceso;
+        listaCodigoProceso = listaCodigoProceso.OrderBy(l => l).ToList();
+        return Ok(listaCodigoProceso);
     }
 
     [HttpGet("MaquinasGesplineActivos2turnoDespues0am")]
@@ -831,11 +829,8 @@ public class EntradaejecucionController : ControllerBase
 
         DateTime final = DateTime.Today.AddHours(6);
 
-        var query =
-
-        from en in _context.Entradaejecucions
-
-        where en.Fechaentrada >= inicio && en.Fechaentrada < final
+        var query = from en in _context.Entradaejecucions
+                    where en.Fechaentrada >= inicio && en.Fechaentrada < final
 
         let tupla = en.CodigotuplaNavigation
 
@@ -914,11 +909,8 @@ public class EntradaejecucionController : ControllerBase
 
         join pr in _context.Procesos on pe.CodigoentradaejecucionNavigation.Codigoentradaejecucion.ToString() equals pr.Codigoproceso
 
-        where 
-        
-        pe.Codigoregistrso != null &&
-
-        p.Nombreparada != null &&
+        where   pe.Codigoregistrso != null &&
+                p.Nombreparada != null &&
         
         gp.Codigogrupoparada != null &&
 
@@ -1072,15 +1064,7 @@ public class EntradaejecucionController : ControllerBase
         
     }
 
-    public interface IParadasService
-    {   
-    List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros);
-    }
-
-
-
-    public class ParadasService : IParadasService
-    {
+    [HttpGet("FiltrarDatos")]
     public List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros)
     {
         string[] filtros = cadenaIdRegistros
@@ -1103,7 +1087,6 @@ public class EntradaejecucionController : ControllerBase
             }
         }
         return datos;
-    }
     }
 
 
@@ -1253,8 +1236,7 @@ public class EntradaejecucionController : ControllerBase
             return Ok(paradas);
         }
 
-        catch (Exception ex)
-        
+        catch
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
@@ -1327,7 +1309,7 @@ public class EntradaejecucionController : ControllerBase
             }
 
         
-            var paradasFiltradas = await Task.Run(() => _paradasService.FiltrarDatos(paradasSinFiltro, cadenas));
+            var paradasFiltradas = await Task.Run(() => FiltrarDatos(paradasSinFiltro, cadenas));
             if (paradasFiltradas == null || !paradasFiltradas.Any())
             {
                 return NotFound("No se encontraron paradas filtradas para el centro de costo especificado.");
