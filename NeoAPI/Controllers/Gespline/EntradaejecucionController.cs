@@ -97,8 +97,8 @@ public class EntradaejecucionController : ControllerBase
 
     }
 
-    [HttpGet("TiempoPerdidoActual1turno")]
-    public async Task<List<string>> TiempoPerdidoActual1turno()
+    [HttpGet("GetTiempoPerdidoActual1turno")]
+    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual1turno()
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(18);
@@ -115,24 +115,16 @@ public class EntradaejecucionController : ControllerBase
             .Select(g => new
             {
                 Codigoproceso = g.Key, 
-                TiempoPerdido = g.Sum(p => (float)((p.Timespan.Value - p.Fechayhoraparada.Value).TotalHours))
+                TiempoPerdido = g.Sum(p => EF.Functions.DateDiffMinute(p.Fechayhoraparada.Value, p.Timespan.Value)) / 60.0f
             })
             .ToListAsync();
     
-        List<string> listaTiempoPerdido = new List<string>();
+        List<string> listaTiempoPerdido = tiempoPerdido
+        .OrderBy(tp => tp.Codigoproceso)
+        .Select(tp =>$"{tp.Codigoproceso}: {tp.TiempoPerdido}")
+        .ToList();
 
-        foreach (var item in listaEjecucion)
-        {
-            var codigo = item.CodigotuplaNavigation.Codigoproceso;
-        
-            var tiempogrupo = tiempoPerdido    
-            .FirstOrDefault(x => x.Codigoproceso == codigo);
-        
-            float tiempo = tiempogrupo != null ? tiempogrupo.TiempoPerdido : 0f;
-            listaTiempoPerdido
-            .Add($"{codigo}: Tiempo perdido total {tiempo} horas");
-        }
-        return listaTiempoPerdido;
+        return Ok(listaTiempoPerdido);
     }
 
     [HttpGet("tiempoPerdidoActual2turnoAntes0am")]
@@ -344,14 +336,14 @@ public class EntradaejecucionController : ControllerBase
         
     }
     
-    [HttpGet("tiempoTrabajadoActual1turno")]
+   /* [HttpGet("tiempoTrabajadoActual1turno")]
     
     public async Task<List<string>> TiempoTrabajadoActual1Turno()
     {
         // Se obtienen las listas de tiempos ejecutados y tiempos perdidos.
         var listaEjecutado = await tiempoEjecutadoActual1();
 
-        var listaPerdido = await TiempoPerdidoActual1turno();
+        var listaPerdido = await GetTiempoPerdidoActual1turno();
 
         // Conversión de la listaEjecutado a objetos con Key y Value
         var ejecutado = listaEjecutado.Select(e => 
@@ -423,7 +415,7 @@ public class EntradaejecucionController : ControllerBase
     // Retornamos el resultado como una lista de strings.
     return resultado.ToList();
 
-    }
+    }*/
 
     [HttpGet("tiempoTrabajadoActual2turno")]
 
