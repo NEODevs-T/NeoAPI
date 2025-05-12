@@ -15,6 +15,7 @@ using System.Text.RegularExpressions;
 using Microsoft.AspNetCore.Mvc.Infrastructure;
 using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Http.HttpResults;
+using System.Globalization;
 
 namespace NeoAPI.Controllers.Gespline;
 
@@ -261,88 +262,64 @@ public class EntradaejecucionController : ControllerBase
         return Ok(listaTiempoActual);
     }
     
-    /* [HttpGet("tiempoTrabajadoActual1turno")]
-    
-    public async Task<List<string>> TiempoTrabajadoActual1Turno()
+    [HttpGet("GetTiempoTrabajadoActual1turno")]
+    public async Task<ActionResult<List<string>>> TiempoTrabajadoActual1Turno()
     {
-        // Se obtienen las listas de tiempos ejecutados y tiempos perdidos.
-        var listaEjecutado = await tiempoEjecutadoActual1();
-
-        var listaPerdido = await GetTiempoPerdidoActual1turno();
-
-        // Conversión de la listaEjecutado a objetos con Key y Value
+        var listaEjecutadoR = await GetTiempoEjecutadoActual1Turno();
+        List<string> listaEjecutado;
+        if (listaEjecutadoR.Result is OkObjectResult okEjecutado 
+        && okEjecutado.Value is List<string> dataEjecutado)
+        {
+            listaEjecutado = dataEjecutado;
+        }
+        else
+        {
+            return BadRequest("No se pudo obtener la lista de tiempo ejecutado.");
+        }
+        var listaPerdidoR = await GetTiempoPerdidoActual1turno();
+        List<string> listaPerdido;
+        if (listaPerdidoR.Result is OkObjectResult okPerdido 
+        && okPerdido.Value is List<string> dataEjecutado2)
+        {
+            listaPerdido = dataEjecutado2;
+        }
+        else
+        {
+            return BadRequest("No se pudo obtener la lista de tiempo perdido.");
+        }
         var ejecutado = listaEjecutado.Select(e => 
     {
-
         var parts = e.Split(':');
-
         return new 
-
         { 
-
             Key = parts[0].Trim(), 
-
             Value = float.Parse(
-
-                parts[1].Replace("Tiempo ejecutado total", "")
-
-                        .Replace("horas", "")
-
-                        .Trim())
+                parts[1].Trim(),
+                new CultureInfo("es-VE"))
         };
-
     }).ToList();
-
-    // Conversión de la listaPerdido a objetos con Key y Value
     var perdido = listaPerdido.Select(p => 
     {
-
         var parts = p.Split(':');
-
         return new 
         { 
-
             Key = parts[0].Trim(), 
-
             Value = float.Parse(
-
-                parts[1].Replace("Tiempo perdido total", "")
-
-                        .Replace("horas", "")
-
-                        .Trim())
+                parts[1].Trim(),
+                new CultureInfo("es-VE"))
         };
     }).ToList();
-
-    // Left Join usando LINQ y cálculo del tiempo neto con mensaje dinámico
     var resultado = from ej in ejecutado
-                    
                     join p in perdido on ej.Key equals p.Key into perdGroup
-                    
                     from perd in perdGroup.DefaultIfEmpty() // Si no hay coincidencia, perd será null.
-                    
                     let tiempoEjecutado = ej.Value
-                    
                     let tiempoPerdido = perd != null ? perd.Value : 0f
-                    
                     let tiempoNeto = tiempoEjecutado - tiempoPerdido
-                    
-                    let comentario = tiempoNeto switch
-                    
-                    {
-                    
-                        var t when t >= 10f  => "¡Excelente rendimiento!",
-                    
-                        _                  => "Rendimiento aceptable."
-                    }
-                    
-                    select $"Código {ej.Key} -> Tiempo Ejecutado: {tiempoEjecutado} h, Tiempo Perdido: {tiempoPerdido} h, Tiempo Neto: {tiempoNeto} h. {comentario}";
-    // Retornamos el resultado como una lista de strings.
-    return resultado.ToList();
+                    select $"{tiempoNeto}";
+    return Ok(resultado);
+    }
 
-    }*/
-
- /*   [HttpGet("tiempoTrabajadoActual2turno")]
+/*   [HttpGet("tiempoTrabajadoActual2turno")]
 
     public async Task<List<string>> tiempoTrabajadoActual2turno(bool band)
     {
