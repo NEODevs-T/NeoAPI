@@ -403,110 +403,46 @@ public class EntradaejecucionController : ControllerBase
     }
     
     [HttpGet("GetParadasActuales1Turno")]
-    // Este atributo indica que el método responderá a solicitudes HTTP GET en la ruta "GetParadasActuales1Turno".
-    public async Task<List<ParadaActual1TurnoDTO>> GetParadasActuales1Turno(string centroCosto)
-    // Declara un método asíncrono público que retorna una lista de objetos del tipo ParadasejecutadaDTO.
-    // Recibe como parámetro un string (centroCosto), que se usará para filtrar los registros según el centro de costo.
+    public async Task<ActionResult<List<ParadaActual1TurnoDTO>>> GetParadasActuales1Turno(string centroCosto)
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);  
-        // Se define la variable "inicio" que representa el inicio del turno, que se calcula tomando la fecha actual a medianoche (DateTime.Today)
-        // y sumándole 5 horas y 50 minutos para obtener las 05:50 del día actual.
-    
         DateTime final  = DateTime.Today.AddHours(18);                 
-        // Se define la variable "final" que representa el fin del turno, calculada como la fecha actual con 18 horas añadidas,
-        // lo que equivale a las 16:00 del mismo día.
 
-        var query =
-        // Se declara la variable "query" para almacenar la consulta LINQ que se construirá a continuación.
-
-        from pe in _context.Paradasejecutadas
-        // Se inicia la consulta obteniendo cada registro (alias "pe") de la entidad Paradasejecutadas del contexto de datos.
-
+        var query = from pe in _context.Paradasejecutadas
         join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
-        // Se realiza una unión (inner join) entre Paradasejecutadas y Paradas, relacionando ambos mediante el campo Codigoparada.
-        // Esto asegura que por cada registro en Paradasejecutadas se recupere el registro correspondiente en Paradas.
-
         join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
-        // Se une la entidad Gruposdeparadas a la consulta usando el campo Codigogrupoparada proveniente de la entidad Paradas,
-        // obteniendo así información del grupo al que pertenece cada parada.
-
-        join part in _context.Partes
-            on pe.Codigoparada.Substring(0, 3).ToUpper() equals part.Codigo into partJoin
-        // Se intenta unir la entidad Partes con Paradasejecutadas: se toma la subcadena de los primeros 3 caracteres de Codigoparada
-        // (convertidos a mayúsculas) y se compara con el campo Codigo de Partes.
-        // El resultado se agrupa en "partJoin", ya que puede no existir coincidencia (por ello se hará un left join en el siguiente paso).
-
-        from pa in partJoin.DefaultIfEmpty() // left join, para Parte (opcional)        
-        // Se realiza un left join sobre el grupo "partJoin": si no se encuentra ningún registro en Partes que coincida, pa será null.
-        // Esto permite que la información procedente de Partes sea opcional y no descartar el registro principal.
-
-        // AÑADIMOS EL JOIN CON LA ENTIDAD PROCESO:
-        join pr in _context.Procesos 
-            on pe.CodigoentradaejecucionNavigation.Codigoentradaejecucion.ToString() equals pr.Codigoproceso
-        // Se une la entidad Procesos (alias pr) para relacionar el proceso asociado al registro.
-        // Se accede a la propiedad de navegación CodigoentradaejecucionNavigation (que representa la relación con la entrada de ejecución)
-        // y se toma el valor de Codigoentradaejecucion, el cual se convierte a string y se compara con el campo Codigoproceso en Procesos.
-        // Esto sirve para aplicar el filtro por centro de costo.
-
+        join part in _context.Partes on pe.Codigoparada
+        .Substring(0, 3)
+        .ToUpper() equals part.Codigo into partJoin
+        from pa in partJoin.DefaultIfEmpty()
+        join pr in _context.Tuplaejecucions on pe.CodigoentradaejecucionNavigation.Codigoentradaejecucion
+        .ToString() equals pr.Codigoproceso
         where pe.Codigoregistrso != null && 
             p.Nombreparada != null &&
             gp.Codigogrupoparada != null &&
-        // Se aplican filtros iniciales para asegurar que los campos obligatorios no sean nulos:
-        //   - Codigoregistrso (identificador en Paradasejecutadas),
-        //   - Nombreparada en Paradas,
-        //   - Codigogrupoparada en Gruposdeparadas.
-
-          // Filtrar por Fechaentrada (de Entradaejecucion)
             pe.CodigoentradaejecucionNavigation.Fechaentrada >= inicio &&
             pe.CodigoentradaejecucionNavigation.Fechaentrada < final &&
-        // Se filtra por la fecha de entrada (obtenida desde la entidad relacionada a través de CodigoentradaejecucionNavigation)
-        // para que se encuentre entre el inicio (05:50) y el final (16:00) del turno.
-
             pe.CodigoentradaejecucionNavigation.Fechaentrada.HasValue &&
-        // Se verifica que la propiedad Fechaentrada tenga un valor (sea distinta de null).
-
             pe.CodigoentradaejecucionNavigation.Fechaentrada.Value.Hour < 17 &&
-        // Se aplica un filtro adicional para que la hora de Fechaentrada sea menor a 17 (lo que cumple la condición de DATENAME(HOUR) < 17 en el SQL original).
-
-            !p.Codigoparada.EndsWith("0114") &&
-        // Se descarta cualquier registro en el que el Codigoparada de la entidad Paradas termine en "0114".
-
-          // Filtro del centro de costo usando la entidad proceso:
+            !p.Codigoparada
+            .EndsWith("0114") &&
             pr.Codigoproceso == centroCosto
-        // Se aplica el filtro del centro de costo: se seleccionan solo aquellos registros cuyo proceso (proporcionado por pr.Codigoproceso)
-         // es igual al valor recibido en el parámetro centroCosto.
-
-        orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
-          // Se ordena el resultado de la consulta de forma descendente en función del "Tiempo Perdido".
-         // EF.Functions.DateDiffMinute calcula la diferencia en minutos entre Fechayhoraparada y Timespan para cada registro.
-
+        orderby EF.Functions
+        .DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
         select new ParadaActual1TurnoDTO
         {
-            CodigoRegistro = pe.Codigoregistrso.ToString(),
-            // Se asigna al DTO el valor de Codigoregistrso convertido a string.
-
+            CodigoRegistro = pe.Codigoregistrso
+            .ToString(),
             CodigoGrupoParada = gp.Codigogrupoparada,
-            // Se asigna el valor del grupo de paradas obtenido (Codigogrupoparada).
-
             NombreParada = p.Nombreparada,
-            // Se asigna el nombre de la parada obtenido de la entidad Paradas.
-
-            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0).ToString(),
-            // Se calcula el tiempo perdido usando EF.Functions.DateDiffMinute. Si el resultado es null, se asigna 0.
-
+            TiempoPerdido = (EF.Functions
+            .DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0)
+            .ToString(),
             ParteNombre = pa != null ? pa.ParteNombre : null,
-            // Se asigna el nombre de la parte (si existe, de lo contrario se asigna null).
-
             CodigoParte = pa != null ? pa.Codigo : null
-            // Se asigna el código de la parte (si existe, de lo contrario se asigna null).
         };
-        // Fin de la consulta LINQ; se ha construido la proyección a ParadasejecutadaDTO.
-
         var resultado = await query.ToListAsync();
-        // Se ejecuta la consulta de forma asíncrona y se transforma el resultado en una lista de ParadasejecutadaDTO.
-
-        return resultado;
-        // Se devuelve la lista resultante.
+        return Ok(resultado);
     }
     
     
@@ -1071,7 +1007,7 @@ public class EntradaejecucionController : ControllerBase
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
     }
-
+/*
     [HttpGet("GetParadasActuales1turnoPorLinea/{centroCosto}")]
 
     public async Task<IActionResult> GetParadasActuales1turnoPorLinea(string centroCosto)
@@ -1175,6 +1111,6 @@ public class EntradaejecucionController : ControllerBase
             {
                 return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
             }
-    }
+    }*/
 
 }
