@@ -420,9 +420,9 @@ public class EntradaejecucionController : ControllerBase
         on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
         join te in _context.Tuplaejecucions
         on ee.Codigotupla equals te.Codigotupla
-        where /*pe.Codigoregistrso != null && 
+        where pe.Codigoregistrso != null && 
         p.Nombreparada != null &&
-        gp.Codigogrupoparada != null &&*/
+        gp.Codigogrupoparada != null &&
         ee.Fechaentrada >= inicio &&
         ee.Fechaentrada < final &&
         ee.Fechaentrada.HasValue &&
