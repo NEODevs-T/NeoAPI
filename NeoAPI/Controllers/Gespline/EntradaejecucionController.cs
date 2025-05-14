@@ -33,47 +33,62 @@ public class EntradaejecucionController : ControllerBase
         _context = context;
     }
 
-
     [HttpGet("GetMaquinasGesplineActivos1turno")]
     public async Task<ActionResult<List<string>>> GetMaquinasGesplineActivos1turno()
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
         DateTime final = DateTime.Today.AddHours(18);//new DateTime(2025,04,22,18,0,0);
         List<string> listaCodigoProceso = new List<string>();
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
-        .Include(e => e.CodigotuplaNavigation)
-        .ToListAsync();
-
-        foreach (var item in listaEjecucion)
+        try
         {
-            listaCodigoProceso
-            .Add(item.CodigotuplaNavigation.Codigoproceso);
+            List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+                .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
+                .Include(e => e.CodigotuplaNavigation)
+                .ToListAsync();
+            if (!listaEjecucion.Any())
+            {
+                return BadRequest("No se encontraron registros.");
+            }
+            listaCodigoProceso = listaEjecucion
+                .Select(e => e.CodigotuplaNavigation.Codigoproceso)
+                .Distinct()
+                .OrderBy(l => l)
+                .ToList();
+            return Ok(listaCodigoProceso);
         }
-
-        listaCodigoProceso = listaCodigoProceso.Distinct().OrderBy(l => l).ToList();
-        return Ok(listaCodigoProceso);
+        catch (Exception ex)
+        {
+            return BadRequest($"Ocurrió un error inesperado: {ex.Message}");
+        }
     }
 
     [HttpGet("GetMaquinasGesplineActivos2turnoDespues0am")]
     public async Task<ActionResult<List<string>>> GetMaquinasGesplineActivos2turnoDespues0am()
     {
-        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);//DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
-        DateTime final = DateTime.Today.AddHours(6);//new DateTime(2025,04,22,18,0,0);
+        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
+        DateTime final = DateTime.Today.AddHours(6);
         List<string> listaCodigoProceso = new List<string>();
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
-        .Include(e => e.CodigotuplaNavigation)
-        .ToListAsync();
-
-        foreach (var item in listaEjecucion)
+        try
         {
-            listaCodigoProceso
-            .Add(item.CodigotuplaNavigation.Codigoproceso);
+            List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+                .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
+                .Include(e => e.CodigotuplaNavigation)
+                .ToListAsync();
+            if (!listaEjecucion.Any())
+            {
+                return BadRequest("No se encontraron registros.");
+            }
+            listaCodigoProceso = listaEjecucion
+                .Select(e => e.CodigotuplaNavigation.Codigoproceso)
+                .Distinct()
+                .OrderBy(l => l)
+                .ToList();
+            return Ok(listaCodigoProceso);
         }
-        
-        listaCodigoProceso = listaCodigoProceso.Distinct().OrderBy(l => l).ToList();
-        return Ok(listaCodigoProceso);
+        catch (Exception ex)
+        {
+            return BadRequest($"Ocurrió un error inesperado: {ex.Message}");
+        }
     }
 
     [HttpGet("GetMaquinasGesplineActivos2turnoAntes0am")]
@@ -82,20 +97,27 @@ public class EntradaejecucionController : ControllerBase
         DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddDays(1).AddHours(6);
         List<string> listaCodigoProceso = new List<string>();
-        List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
-        .Where(e => e.Fechaentrada >= inicio && e.Fechaentrada < final)
-        .Include(e => e.CodigotuplaNavigation)
-        .ToListAsync();
-        
-        foreach (var item in listaEjecucion)
+        try
         {
-            listaCodigoProceso
-            .Add(item.CodigotuplaNavigation.Codigoproceso);
+            List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
+                .Where(e => e.Fechaentrada >= inicio &&  e.Fechaentrada < final)
+                .Include(e => e.CodigotuplaNavigation)
+                .ToListAsync();
+            if (!listaEjecucion.Any())
+            {
+                return BadRequest("No se encontraron registros.");
+            }
+            listaCodigoProceso = listaEjecucion
+                .Select(e => e.CodigotuplaNavigation.Codigoproceso)
+                .Distinct()
+                .OrderBy(l => l)
+                .ToList();
+            return Ok(listaCodigoProceso);
         }
-        
-        listaCodigoProceso = listaCodigoProceso.Distinct().OrderBy(l => l).ToList();
-        return Ok(listaCodigoProceso);
-
+        catch (Exception ex)
+        {
+            return BadRequest($"Ocurrió un error inesperado: {ex.Message}");
+        }
     }
 
     [HttpGet("GetTiempoPerdidoActual1turno")]
@@ -414,7 +436,7 @@ public class EntradaejecucionController : ControllerBase
         join gp in _context.Gruposdeparadas 
         on p.Codigogrupoparada equals gp.Codigogrupoparada
         join part in _context.Partes 
-        on pe.Codigoparada.Substring(0, 3).ToUpper() equals part.Codigo into partJoin
+        on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
         from pa in partJoin.DefaultIfEmpty()
         join ee in _context.Entradaejecucions
         on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
