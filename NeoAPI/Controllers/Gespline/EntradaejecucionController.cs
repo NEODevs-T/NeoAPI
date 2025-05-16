@@ -37,7 +37,7 @@ public class EntradaejecucionController : ControllerBase
     public async Task<ActionResult<List<string>>> GetMaquinasGesplineActivos1turno()
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);//new DateTime(2025,04,22,5,50,0);
-        DateTime final = DateTime.Today.AddHours(18);//new DateTime(2025,04,22,18,0,0);
+        DateTime final = DateTime.Today.AddHours(18); //new DateTime(2025,04,22,18,0,0);
         List<string> listaCodigoProceso = new List<string>();
         try
         {
@@ -467,62 +467,76 @@ public class EntradaejecucionController : ControllerBase
     }
     
     
-    [HttpGet("GetParadasActuales1TurnoAgrupados")]    
-    public async Task<List<ParadaActual1TurnoAgrupadoDTO>> GetParadasActuales1TurnoAgrupados(string centroCosto)
-    {
-        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
-        DateTime final  = DateTime.Today.AddHours(18);
+[HttpGet("GetParadasActuales1TurnoAgrupados")]
+public async Task<ActionResult<List<ParadaActual1TurnoAgrupadoDTO>>> GetParadasActuales1TurnoAgrupados(string centroCosto)
+{
+    DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);  
+    DateTime final  = DateTime.Today.AddHours(18);  
 
-var query = 
-    from en in _context.Entradaejecucions
-    where en.Fechaentrada >= inicio && en.Fechaentrada < final
-    let tupla = en.CodigotuplaNavigation 
-    from pe in _context.Paradasejecutadas
-    .Where(pe => pe.Codigoentradaejecucion == en.Codigoentradaejecucion)
-    join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
-    join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
-    join a in _context.Areas on p.Codigoparada equals a.AcodGes
-    where p.Codigoparada.Length >= 4 && 
-        p.Codigoparada.Substring(p.Codigoparada.Length - 4, 4) != "0114" &&
-        tupla.Codigoproceso == centroCosto
-    group new { pe, p, gp, a } by new
-    {    
-        p.Codigoparada,
-        gp.Codigogrupoparada,
-        a.AcodGes,
-        p.Nombreparada,
-        a.Aparte
-    } into grp
-    select new
-    {
-        grp.Key.Codigoparada,
-        grp.Key.Codigogrupoparada,
-        grp.Key.AcodGes,
-        grp.Key.Nombreparada,
-        grp.Key.Aparte,
-        TiempoPerdido = grp.Sum(x => 
-            (x.pe.Timespan.HasValue && x.pe.Fechayhoraparada.HasValue 
-                ? (x.pe.Timespan.Value - x.pe.Fechayhoraparada.Value).TotalDays 
-                : 0) * 1440)
-    };
+    var query = from pe in _context.Paradasejecutadas
+                join ee in _context.Entradaejecucions
+                on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+                join te in _context.Tuplaejecucions
+                on ee.Codigotupla equals te.Codigotupla
+                join p in _context.Paradas 
+                on pe.Codigoparada equals p.Codigoparada
+                join gp in _context.Gruposdeparadas 
+                on p.Codigogrupoparada equals gp.Codigogrupoparada
+                join a in _context.Areas
+                on pe.Codigoparada.Substring(0, 4).Trim() equals a.AcodGes.Trim() into aJoin
+                from pa in aJoin.DefaultIfEmpty()
+                where pe.Codigoregistrso != null && 
+                p.Nombreparada != null &&
+                gp.Codigogrupoparada != null &&
+                ee.Fechaentrada >= inicio &&
+                ee.Fechaentrada < final &&
+                !p.Codigoparada.EndsWith("0114") &&
+                te.Codigoproceso == centroCosto
+                orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
+                select new
+                {
+                    pe,
+                    p,
+                    gp,
+                    pa,
+                    TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0
+                };
 
-var result = query.AsEnumerable()
-    .Select(x => new ParadaActual1TurnoAgrupadoDTO
-    {
-        CodigoParada = x.Codigoparada,
-        CodigoGrupoParada = x.Codigogrupoparada,
-        ACodGes = x.AcodGes,
-        NombreParada = x.Nombreparada,
-        Aparte = x.Aparte,
-        TiempoPerdido = x.TiempoPerdido.ToString()
-    })
-    .OrderByDescending(x => x.TiempoPerdido)
-    .ToList();
+    var data = await query.ToListAsync();
 
-return await Task.FromResult(result);
+    // Paso 2: Realizar la agregación en el cliente
+    var result = data
+        .GroupBy(x => new
+        {
+            x.p.Codigoparada,
+            x.gp.Codigogrupoparada,
+            ACodGes = x.pa?.AcodGes ?? "N/A",
+            x.p.Nombreparada,
+            Aparte = x.pa?.Aparte ?? "N/A"
+        })
+        .Select(grp => new
+        {
+            CodigoParada = grp.Key.Codigoparada,
+            CodigoGrupoParada = grp.Key.Codigogrupoparada,
+            ACodGes = grp.Key.ACodGes,
+            NombreParada = grp.Key.Nombreparada,
+            Aparte = grp.Key.Aparte,
+            TiempoPerdido = grp.Sum(x => x.TiempoPerdido)
+        })
+        .OrderByDescending(x => x.TiempoPerdido)
+        .Select(grp => new ParadaActual1TurnoAgrupadoDTO
+        {
+            CodigoParada = grp.CodigoParada,
+            CodigoGrupoParada = grp.CodigoGrupoParada,
+            ACodGes = grp.ACodGes,
+            NombreParada = grp.NombreParada,
+            Aparte = grp.Aparte,
+            TiempoPerdido = grp.TiempoPerdido.ToString()
+        });
 
+    return Ok(result);
+}
 
-    }
 
     [HttpGet("GetParadasActuales2turnoAntesDeLas0amAgrupadas")]
     public async Task<List<ParadasActuales2turnoAntesDeLas0amAgrupadasDTO>> GetParadasActuales2TurnoAntesDeLas0AmAgrupadas(string centroCosto)
@@ -806,7 +820,7 @@ return await Task.FromResult(result);
         }
     }*/
 
-    [HttpGet("GetParadasGesplienActualesAgrupados1turno/{centroCosto}")]
+/*  [HttpGet("GetParadasGesplienActualesAgrupados1turno/{centroCosto}")]
     public async Task<IActionResult> GetParadasGesplienActualesAgrupados1turno(string centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto))
@@ -826,7 +840,7 @@ return await Task.FromResult(result);
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
-    }
+    }*/
 
     [HttpGet("GetParadasGesplienActualesAgrupados2turnoAntesDeLas0am/{centroCosto}")]
     public async Task<IActionResult> GetParadasGesplienActualesAgrupados2turnoAntesDeLas0am(string centroCosto)
