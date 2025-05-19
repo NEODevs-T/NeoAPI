@@ -757,33 +757,31 @@ public class EntradaejecucionController : ControllerBase
         return Ok(result);
     }
 
-/*  [HttpGet("GetParadasActuales2turno")]
-            public async Task<List<List<string>>> GetParadasActuales2turno(string centroCosto)
-            {
-                DateTime hoy = DateTime.Now;
-                var resultado = hoy.Hour < 6       
-                ? (await this.GetParadasActuales2turnoAntesDeLas0am(centroCosto))       
-                .Select(dto => new List<string>
-                {        
-                    dto.CodigoRegistro,         
-                    dto.CodigoGrupoParada,        
-                    dto.NombreParada,       
-                    dto.TiempoPerdido,        
-                    dto.ParteNombre, 
-                    dto.CodigoParte
-                }).ToList()
-                : (await this.GetParadasActuales2turnoDespuesDeLas0am(centroCosto))
-                .Select(dto => new List<string>
-                {    
-                    dto.CodigoRegistro,        
-                    dto.CodigoGrupoParada,        
-                    dto.NombreParada,
-                    dto.TiempoPerdido,
-                    dto.ParteNombre,
-                    dto.CodigoParte
-                }).ToList();
-                return resultado;
-            }*/
+  /*  [HttpGet("GetParadasActuales2turno")]
+    public async Task<ActionResult<List<string>>> GetParadasActuales2turno(string centroCosto)
+    {
+        DateTime hoy = DateTime.Now;
+        ActionResult<List<ParadasActuales2turnoAntesDeLas0amDTO>> actionResult = hoy.Hour < 6
+            ? await this.GetParadasActuales2turnoAntesDeLas0am(centroCosto)
+            : await this.GetParadasActuales2turnoDespuesDeLas0am(centroCosto);
+
+        if (actionResult.Value is null)
+        {
+            return NotFound();
+        }
+
+        var resultado = actionResult.Value.Select(dto => new List<string>
+        {
+            dto.CodigoRegistro,
+            dto.CodigoGrupoParada,
+            dto.NombreParada,
+            dto.TiempoPerdido,
+            dto.ParteNombre,
+            dto.CodigoParte
+        }).ToList();
+
+        return Ok(resultado);
+    }*/
 
     [HttpGet("FiltrarDatos")]
     public List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros)
@@ -809,25 +807,31 @@ public class EntradaejecucionController : ControllerBase
         return datos;
     }
 
-/*  [HttpGet("GetPrimeraParadaporLinea")]
+    [HttpGet("GetPrimeraParadaporLinea")]
     public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea()
     {
         DateTime today = DateTime.Now;
         List<string> maquinas;
+        ActionResult<List<string>> actionResult;
+
         if (today.Hour >= 6 && today.Hour < 18)
         {
-         //   maquinas = await this.GetMaquinasGesplineActivos1turno();
-
+            actionResult = await this.GetMaquinasGesplineActivos1turno();
         }
         else if (today.Hour >= 18 && today.Hour < 24)
         {
-         //   maquinas = await this.MaquinasGesplineActivos2turnoAntes0am();
+            actionResult = await this.GetMaquinasGesplineActivos2turnoAntes0am();
         }
         else
         {
-          //  maquinas = await this.MaquinasGesplineActivos2turnoDespues0am();
+            actionResult = await this.GetMaquinasGesplineActivos2turnoDespues0am();
         }
 
+        if (actionResult.Value is null)
+            return NotFound("No se encontró información de máquinas");
+
+        maquinas = actionResult.Value;
+        
         foreach (string maquina in maquinas)
         {
             var query = await _context.Paradasejecutadas
@@ -842,15 +846,15 @@ public class EntradaejecucionController : ControllerBase
             })
             .FirstOrDefaultAsync();
 
-        if(query != null)
-        {
-            return Ok(query);
-        }
+            if (query != null)
+            {
+                return Ok(query);
+            }
 
         }
 
         return NotFound("No se encontró información para ninguna máquina");
-    }*/
+    }
 
 /* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}")]
     public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto)
