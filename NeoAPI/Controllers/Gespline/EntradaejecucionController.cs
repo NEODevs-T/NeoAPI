@@ -465,6 +465,7 @@ public class EntradaejecucionController : ControllerBase
         var resultado = await query.ToListAsync();
         return Ok(resultado);
     }
+
     [HttpGet("GetParadasActuales1TurnoAgrupados")]
     public async Task<ActionResult<List<ParadaActual1TurnoAgrupadoDTO>>> GetParadasActuales1TurnoAgrupados(string centroCosto)
     {
@@ -533,7 +534,48 @@ public class EntradaejecucionController : ControllerBase
 
         return Ok(result);
     }
-
+    
+    [HttpGet("GetParadasActuales2turnoAntesDeLas0am")]
+    public async Task<ActionResult<List<ParadasActuales2turnoAntesDeLas0amDTO>>> GetParadasActuales2turnoAntesDeLas0am(string centroCosto)
+    {
+        DateTime inicio = DateTime.Today.AddHours(18);       
+        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+        
+        var query = from pe in _context.Paradasejecutadas
+        join p in _context.Paradas 
+        on pe.Codigoparada equals p.Codigoparada
+        join gp in _context.Gruposdeparadas 
+        on p.Codigogrupoparada equals gp.Codigogrupoparada
+        join part in _context.Partes 
+        on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
+        from pa in partJoin.DefaultIfEmpty()
+        join ee in _context.Entradaejecucions
+        on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+        join te in _context.Tuplaejecucions
+        on ee.Codigotupla equals te.Codigotupla
+        where pe.Codigoregistrso != null && 
+        p.Nombreparada != null &&
+        gp.Codigogrupoparada != null &&
+        ee.Fechaentrada >= inicio &&
+        ee.Fechaentrada < final &&
+        ee.Fechaentrada.HasValue &&
+        ee.Fechaentrada.Value.Hour >= 17 &&
+        !p.Codigoparada.EndsWith("0114") &&
+        te.Codigoproceso == centroCosto
+        orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
+        select new ParadasActuales2turnoAntesDeLas0amDTO
+        {
+        CodigoRegistro = pe.Codigoregistrso.ToString(),
+        CodigoGrupoParada = gp.Codigogrupoparada,
+        NombreParada = p.Nombreparada,
+        TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0)
+                        .ToString(),
+        ParteNombre = pa != null ? pa.ParteNombre : null,
+        CodigoParte = pa != null ? pa.Codigo : null
+        };
+        var resultado = await query.ToListAsync();
+        return Ok(resultado);
+    }
 
     [HttpGet("GetParadasActuales2turnoAntesDeLas0amAgrupadas")]
     public async Task<ActionResult<List<ParadasActuales2turnoAntesDeLas0amAgrupadasDTO>>> GetParadasActuales2TurnoAntesDeLas0AmAgrupadas(string centroCosto)
@@ -602,90 +644,8 @@ public class EntradaejecucionController : ControllerBase
         });
 
         return Ok(result);
-    }
-
-    [HttpGet("GetParadasActuales2turnoDespuesDeLas0amAgrupadas")]
-    public async Task<List<ParadasActuales2turnoDespuesDeLas0amAgrupadasDTO>> GetParadasActuales2turnoDespuesDeLas0amAgrupadas(string centroCosto)
-    {
-        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(18);
-        DateTime final = DateTime.Today.AddHours(6);
-
-        var query = from en in _context.Entradaejecucions
-                    where en.Fechaentrada >= inicio && en.Fechaentrada < final
-        let tupla = en.CodigotuplaNavigation
-        from pe in _context.Paradasejecutadas
-        .Where(pe => pe.Codigoentradaejecucion == en.Codigoentradaejecucion)
-        join p in _context.Paradas on pe.Codigoparada equals p.Codigoparada
-        join gp in _context.Gruposdeparadas on p.Codigogrupoparada equals gp.Codigogrupoparada
-        join a in _context.Areas on p.Codigoparada equals a.AcodGes
-        where p.Codigoparada.Length >= 4 &&
-        p.Codigoparada.Substring(p.Codigoparada.Length - 4,4) != "0114" &&
-        tupla.Codigoproceso == centroCosto
-        group new {pe, p, gp, a}by new
-        {
-            p.Codigoparada,
-            gp.Codigogrupoparada,
-            a.AcodGes,
-            p.Nombreparada,
-            a.Aparte
-        }into grp select new ParadasActuales2turnoDespuesDeLas0amAgrupadasDTO
-        {
-            CodigoParada = grp.Key.Codigoparada,
-            CodigoGrupoParada = grp.Key.Codigogrupoparada,
-            ACodGes = grp.Key.AcodGes,
-            NombreParada = grp.Key.Nombreparada,
-            Aparte = grp.Key.Aparte,
-            TiempoPerdido = (grp.Sum(x =>(x.pe.Timespan.HasValue && x.pe.Fechayhoraparada.HasValue)
-            ?(x.pe.Timespan.Value - x.pe.Fechayhoraparada.Value).TotalDays           
-            : 0)*1440).ToString()
-        };
-        query = query.OrderByDescending(x => x.TiempoPerdido);
-        return await query.ToListAsync();
-    }
-
-    [HttpGet("GetParadasActuales2turnoAntesDeLas0am")]
-    public async Task<ActionResult<List<ParadasActuales2turnoAntesDeLas0amDTO>>> GetParadasActuales2turnoAntesDeLas0am(string centroCosto)
-    {
-        DateTime inicio = DateTime.Today.AddHours(18);       
-        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
-
-        
-        var query = from pe in _context.Paradasejecutadas
-        join p in _context.Paradas 
-        on pe.Codigoparada equals p.Codigoparada
-        join gp in _context.Gruposdeparadas 
-        on p.Codigogrupoparada equals gp.Codigogrupoparada
-        join part in _context.Partes 
-        on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
-        from pa in partJoin.DefaultIfEmpty()
-        join ee in _context.Entradaejecucions
-        on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-        join te in _context.Tuplaejecucions
-        on ee.Codigotupla equals te.Codigotupla
-        where pe.Codigoregistrso != null && 
-        p.Nombreparada != null &&
-        gp.Codigogrupoparada != null &&
-        ee.Fechaentrada >= inicio &&
-        ee.Fechaentrada < final &&
-        ee.Fechaentrada.HasValue &&
-        ee.Fechaentrada.Value.Hour >= 17 &&
-        !p.Codigoparada.EndsWith("0114") &&
-        te.Codigoproceso == centroCosto
-        orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
-        select new ParadasActuales2turnoAntesDeLas0amDTO
-        {
-        CodigoRegistro = pe.Codigoregistrso.ToString(),
-        CodigoGrupoParada = gp.Codigogrupoparada,
-        NombreParada = p.Nombreparada,
-        TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0)
-                        .ToString(),
-        ParteNombre = pa != null ? pa.ParteNombre : null,
-        CodigoParte = pa != null ? pa.Codigo : null
-        };
-        var resultado = await query.ToListAsync();
-        return Ok(resultado);
-    }
-
+    }    
+    
     [HttpGet ("GetParadasActuales2turnoDespuesDeLas0am")]
     public async Task<ActionResult<List<ParadasActuales2turnoDespuesDeLas0amDTO>>> GetParadasActuales2turnoDespuesDeLas0am(string centroCosto)
     {
@@ -727,34 +687,103 @@ public class EntradaejecucionController : ControllerBase
         var resultado = await query.ToListAsync();
         return Ok(resultado);
     }
+    
+    [HttpGet("GetParadasActuales2turnoDespuesDeLas0amAgrupadas")]
+    public async Task<ActionResult<List<ParadasActuales2turnoDespuesDeLas0amAgrupadasDTO>>> GetParadasActuales2turnoDespuesDeLas0amAgrupadas(string centroCosto)
+    {
+        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(18);
+        DateTime final = DateTime.Today.AddHours(6);
+
+        var query = from pe in _context.Paradasejecutadas
+                    join ee in _context.Entradaejecucions
+                    on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+                    join te in _context.Tuplaejecucions
+                    on ee.Codigotupla equals te.Codigotupla
+                    join p in _context.Paradas
+                    on pe.Codigoparada equals p.Codigoparada
+                    join gp in _context.Gruposdeparadas
+                    on p.Codigogrupoparada equals gp.Codigogrupoparada
+                    join a in _context.Areas
+                    on pe.Codigoparada.Substring(0, 4).Trim() equals a.AcodGes.Trim() into aJoin
+                    from pa in aJoin.DefaultIfEmpty()
+                    where pe.Codigoregistrso != null &&
+                    p.Nombreparada != null &&
+                    gp.Codigogrupoparada != null &&
+                    ee.Fechaentrada >= inicio &&
+                    ee.Fechaentrada < final &&
+                    !p.Codigoparada.EndsWith("0114") &&
+                    te.Codigoproceso == centroCosto
+                    orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
+                    select new
+                    {
+                        pe,
+                        p,
+                        gp,
+                        pa,
+                        TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0
+                    };
+
+        var data = await query.ToListAsync();
+
+        var result = data
+        .GroupBy(x => new
+        {
+            x.p.Codigoparada,
+            x.gp.Codigogrupoparada,
+            AcodGes = x.pa?.AcodGes ?? "NULL",
+            x.p.Nombreparada,
+        Aparte = x.pa?.Aparte ?? "NULL"
+        })
+        .Select(grp => new
+        {
+            CodigoParada = grp.Key.Codigoparada,
+            CodigoGrupoParada = grp.Key.Codigogrupoparada,
+            ACodGes = grp.Key.AcodGes,
+            NombreParada = grp.Key.Nombreparada,
+            Aparte = grp.Key.Aparte,
+            TiempoPerdido = grp.Sum(x => x.TiempoPerdido)
+        })
+        .OrderByDescending(x => x.TiempoPerdido)
+        .Select(grp => new ParadasActuales2turnoDespuesDeLas0amAgrupadasDTO
+        {
+            CodigoParada = grp.CodigoParada,
+            CodigoGrupoParada = grp.CodigoGrupoParada,
+            ACodGes = grp.ACodGes,
+            NombreParada = grp.NombreParada,
+            Aparte = grp.Aparte,
+            TiempoPerdido = grp.TiempoPerdido.ToString()
+        });
+
+        return Ok(result);
+    }
 
 /*  [HttpGet("GetParadasActuales2turno")]
-    public async Task<List<List<string>>> GetParadasActuales2turno(string centroCosto)
-    {
-        DateTime hoy = DateTime.Now;
-        var resultado = hoy.Hour < 6       
-        ? (await this.GetParadasActuales2turnoAntesDeLas0am(centroCosto))       
-        .Select(dto => new List<string>
-        {        
-            dto.CodigoRegistro,         
-            dto.CodigoGrupoParada,        
-            dto.NombreParada,       
-            dto.TiempoPerdido,        
-            dto.ParteNombre, 
-            dto.CodigoParte
-        }).ToList()
-        : (await this.GetParadasActuales2turnoDespuesDeLas0am(centroCosto))
-        .Select(dto => new List<string>
-        {    
-            dto.CodigoRegistro,        
-            dto.CodigoGrupoParada,        
-            dto.NombreParada,
-            dto.TiempoPerdido,
-            dto.ParteNombre,
-            dto.CodigoParte
-        }).ToList();
-        return resultado;
-    }*/
+            public async Task<List<List<string>>> GetParadasActuales2turno(string centroCosto)
+            {
+                DateTime hoy = DateTime.Now;
+                var resultado = hoy.Hour < 6       
+                ? (await this.GetParadasActuales2turnoAntesDeLas0am(centroCosto))       
+                .Select(dto => new List<string>
+                {        
+                    dto.CodigoRegistro,         
+                    dto.CodigoGrupoParada,        
+                    dto.NombreParada,       
+                    dto.TiempoPerdido,        
+                    dto.ParteNombre, 
+                    dto.CodigoParte
+                }).ToList()
+                : (await this.GetParadasActuales2turnoDespuesDeLas0am(centroCosto))
+                .Select(dto => new List<string>
+                {    
+                    dto.CodigoRegistro,        
+                    dto.CodigoGrupoParada,        
+                    dto.NombreParada,
+                    dto.TiempoPerdido,
+                    dto.ParteNombre,
+                    dto.CodigoParte
+                }).ToList();
+                return resultado;
+            }*/
 
     [HttpGet("FiltrarDatos")]
     public List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros)
@@ -780,7 +809,7 @@ public class EntradaejecucionController : ControllerBase
         return datos;
     }
 
-  /*  [HttpGet("GetPrimeraParadaporLinea")]
+/*  [HttpGet("GetPrimeraParadaporLinea")]
     public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea()
     {
         DateTime today = DateTime.Now;
@@ -823,7 +852,7 @@ public class EntradaejecucionController : ControllerBase
         return NotFound("No se encontró información para ninguna máquina");
     }*/
 
-   /* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}")]
+/* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}")]
     public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto))
@@ -867,7 +896,7 @@ public class EntradaejecucionController : ControllerBase
         }
     }*/
 
- /*   [HttpGet("GetParadasGesplienActualesAgrupados2turnoAntesDeLas0am/{centroCosto}")]
+/*   [HttpGet("GetParadasGesplienActualesAgrupados2turnoAntesDeLas0am/{centroCosto}")]
     public async Task<IActionResult> GetParadasGesplienActualesAgrupados2turnoAntesDeLas0am(string centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto))
@@ -889,7 +918,7 @@ public class EntradaejecucionController : ControllerBase
         }
     }*/
 
-    [HttpGet("GetParadasGesplienActualesAgrupados2turnoDespuesDeLas0am/{centroCosto}")]
+/*   [HttpGet("GetParadasGesplienActualesAgrupados2turnoDespuesDeLas0am/{centroCosto}")]
     public async Task<IActionResult> GetParadasGesplienActualesAgrupados2turnoDespuesDeLas0am(string centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto))
@@ -909,7 +938,7 @@ public class EntradaejecucionController : ControllerBase
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
-    }
+    }*/
 /*
     [HttpGet("GetParadasActuales1turnoPorLinea/{centroCosto}")]
 
