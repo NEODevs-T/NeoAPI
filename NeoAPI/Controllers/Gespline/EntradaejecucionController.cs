@@ -780,12 +780,7 @@ public class EntradaejecucionController : ControllerBase
             dto.ParteNombre,
             dto.CodigoParte
         }).ToList();
-<<<<<<< HEAD
-
-        return Ok(resultado);
-=======
         return resultado;
->>>>>>> c0885059c61e6654fc0a817af6e3356a36677f3e
     }*/
 
     [HttpGet("FiltrarDatos")]
