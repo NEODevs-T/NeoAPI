@@ -536,7 +536,7 @@ public class EntradaejecucionController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales2turnoAntesDeLas0am")]
-    public async Task<ActionResult<List<ParadasActuales2turnoAntesDeLas0amDTO>>> GetParadasActuales2turnoAntesDeLas0am(string centroCosto)
+    public async Task<ActionResult<List<ParadasActuales2turnoDTO>>> GetParadasActuales2turnoAntesDeLas0am(string centroCosto)
     {
         DateTime inicio = DateTime.Today.AddHours(18);
         DateTime final = DateTime.Today.AddDays(1).AddHours(6);
@@ -563,7 +563,7 @@ public class EntradaejecucionController : ControllerBase
                     !p.Codigoparada.EndsWith("0114") &&
                     te.Codigoproceso == centroCosto
                     orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
-                    select new ParadasActuales2turnoAntesDeLas0amDTO
+                    select new ParadasActuales2turnoDTO
                     {
                         CodigoRegistro = pe.Codigoregistrso.ToString(),
                         CodigoGrupoParada = gp.Codigogrupoparada,
@@ -647,7 +647,7 @@ public class EntradaejecucionController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales2turnoDespuesDeLas0am")]
-    public async Task<ActionResult<List<ParadasActuales2turnoDespuesDeLas0amDTO>>> GetParadasActuales2turnoDespuesDeLas0am(string centroCosto)
+    public async Task<ActionResult<List<ParadasActuales2turnoDTO>>> GetParadasActuales2turnoDespuesDeLas0am(string centroCosto)
     {
         DateTime inicio = DateTime.Today.AddDays(-1).AddHours(18);
         DateTime final = DateTime.Today.AddHours(6);
@@ -674,7 +674,7 @@ public class EntradaejecucionController : ControllerBase
                     !p.Codigoparada.EndsWith("0114") &&
                     te.Codigoproceso == centroCosto
                     orderby EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) descending
-                    select new ParadasActuales2turnoDespuesDeLas0amDTO
+                    select new ParadasActuales2turnoDTO
                     {
                         CodigoRegistro = pe.Codigoregistrso.ToString(),
                         CodigoGrupoParada = gp.Codigogrupoparada,
@@ -758,30 +758,31 @@ public class EntradaejecucionController : ControllerBase
         return Ok(result);
     }
 
-    /* [HttpGet("GetParadasActuales2turno")]
-     public async Task<ActionResult<List<string>>> GetParadasActuales2turno(string centroCosto)
-     {
-         DateTime hoy = DateTime.Now;
-         ActionResult<List<ParadasActuales2turnoAntesDeLas0amDTO>> actionResult = hoy.Hour < 6
-             ? await this.GetParadasActuales2turnoAntesDeLas0am(centroCosto)
-             : await this.GetParadasActuales2turnoDespuesDeLas0am(centroCosto);
+    [HttpGet("GetParadasActuales2turno")]
+    
+    public async Task<ActionResult<List<List<string>>>> GetParadasActuales2turno(string centroCosto)
+    {
+        DateTime hoy = DateTime.Now;
+        ActionResult<List<ParadasActuales2turnoDTO>> actionResult = hoy.Hour < 6
+            ? await this.GetParadasActuales2turnoAntesDeLas0am(centroCosto)
+            : await this.GetParadasActuales2turnoDespuesDeLas0am(centroCosto);
 
-         if (actionResult.Value is null)
-         {
-             return NotFound();
-         }
+        if (actionResult.Value is null)
+        {
+            return NotFound();
+        }
 
-         var resultado = actionResult.Value.Select(dto => new List<string>
-         {
-             dto.CodigoRegistro,
-             dto.CodigoGrupoParada,
-             dto.NombreParada,
-             dto.TiempoPerdido,
-             dto.ParteNombre,
-             dto.CodigoParte
-         }).ToList();
-         return resultado;
-     }*/
+        var resultado = actionResult.Value.Select(dto => new List<string>
+        {
+            dto.CodigoRegistro,
+            dto.CodigoGrupoParada,
+            dto.NombreParada,
+            dto.TiempoPerdido,
+            dto.ParteNombre,
+            dto.CodigoParte
+        }).ToList();
+        return resultado;
+    }
 
     [HttpGet("FiltrarDatos")]
     public List<List<string>> FiltrarDatos(List<List<string>> datos, string cadenaIdRegistros)

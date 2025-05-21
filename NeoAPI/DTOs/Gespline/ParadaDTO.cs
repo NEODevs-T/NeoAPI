@@ -33,7 +33,7 @@ public class ParadaActual1TurnoDTO
 
 public class ParadaActual1TurnoAgrupadoDTO
 {
-    
+
     public string CodigoParada { get; set; }
 
     public string CodigoGrupoParada { get; set; }
@@ -48,17 +48,7 @@ public class ParadaActual1TurnoAgrupadoDTO
 
 }
 
-public class ParadasActuales2turnoAntesDeLas0amDTO
-{
-    public string CodigoRegistro { get; set; }
-    public string CodigoGrupoParada { get; set; }
-    public string NombreParada { get; set; }
-    public string TiempoPerdido { get; set; }
-    public string ParteNombre { get; set; }
-    public string CodigoParte { get; set; }
-}
-
-public class ParadasActuales2turnoDespuesDeLas0amDTO
+public class ParadasActuales2turnoDTO
 {
     public string CodigoRegistro { get; set; }
     public string CodigoGrupoParada { get; set; }
