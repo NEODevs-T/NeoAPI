@@ -532,7 +532,7 @@ public class EntradaejecucionController : ControllerBase
                 TiempoPerdido = grp.TiempoPerdido.ToString()
             });
 
-        return Ok(result);
+        return Ok(result.ToList());
     }
     
     [HttpGet("GetParadasActuales2turnoAntesDeLas0am")]
@@ -758,7 +758,7 @@ public class EntradaejecucionController : ControllerBase
         return Ok(result);
     }
 
-/*  [HttpGet("GetParadasActuales2turno")]
+   /* [HttpGet("GetParadasActuales2turno")]
     public async Task<ActionResult<List<string>>> GetParadasActuales2turno(string centroCosto)
     {
         DateTime hoy = DateTime.Now;
@@ -808,77 +808,69 @@ public class EntradaejecucionController : ControllerBase
     }
 
     [HttpGet("GetPrimeraParadaporLinea")]
-    public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea()
+    public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea(string proceso)
     {
-        DateTime today = DateTime.Now;
-        List<string> maquinas;
-        ActionResult<List<string>> actionResult;
-
-        if (today.Hour >= 6 && today.Hour < 18)
+        if (string.IsNullOrWhiteSpace(proceso))
         {
-            actionResult = await this.GetMaquinasGesplineActivos1turno();
-        }
-        else if (today.Hour >= 18 && today.Hour < 24)
-        {
-            actionResult = await this.GetMaquinasGesplineActivos2turnoAntes0am();
-        }
-        else
-        {
-            actionResult = await this.GetMaquinasGesplineActivos2turnoDespues0am();
+            return BadRequest("El código de proceso es obligatorio.");
         }
 
-        if (actionResult.Value is null)
-            return NotFound("No se encontró información de máquinas");
-
-        maquinas = actionResult.Value;
-        
-        foreach (string maquina in maquinas)
-        {
-            var query = await _context.Paradasejecutadas
-            .Where(p => p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso == maquina)
-            .OrderBy(p => p.Fechayhoraparada)
-            .Select(p => new PrimeraParadaporLineaDTO
-            {
-                CodigoProceso = p.CodigoentradaejecucionNavigation.CodigotuplaNavigation.Codigoproceso,
-                FechaYHoraParada = p.Fechayhoraparada,
-                Timespan = p.Timespan
-
-            })
-            .FirstOrDefaultAsync();
-
-            if (query != null)
-            {
-                return Ok(query);
-            }
-
-        }
-
-        return NotFound("No se encontró información para ninguna máquina");
-    }
-
-/* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}")]
-    public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto)
-    {
-        if (string.IsNullOrWhiteSpace(centroCosto))
-        {
-            return BadRequest("El centro de costo es obligatorio.");
-        }
         try
         {
-            var paradas = await GetParadasActuales2turno(centroCosto);
-            if (paradas == null || !paradas.Any())
+            var registro = await (
+                from pe in _context.Paradasejecutadas
+                join ee in _context.Entradaejecucions
+                    on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+                join te in _context.Tuplaejecucions
+                    on ee.Codigotupla equals te.Codigotupla
+                join tw in _context.Transmicionwebs
+                    on ee.Codigoentradaejecucion equals tw.Codigoentradaejecucion
+                where te.Codigoproceso == proceso
+                orderby pe.Fechayhoraparada
+                select new
+                {
+                    Codigoproceso = te.Codigoproceso,
+                    FechaYHoraParada = pe.Fechayhoraparada,
+                    Timespan = pe.Timespan
+                }
+            ).FirstOrDefaultAsync();
+
+            if (registro == null)
             {
-                return NotFound("No se encontraron paradas para el centro de costo especificado.");
+                return NotFound("No se encontró registro para el proceso especificado.");
             }
-            return Ok(paradas);
+            return Ok(registro);
         }
         catch (Exception ex)
         {
+            // Opcional: registrar el error ex
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
-    }*/
+    }
 
-/*  [HttpGet("GetParadasGesplienActualesAgrupados1turno/{centroCosto}")]
+    /* [HttpGet("GetParadasSegundoTurnoPorMaquina/{centroCosto}")]
+        public async Task<IActionResult> GetParadasSegundoTurnoPorMaquina(string centroCosto)
+        {
+            if (string.IsNullOrWhiteSpace(centroCosto))
+            {
+                return BadRequest("El centro de costo es obligatorio.");
+            }
+            try
+            {
+                var paradas = await GetParadasActuales2turno(centroCosto);
+                if (paradas == null || !paradas.Any())
+                {
+                    return NotFound("No se encontraron paradas para el centro de costo especificado.");
+                }
+                return Ok(paradas);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
+            }
+        }*/
+
+ /*   [HttpGet("GetParadasGesplienActualesAgrupados1turno/{centroCosto}")]
     public async Task<IActionResult> GetParadasGesplienActualesAgrupados1turno(string centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto))
@@ -888,13 +880,13 @@ public class EntradaejecucionController : ControllerBase
         try
         {
             var paradas = await GetParadasActuales1TurnoAgrupados(centroCosto);
-            if (paradas == null || !paradas.Any())
+            if (paradas.Value == null || !paradas.Value.Any())
             {
                 return NotFound("No se encontraron paradas para el centro de costo especificado.");
             }
-            return Ok(paradas);
+            return Ok(paradas.Value);
         }
-        catch(Exception ex)
+        catch(Exception)
         {
             return StatusCode(StatusCodes.Status500InternalServerError, "Ha ocurrido un error en el servidor.");
         }
