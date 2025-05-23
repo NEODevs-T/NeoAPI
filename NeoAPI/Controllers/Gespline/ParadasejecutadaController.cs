@@ -210,7 +210,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
                             CodigoRegistro = pe.Codigoregistrso.ToString(),
                             CodigoGrupoParada = gp.Codigogrupoparada,
                             NombreParada = p.Nombreparada,
-                            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0)
+                            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0/ 60.0)
                                         .ToString(),
                             ParteNombre = pa != null ? pa.ParteNombre : null,
                             CodigoParte = pa != null ? pa.Codigo : null
@@ -265,7 +265,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
                             p,
                             gp,
                             pa,
-                            TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0
+                            TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0/ 60.0
                         };
             var data = await query.ToListAsync();
             var result = data
@@ -346,7 +346,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
                             CodigoRegistro = pe.Codigoregistrso.ToString(),
                             CodigoGrupoParada = gp.Codigogrupoparada,
                             NombreParada = p.Nombreparada,
-                            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0)
+                            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0/ 60.0)
                                         .ToString(),
                             ParteNombre = pa != null ? pa.ParteNombre : null,
                             CodigoParte = pa != null ? pa.Codigo : null
@@ -401,7 +401,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
                             p,
                             gp,
                             pa,
-                            TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0
+                            TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0/ 60.0
                         };
             var data = await query.ToListAsync();
             var result = data
