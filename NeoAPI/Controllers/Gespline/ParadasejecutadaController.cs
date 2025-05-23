@@ -24,13 +24,13 @@ namespace NeoAPI.Controllers.Gespline;
 [ApiController]
 [Route("api/[controller]")]
 
-public class ParadasejecutadaController : ControllerBase
+public class Gespline_ParadasejecutadaController : ControllerBase
 {
     private readonly GesplineContext _context;
 
     private readonly IMaquinasGesplineLogic _maquinasGesplineLogic;
 
-    public ParadasejecutadaController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
+    public Gespline_ParadasejecutadaController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
     {
         _context = context;
         _maquinasGesplineLogic = maquinasGesplineLogic;
@@ -74,7 +74,7 @@ public class ParadasejecutadaController : ControllerBase
                             CodigoRegistro = pe.Codigoregistrso.ToString(),
                             CodigoGrupoParada = gp.Codigogrupoparada,
                             NombreParada = p.Nombreparada,
-                            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0)
+                            TiempoPerdido = (EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0/ 60.0)
                                             .ToString(),
                             ParteNombre = pa != null ? pa.ParteNombre : null,
                             CodigoParte = pa != null ? pa.Codigo : null
@@ -129,7 +129,7 @@ public class ParadasejecutadaController : ControllerBase
                             p,
                             gp,
                             pa,
-                            TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0
+                            TiempoPerdido = EF.Functions.DateDiffMinute(pe.Fechayhoraparada, pe.Timespan) ?? 0/ 60.0
                         };
             var data = await query.ToListAsync();
             var result = data

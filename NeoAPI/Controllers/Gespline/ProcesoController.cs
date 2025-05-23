@@ -23,11 +23,11 @@ namespace NeoAPI.Controllers.Gespline;
 [ApiController]
 [Route("api/[controller]")]
 
-public class ProcesoController : ControllerBase
+public class Gespline_ProcesoController : ControllerBase
 {
     private readonly GesplineContext _context;
 
-    public ProcesoController(GesplineContext context)
+    public Gespline_ProcesoController(GesplineContext context)
     {
         _context = context;
     }
