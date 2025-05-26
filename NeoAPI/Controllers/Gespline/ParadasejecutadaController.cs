@@ -538,12 +538,8 @@ public class Gespline_ParadasejecutadaController : ControllerBase
     }
 
     [HttpGet("GetPrimeraParadaporLinea")]
-    public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea(string proceso)
+    public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea()
     {
-        if (string.IsNullOrWhiteSpace(proceso))
-        {
-            return BadRequest("El código de proceso es obligatorio.");
-        }
         var horaActual = DateTime.Now.Hour;
         ActionResult<List<string>> resultadoTurno;
         if (horaActual >= 6 && horaActual < 18)
@@ -574,19 +570,23 @@ public class Gespline_ParadasejecutadaController : ControllerBase
         try
         {
             var registro = await (
-                from pe in _context.Paradasejecutadas
-                join ee in _context.Entradaejecucions on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-                join te in _context.Tuplaejecucions on ee.Codigotupla equals te.Codigotupla
-                join tw in _context.Transmicionwebs on ee.Codigoentradaejecucion equals tw.Codigoentradaejecucion
-                where te.Codigoproceso == proceso
-                orderby pe.Fechayhoraparada
-                select new PrimeraParadaporLineaDTO
-                {
-                    CodigoProceso = te.Codigoproceso,
-                    FechaYHoraParada = pe.Fechayhoraparada,
-                    Timespan = pe.Timespan
-                })
-                .FirstOrDefaultAsync();
+    from pe in _context.Paradasejecutadas
+    join ee in _context.Entradaejecucions
+        on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+    join te in _context.Tuplaejecucions
+        on ee.Codigotupla equals te.Codigotupla
+    join tw in _context.Transmicionwebs
+        on ee.Codigoentradaejecucion equals tw.Codigoentradaejecucion
+    orderby pe.Fechayhoraparada
+    select new PrimeraParadaporLineaDTO
+    {
+        CodigoProceso = te.Codigoproceso,
+        FechaYHoraParada = pe.Fechayhoraparada,
+        Timespan = pe.Timespan
+    })
+    .GroupBy(dto => dto.CodigoProceso)
+    .Select(grupo => grupo.OrderBy(dto => dto.FechaYHoraParada).FirstOrDefault())
+    .ToListAsync();
             if (registro == null)
             {
                 return NotFound("No se encontró registro para el proceso especificado.");
@@ -598,5 +598,4 @@ public class Gespline_ParadasejecutadaController : ControllerBase
             return BadRequest($"Ocurrió un error inesperado: {ex.Message}");
         }
     }
-
 }   
