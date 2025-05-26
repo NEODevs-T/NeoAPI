@@ -216,7 +216,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
                             ee.Fechaentrada >= inicio &&
                             ee.Fechaentrada < final &&
                             ee.Fechaentrada.HasValue &&
-                            ee.Fechaentrada.Value.Hour < 17 &&
+                            ee.Fechaentrada.Value.Hour >= 17 &&
                             !p.Codigoparada.EndsWith("0114") &&
                             te.Codigoproceso == centroCosto
                             select new
@@ -262,7 +262,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
-        DateTime inicio = DateTime.Today.AddHours(18);
+        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddDays(1).AddHours(6);
         try
         {
@@ -367,7 +367,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
                             ee.Fechaentrada >= inicio &&
                             ee.Fechaentrada < final &&
                             ee.Fechaentrada.HasValue &&
-                            ee.Fechaentrada.Value.Hour < 17 &&
+                            ee.Fechaentrada.Value.Hour >= 17 &&
                             !p.Codigoparada.EndsWith("0114") &&
                             te.Codigoproceso == centroCosto
                             select new
@@ -413,7 +413,7 @@ public class Gespline_ParadasejecutadaController : ControllerBase
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
-        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(18);
+        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(6);
         try
         {

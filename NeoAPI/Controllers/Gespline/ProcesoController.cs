@@ -74,7 +74,7 @@ public class Gespline_ProcesoController : ControllerBase
     public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual2turnoAntes0am()
     {
         DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
-        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+        DateTime final = DateTime.Today.AddDays(1).AddHours(23).AddMinutes(59).AddSeconds(59);
         try
         {
             List<Entradaejecucion> listaEjecucion = await this._context.Entradaejecucions
