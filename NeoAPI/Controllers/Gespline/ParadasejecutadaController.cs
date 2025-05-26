@@ -24,13 +24,13 @@ namespace NeoAPI.Controllers.Gespline;
 [ApiController]
 [Route("api/[controller]")]
 
-public class Gespline_ParadasejecutadaController : ControllerBase
+public class GesplineParadasejecutadasController : ControllerBase
 {
     private readonly GesplineContext _context;
 
     private readonly IMaquinasGesplineLogic _maquinasGesplineLogic;
 
-    public Gespline_ParadasejecutadaController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
+    public GesplineParadasejecutadasController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
     {
         _context = context;
         _maquinasGesplineLogic = maquinasGesplineLogic;

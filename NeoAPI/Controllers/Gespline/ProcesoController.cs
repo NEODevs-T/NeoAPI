@@ -23,11 +23,11 @@ namespace NeoAPI.Controllers.Gespline;
 [ApiController]
 [Route("api/[controller]")]
 
-public class Gespline_ProcesoController : ControllerBase
+public class GesplineProcesoController : ControllerBase
 {
     private readonly GesplineContext _context;
 
-    public Gespline_ProcesoController(GesplineContext context)
+    public GesplineProcesoController(GesplineContext context)
     {
         _context = context;
     }
@@ -51,7 +51,7 @@ public class Gespline_ProcesoController : ControllerBase
                 .Select(g => new
                 {
                     Codigoproceso = g.Key,
-                    TiempoPerdido = g.Sum(p => EF.Functions.DateDiffMinute(p.Fechayhoraparada.Value, p.Timespan.Value)) / 60.0f
+                    TiempoPerdido = g.Sum(p => EF.Functions.DateDiffSecond(p.Fechayhoraparada.Value, p.Timespan.Value)) / 3600.0f 
                 })
                 .ToListAsync();
             if (!listaEjecucion.Any())
@@ -89,7 +89,7 @@ public class Gespline_ProcesoController : ControllerBase
             .Select(g => new
             {
                 Codigoproceso = g.Key,
-                TiempoPerdido = g.Sum(p => EF.Functions.DateDiffMinute(p.Fechayhoraparada.Value, p.Timespan.Value)) / 60.0f
+                TiempoPerdido = g.Sum(p => EF.Functions.DateDiffSecond(p.Fechayhoraparada.Value, p.Timespan.Value)) / 3600.0f
             })
             .ToListAsync();
             if (!listaEjecucion.Any())
@@ -127,7 +127,7 @@ public class Gespline_ProcesoController : ControllerBase
             .Select(g => new
             {
                 Codigoproceso = g.Key,
-                TiempoPerdido = g.Sum(p => EF.Functions.DateDiffMinute(p.Fechayhoraparada.Value, p.Timespan.Value)) / 60.0f
+                TiempoPerdido = g.Sum(p => EF.Functions.DateDiffSecond(p.Fechayhoraparada.Value, p.Timespan.Value)) / 3600.0f
             })
             .ToListAsync();
             if (!listaEjecucion.Any())
@@ -296,7 +296,7 @@ public class Gespline_ProcesoController : ControllerBase
                             let tiempoEjecutado = ej.Value
                             let tiempoPerdido = perd != null ? perd.Value : 0f
                             let tiempoNeto = tiempoEjecutado - tiempoPerdido
-                            select $"{tiempoNeto}";
+                            select $"{(tiempoNeto / 1e16):F16}";
             return Ok(resultado);
         }
         catch (Exception ex)
@@ -386,7 +386,7 @@ public class Gespline_ProcesoController : ControllerBase
                             let tiempoEjecutado = ej.Value
                             let tiempoPerdido = perd != null ? perd.Value : 0f
                             let tiempoNeto = tiempoEjecutado - tiempoPerdido
-                            select $"{tiempoNeto}";
+                            select $"{(tiempoNeto / 1e16):F16}";
             return Ok(resultado);
         }
         catch (Exception ex)

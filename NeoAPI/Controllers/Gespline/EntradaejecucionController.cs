@@ -26,12 +26,12 @@ namespace NeoAPI.Controllers.Gespline;
 [ApiController]
 [Route("api/[controller]")]
 
-public class Gespline_EntradaejecucionController : ControllerBase
+public class GesplineEntradaejecucionController : ControllerBase
 {
     private readonly GesplineContext _context;
     private readonly IMaquinasGesplineLogic _maquinasGesplineLogic;
 
-    public Gespline_EntradaejecucionController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
+    public GesplineEntradaejecucionController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
     {
         _context = context;
         _maquinasGesplineLogic = maquinasGesplineLogic;
