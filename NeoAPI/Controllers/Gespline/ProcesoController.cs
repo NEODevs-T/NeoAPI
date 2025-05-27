@@ -32,8 +32,8 @@ public class GesplineProcesoController : ControllerBase
         _context = context;
     }
 
-    [HttpGet("GetTiempoPerdidoActual1turno")]
-    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual1turno()
+    [HttpGet("GetTiempoPerdidoActual1Turno")]
+    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual1Turno()
     {
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(18);
@@ -70,8 +70,8 @@ public class GesplineProcesoController : ControllerBase
         }
     }
 
-    [HttpGet("GetTiempoPerdidoActual2turnoAntes0am")]
-    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual2turnoAntes0am()
+    [HttpGet("GetTiempoPerdidoActual2TurnoAntes0am")]
+    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual2TurnoAntes0am()
     {
         DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddDays(1).AddHours(23).AddMinutes(59).AddSeconds(59);
@@ -108,8 +108,8 @@ public class GesplineProcesoController : ControllerBase
         }
     }
 
-    [HttpGet("GetTiempoPerdidoActual2turnoDespues0am")]
-    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual2turnoDespues0am()
+    [HttpGet("GetTiempoPerdidoActual2TurnoDespues0am")]
+    public async Task<ActionResult<List<string>>> GetTiempoPerdidoActual2TurnoDespues0am()
     {
         DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(6);
@@ -179,8 +179,8 @@ public class GesplineProcesoController : ControllerBase
         }
     }
 
-    [HttpGet("GetTiempoEjecutadoActual2turnoAntes0am")]
-    public async Task<ActionResult<List<string>>> GetTiempoEjecutadoActual2turnoAntes0am()
+    [HttpGet("GetTiempoEjecutadoActual2TurnoAntes0am")]
+    public async Task<ActionResult<List<string>>> GetTiempoEjecutadoActual2TurnoAntes0am()
     {
         DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(23).AddMinutes(59).AddSeconds(59);
@@ -210,8 +210,8 @@ public class GesplineProcesoController : ControllerBase
         }
     }
 
-    [HttpGet("GetTiempoEjecutadoActual2turnoDespues0am")]
-    public async Task<ActionResult<List<string>>> GetTiempoEjecutadoActual2turnoDespues0am()
+    [HttpGet("GetTiempoEjecutadoActual2TurnoDespues0am")]
+    public async Task<ActionResult<List<string>>> GetTiempoEjecutadoActual2TurnoDespues0am()
     {
         DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(5).AddMinutes(50);
@@ -241,7 +241,7 @@ public class GesplineProcesoController : ControllerBase
         }
     }
 
-    [HttpGet("GetTiempoTrabajadoActual1turno")]
+    [HttpGet("GetTiempoTrabajadoActual1Turno")]
     public async Task<ActionResult<List<string>>> TiempoTrabajadoActual1Turno()
     {
         try
@@ -257,7 +257,7 @@ public class GesplineProcesoController : ControllerBase
             {
                 return BadRequest("No se pudo obtener la lista de tiempo ejecutado.");
             }
-            var listaPerdidoR = await GetTiempoPerdidoActual1turno();
+            var listaPerdidoR = await GetTiempoPerdidoActual1Turno();
             List<string> listaPerdido;
             if (listaPerdidoR.Result is OkObjectResult okPerdido
             && okPerdido.Value is List<string> dataEjecutado2)
@@ -305,8 +305,8 @@ public class GesplineProcesoController : ControllerBase
         }
     }
 
-    [HttpGet("GetTiempoTrabajadoActual2turno")]
-    public async Task<ActionResult<List<string>>> GetTiempoTrabajadoActual2turno(bool band)
+    [HttpGet("GetTiempoTrabajadoActual2Turno")]
+    public async Task<ActionResult<List<string>>> GetTiempoTrabajadoActual2Turno(bool band)
     {
         try
         {
@@ -314,7 +314,7 @@ public class GesplineProcesoController : ControllerBase
             List<string> listaPerdido;
             if (band)
             {
-                var listaEjecutadoR = await GetTiempoEjecutadoActual2turnoAntes0am();
+                var listaEjecutadoR = await GetTiempoEjecutadoActual2TurnoAntes0am();
                 if (listaEjecutadoR.Result is OkObjectResult okEjectudado
                 && okEjectudado.Value is List<string> dataEjecutado)
                 {
@@ -324,7 +324,7 @@ public class GesplineProcesoController : ControllerBase
                 {
                     return BadRequest("No se pudo obtener la lista de tiempo ejecutado (antes 0 am).");
                 }
-                var listaPerdidoR = await GetTiempoPerdidoActual2turnoAntes0am();
+                var listaPerdidoR = await GetTiempoPerdidoActual2TurnoAntes0am();
                 if (listaPerdidoR.Result is OkObjectResult okPerdido
                 && okPerdido.Value is List<string> dataEjecutado2)
                 {
@@ -337,7 +337,7 @@ public class GesplineProcesoController : ControllerBase
             }
             else
             {
-                var listaEjecutadoR = await GetTiempoEjecutadoActual2turnoDespues0am();
+                var listaEjecutadoR = await GetTiempoEjecutadoActual2TurnoDespues0am();
                 if (listaEjecutadoR.Result is OkObjectResult okEjectudado
                 && okEjectudado.Value is List<string> dataEjecutado)
                 {
@@ -347,7 +347,7 @@ public class GesplineProcesoController : ControllerBase
                 {
                     return BadRequest("No se pudo obtener la lista de tiempo ejecutado (después 0 am).");
                 }
-                var listaPerdidoR = await GetTiempoPerdidoActual2turnoDespues0am();
+                var listaPerdidoR = await GetTiempoPerdidoActual2TurnoDespues0am();
                 if (listaPerdidoR.Result is OkObjectResult okPerdido
                 && okPerdido.Value is List<string> dataEjecutado2)
                 {

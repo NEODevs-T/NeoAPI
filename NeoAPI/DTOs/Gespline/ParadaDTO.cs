@@ -29,7 +29,7 @@ public class ParadasActualesAgrupadasDTO
 
 }
 
-public class PrimeraParadaporLineaDTO
+public class PrimeraParadaPorLineaDTO
 {
     public string CodigoProceso {get; set;}
 

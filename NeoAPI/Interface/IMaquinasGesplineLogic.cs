@@ -9,8 +9,8 @@ namespace NeoAPI.Interface
 {
     public interface IMaquinasGesplineLogic
     {
-        Task<List<string>> GetMaquinasGesplineActivos1turno();
-        Task<List<string>> GetMaquinasGesplineActivos2turnoDespues0am();
-        Task<List<string>> GetMaquinasGesplineActivos2turnoAntes0am();
+        Task<List<string>> GetMaquinasGesplineActivos1Turno();
+        Task<List<string>> GetMaquinasGesplineActivos2TurnoDespues0am();
+        Task<List<string>> GetMaquinasGesplineActivos2TurnoAntes0am();
     }
 }

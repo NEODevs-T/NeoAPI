@@ -24,13 +24,13 @@ namespace NeoAPI.Controllers.Gespline;
 [ApiController]
 [Route("api/[controller]")]
 
-public class GesplineParadasejecutadasController : ControllerBase
+public class GesplineParadasEjecutadasController : ControllerBase
 {
     private readonly GesplineContext _context;
 
     private readonly IMaquinasGesplineLogic _maquinasGesplineLogic;
 
-    public GesplineParadasejecutadasController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
+    public GesplineParadasEjecutadasController(GesplineContext context, IMaquinasGesplineLogic maquinasGesplineLogic)
     {
         _context = context;
         _maquinasGesplineLogic = maquinasGesplineLogic;
@@ -187,8 +187,8 @@ public class GesplineParadasejecutadasController : ControllerBase
         }
     }
 
-    [HttpGet("GetParadasActuales2turnoAntesDeLas0am")]
-    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2turnoAntesDeLas0am([FromQuery] string? centroCosto)
+    [HttpGet("GetParadasActuales2TurnoAntesDeLas0am")]
+    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2TurnoAntesDeLas0am([FromQuery] string? centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
         {
@@ -255,7 +255,7 @@ public class GesplineParadasejecutadasController : ControllerBase
         }
     }
 
-    [HttpGet("GetParadasActuales2turnoAntesDeLas0amAgrupadas")]
+    [HttpGet("GetParadasActuales2TurnoAntesDeLas0amAgrupadas")]
     public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales2TurnoAntesDeLas0AmAgrupadas([FromQuery] string? centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
@@ -338,8 +338,8 @@ public class GesplineParadasejecutadasController : ControllerBase
         }
     }
 
-    [HttpGet("GetParadasActuales2turnoDespuesDeLas0am")]
-    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2turnoDespuesDeLas0am([FromQuery] string? centroCosto)
+    [HttpGet("GetParadasActuales2TurnoDespuesDeLas0am")]
+    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2TurnoDespuesDeLas0am([FromQuery] string? centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
         {
@@ -406,8 +406,8 @@ public class GesplineParadasejecutadasController : ControllerBase
         }
     }
 
-    [HttpGet("GetParadasActuales2turnoDespuesDeLas0amAgrupadas")]
-    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales2turnoDespuesDeLas0amAgrupadas([FromQuery] string? centroCosto)
+    [HttpGet("GetParadasActuales2TurnoDespuesDeLas0amAgrupadas")]
+    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales2TurnoDespuesDeLas0amAgrupadas([FromQuery] string? centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
         {
@@ -489,8 +489,8 @@ public class GesplineParadasejecutadasController : ControllerBase
         }
     }
 
-    [HttpGet("GetParadasActuales2turno")]
-    public async Task<ActionResult<List<List<string>>>> GetParadasActuales2turno(string centroCosto)
+    [HttpGet("GetParadasActuales2Turno")]
+    public async Task<ActionResult<List<List<string>>>> GetParadasActuales2Turno(string centroCosto)
     {
         if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
         {
@@ -502,11 +502,11 @@ public class GesplineParadasejecutadasController : ControllerBase
             ActionResult<List<ParadasActualesDTO>> actionResult;
             if (hoy.Hour < 6)
             {
-                actionResult = await GetParadasActuales2turnoDespuesDeLas0am(centroCosto);
+                actionResult = await GetParadasActuales2TurnoDespuesDeLas0am(centroCosto);
             }
             else if (hoy.Hour >= 18)
             {
-                actionResult = await GetParadasActuales2turnoAntesDeLas0am(centroCosto);
+                actionResult = await GetParadasActuales2TurnoAntesDeLas0am(centroCosto);
             }
             else
             {
@@ -537,22 +537,22 @@ public class GesplineParadasejecutadasController : ControllerBase
         }
     }
 
-    [HttpGet("GetPrimeraParadaporLinea")]
-    public async Task<ActionResult<PrimeraParadaporLineaDTO>> GetPrimeraParadaporLinea()
+    [HttpGet("GetPrimeraParadaPorLinea")]
+    public async Task<ActionResult<PrimeraParadaPorLineaDTO>> GetPrimeraParadaPorLinea()
     {
         var horaActual = DateTime.Now.Hour;
         ActionResult<List<string>> resultadoTurno;
         if (horaActual >= 6 && horaActual < 18)
         {
-            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos1turno();
+            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos1Turno();
         }
         else if (horaActual >= 18 && horaActual < 22)
         {
-            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos2turnoAntes0am();
+            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos2TurnoAntes0am();
         }
         else
         {
-            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos2turnoDespues0am();
+            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos2TurnoDespues0am();
         }
         List<string> turnoList = null;
         if (resultadoTurno.Result is OkObjectResult okResult)
@@ -578,7 +578,7 @@ public class GesplineParadasejecutadasController : ControllerBase
     join tw in _context.Transmicionwebs
         on ee.Codigoentradaejecucion equals tw.Codigoentradaejecucion
     orderby pe.Fechayhoraparada
-    select new PrimeraParadaporLineaDTO
+    select new PrimeraParadaPorLineaDTO
     {
         CodigoProceso = te.Codigoproceso,
         FechaYHoraParada = pe.Fechayhoraparada,

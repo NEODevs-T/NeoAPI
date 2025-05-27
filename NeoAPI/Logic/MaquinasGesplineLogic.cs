@@ -20,7 +20,7 @@ namespace NeoAPI.Logic.MaquinasGespline
             _context = context;
         }
 
-        public async Task<List<string>> GetMaquinasGesplineActivos1turno()
+        public async Task<List<string>> GetMaquinasGesplineActivos1Turno()
         {
             DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
             DateTime final = DateTime.Today.AddHours(18);
@@ -50,7 +50,7 @@ namespace NeoAPI.Logic.MaquinasGespline
             }
         }
 
-        public async Task<List<string>> GetMaquinasGesplineActivos2turnoDespues0am()
+        public async Task<List<string>> GetMaquinasGesplineActivos2TurnoDespues0am()
         {
             DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
             DateTime final = DateTime.Today.AddHours(6);
@@ -80,7 +80,7 @@ namespace NeoAPI.Logic.MaquinasGespline
             }
         }
         
-        public async Task<List<string>> GetMaquinasGesplineActivos2turnoAntes0am()
+        public async Task<List<string>> GetMaquinasGesplineActivos2TurnoAntes0am()
         {
         DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
         DateTime final = DateTime.Today.AddDays(1).AddHours(6);
