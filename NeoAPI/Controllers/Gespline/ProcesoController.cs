@@ -291,12 +291,12 @@ public class GesplineProcesoController : ControllerBase
                 };
             }).ToList();
             var resultado = from ej in ejecutado
-                            join p in perdido on ej.Key equals p.Key into perdGroup
-                            from perd in perdGroup.DefaultIfEmpty() // Si no hay coincidencia, perd será null.
-                            let tiempoEjecutado = ej.Value
-                            let tiempoPerdido = perd != null ? perd.Value : 0f
-                            let tiempoNeto = tiempoEjecutado - tiempoPerdido
-                            select $"{(tiempoNeto / 1e16):F16}";
+                join p in perdido on ej.Key equals p.Key into perdGroup
+                from perd in perdGroup.DefaultIfEmpty() 
+                let tiempoEjecutado = ej.Value
+                let tiempoPerdido = perd != null ? perd.Value : 0f
+                let tiempoNeto = tiempoEjecutado - tiempoPerdido
+                select tiempoNeto.ToString("F16", CultureInfo.InvariantCulture);
             return Ok(resultado);
         }
         catch (Exception ex)
@@ -381,12 +381,12 @@ public class GesplineProcesoController : ControllerBase
                 };
             }).ToList();
             var resultado = from ej in ejecutado
-                            join p in perdido on ej.Key equals p.Key into perdGroup
-                            from perd in perdGroup.DefaultIfEmpty() // Si no hay coincidencia, perd será null.
-                            let tiempoEjecutado = ej.Value
-                            let tiempoPerdido = perd != null ? perd.Value : 0f
-                            let tiempoNeto = tiempoEjecutado - tiempoPerdido
-                            select $"{(tiempoNeto / 1e16):F16}";
+                join p in perdido on ej.Key equals p.Key into perdGroup
+                from perd in perdGroup.DefaultIfEmpty() 
+                let tiempoEjecutado = ej.Value
+                let tiempoPerdido = perd != null ? perd.Value : 0f
+                let tiempoNeto = tiempoEjecutado - tiempoPerdido
+                select tiempoNeto.ToString("F16", CultureInfo.InvariantCulture);
             return Ok(resultado);
         }
         catch (Exception ex)
