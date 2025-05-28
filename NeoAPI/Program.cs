@@ -18,7 +18,15 @@ var builder = WebApplication.CreateBuilder(args);
 // Add services to the container.
 
 builder.Services.AddControllers();
+builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IMaquinasGesplineLogic, MaquinasGesplineLogic>();
+builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>
+    options.UseSqlServer(
+        builder.Configuration.GetConnectionString("PolybaseVen"),
+        sqlOptions => sqlOptions.CommandTimeout(60) // 180 segundos
+    )
+);
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
@@ -31,7 +39,7 @@ builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlSe
 builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DbSPIContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("SPI")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<GesplineContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Gespline")), ServiceLifetime.Transient);
-
+builder.Services.AddControllers();
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();
 

@@ -11,6 +11,7 @@ using NeoAPI.Controllers.Maestras;
 using NeoAPI.Interface;
 using NeoAPI.Models.PolybaseBPCSVen;
 using System.Drawing.Drawing2D;
+using NeoAPI.DTOs.OEE;
 
 namespace NeoAPI.Controllers.OEE;
 
@@ -26,35 +27,39 @@ public class OEEController : ControllerBase
     {
         _context = context;
     }
-
     [HttpGet("GetMaquinaProductosProduccionActual1Turno")]
-    public async Task<ActionResult<List<string>>> GetMaquinaProductosProduccionActual1Turno()
+    public async Task<ActionResult<List<MaquinaProduccionDTO>>> GetMaquinaProductosProduccionActual1Turno()
     {
-        var fechaActual = Convert.ToDecimal(DateTime.Now.ToString("yyyyMMdd"));
-        var consulta =
-            from th in _context.Iths
-            where th.Ttype == "R"
-                && th.Ttdte == fechaActual
-                && th.Twhs == "PT "
-                && th.Thtime >= 6000
-                && th.Thtime < 180000
-            group th by new { th.Thwrkc, th.Tprod } into grp
-            orderby grp.Key.Thwrkc
-            select new
+        var today = DateTime.Today;
+        int fechaActualInt = today.Year * 10000 + today.Month * 100 + today.Day;
+        decimal fechaActual = fechaActualInt;
+        int inicioNum = 6000;
+        int finalNum = 180000;
+        var registros = await _context.Iths
+            .AsNoTracking()
+            .Where(th => th.Ttype == "R" &&
+                        th.Ttdte == fechaActual &&
+                        th.Twhs.Trim() == "PT" &&
+                        th.Thtime >= inicioNum &&
+                        th.Thtime < finalNum)
+            .Select(th => new
             {
-                thwrkc = grp.Key.Thwrkc,
-                tprod = grp.Key.Tprod,
-                produccion = grp.Sum(x => x.Tqty)
-            };
+                th.Thwrkc,
+                Tprod = th.Tprod.Trim(),
+                th.Tqty
+            })
+            .ToListAsync();
+        var resultado = registros
+            .GroupBy(x => new { x.Thwrkc, x.Tprod })
+            .OrderBy(g => g.Key.Thwrkc)
+            .Select(g => new MaquinaProduccionDTO
+            {
+                Thwrkc = g.Key.Thwrkc,
+                Tprod = g.Key.Tprod,
+                Produccion = g.Sum(x => x.Tqty)
+            })
+            .ToList();
 
-        return Ok(consulta.ToList());
+        return Ok(resultado);
     }
-
-   /* SELECT ITH.THWRKC, ITH.TPROD, Sum(ITH.TQTY) AS PRODUCCION 
-                        FROM DbBpcsVen.bpcs.ITH
-                        WHERE (ITH.TTYPE='R') AND (ITH.TTDTE ='20250527') AND (ITH.TWHS='PT ') AND (ITH.THTIME>=60000 And ITH.THTIME<180000) 
-                        GROUP BY ITH.THWRKC, ITH.TPROD 
-                        ORDER BY ITH.THWRKC*/
-
-
 }   
