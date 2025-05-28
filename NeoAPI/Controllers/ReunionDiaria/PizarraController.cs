@@ -91,6 +91,7 @@ public class PizarraController : ControllerBase
 [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
 {
+    estado = Uri.UnescapeDataString(estado);
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
@@ -147,7 +148,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
                          && a.Rdstatus != "En Curso"
-                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Confome"))
+                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Conforme"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .OrderByDescending(b => b.RdfecReu)
@@ -190,7 +191,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
                          && a.Rdstatus != "En Curso"
-                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Confome"))
+                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Conforme"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .OrderByDescending(b => b.RdfecTra)
