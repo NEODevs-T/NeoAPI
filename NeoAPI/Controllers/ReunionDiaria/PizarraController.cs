@@ -147,7 +147,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
                          && a.Rdstatus != "En Curso"
-                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
+                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Confome"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .OrderByDescending(b => b.RdfecReu)
@@ -190,7 +190,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                          && a.IdTipReu == reunion 
                          && a.Rddiv == div 
                          && a.Rdstatus != "En Curso"
-                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable"))
+                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Confome"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .OrderByDescending(b => b.RdfecTra)
@@ -472,7 +472,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(
         {
             reudiatablas = await _context.Reunions
                 .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
-                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable") &&
+                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Conforme") &&
                             a.RdfecTra >= f1 && a.RdfecTra <= f2.AddDays(1) &&
                             a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
@@ -509,7 +509,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetHistoricos(
         {
             reudiatablas = await _context.Reunions
                 .Where(a => a.Rdcentro == centro && a.IdTipReu == reunion && a.Rddiv == div &&
-                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable") &&
+                            (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Conforme") &&
                             a.RdfecReu >= f1 && a.RdfecReu <= f2.AddDays(1) &&
                             a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
