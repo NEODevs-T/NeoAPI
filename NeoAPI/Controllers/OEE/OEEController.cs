@@ -131,37 +131,4 @@ public class OEEController : ControllerBase
             ).ToListAsync();
         return Ok(resultado);
     }
-    [HttpGet("GetProduccionActualPorMaquinaPorHora")]
-    public async Task<ActionResult<List<string>>> GetProduccionActualPorMaquinaPorHora(int tiempo)
-    {
-        ActionResult<List<string>> result = null;
-        switch (tiempo)
-        {
-            case 1:
-                result = await _tiempoTrabajo.GetTiempoTrabajadoActual1Turno();
-                break;
-            case 2:
-                result = await _tiempoTrabajo.GetTiempoTrabajadoActual2Turno(true);
-                break;
-            case 3:
-                result = await _tiempoTrabajo.GetTiempoTrabajadoActual2Turno(false);
-                break;
-            default:
-                return BadRequest("El valor de tiempo debe ser 1, 2 o 3.");
-        }
-        if (result == null)
-        {
-            return BadRequest("El servicio devolvió null.");
-        }
-        var listaTiempoTrabajo = result.Value;
-        if (listaTiempoTrabajo == null)
-        {
-            return BadRequest("El servicio devolvió un valor nulo.");
-        }
-        if (!listaTiempoTrabajo.Any())
-        {
-            return BadRequest("No se encontraron registros.");
-        }
-        return Ok(listaTiempoTrabajo);
-    }
 }   
