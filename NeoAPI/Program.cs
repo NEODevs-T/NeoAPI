@@ -11,6 +11,7 @@ using NeoAPI.Models.SPI;
 using NeoAPI.Models.Gespline;
 using NeoAPI.Interface;
 using NeoAPI.Logic.MaquinasGespline;
+using NeoAPI.Logic.TiempoTrabajoGespline;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -20,6 +21,7 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddControllers();
 builder.Services.AddMemoryCache();
 builder.Services.AddScoped<IMaquinasGesplineLogic, MaquinasGesplineLogic>();
+builder.Services.AddScoped<ITiempoTrabajoGesplineLogic, TiempoTrabajoGesplineLogic>();
 builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>
     options.UseSqlServer(
         builder.Configuration.GetConnectionString("PolybaseVen"),
