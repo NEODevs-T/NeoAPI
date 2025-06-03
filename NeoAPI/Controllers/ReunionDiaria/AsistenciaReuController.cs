@@ -8,6 +8,7 @@ using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Logic.ReunionDia;
 namespace NeoAPI.Controllers.AsistenciaReuControllers;
+
 [ApiController]
 [Route("api/[controller]")]
 public class AsistenciaReuController : ControllerBase
@@ -66,7 +67,7 @@ public class AsistenciaReuController : ControllerBase
 
     }
 
-    [HttpGet("GetStatsAsis/{cent}/{empresa}/{Fecha_inicio}/{Fecha_Final}")]
+    [HttpGet("GetStatsAsis/{cent}/{Fecha_inicio}/{Fecha_Final}")]
     public async Task<ActionResult<List<StatsAsisDto>>> GetStatsAsis(string cent, string empresa, string Fecha_inicio, string Fecha_Final)
     {
 
@@ -153,7 +154,5 @@ public class AsistenciaReuController : ControllerBase
             return Ok(_mapper.Map<List<AsistenReuDTO>>(result));
         }
 
-    }
-
-
+    } 
 }
