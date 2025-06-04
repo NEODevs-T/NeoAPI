@@ -23,6 +23,7 @@ public partial class CargoReuDTO
 
 public partial class CargReuDTO
 {
+    public int IdCargoR { get; set; }
     public string Crnombre { get; set; } = null!;
     public bool Cresta { get; set; }
     public string Crempresa { get; set; } = null!;
