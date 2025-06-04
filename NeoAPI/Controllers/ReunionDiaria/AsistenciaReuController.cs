@@ -161,8 +161,8 @@ public class AsistenciaReuController : ControllerBase
     [HttpGet("GetCargoReuDiaria")]
     public async Task<ActionResult<List<CargoReuDTO>>> GetCargoReuDiaria()
     {
-            var cargos = await _reunionesLogic.GetCargoReuDiaria();
-            return Ok(cargos);
+        var cargos = await _reunionesLogic.GetCargoReuDiaria();
+        return Ok(cargos);
     }
 
     [HttpGet("GetAsisReuDiaria")]
@@ -170,6 +170,86 @@ public class AsistenciaReuController : ControllerBase
     {
         var asistencia = await _reunionesLogic.GetAsisReuDiaria();
         return Ok(asistencia);
+    }
+    
+    [HttpGet("GetPorcentajeAsistencia")]
+    public async Task<ActionResult<object>> GetPorcentajeAsistencia(string fechaInicio, string fechaFin)
+    {
+        try
+        {
+            string[] partsInicio = fechaInicio.Split('-');
+            string[] partsFin = fechaFin.Split('-');
+            DateTime inicio = new DateTime(
+                int.Parse(partsInicio[2]),
+                int.Parse(partsInicio[1]),
+                int.Parse(partsInicio[0])
+            );
+            DateTime fin = new DateTime(
+                int.Parse(partsFin[2]),
+                int.Parse(partsFin[1]),
+                int.Parse(partsFin[0])
+            );
+            if (inicio > fin)
+            {
+                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
+            }
+            int totalDias = (fin.Date - inicio.Date).Days + 1;
+            List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
+            if (cargos == null)
+            {
+                return StatusCode(500, "Error al obtener datos de los cargos.");
+            }
+            List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
+            if (asistencias == null)
+            {
+                return StatusCode(500, "Error al obtener datos de la asistencia.");
+            }
+            var asistenciasFiltradas = asistencias
+                .Where(a => a.Arfecha.HasValue &&
+                            a.Arfecha.Value.Date >= inicio.Date &&
+                            a.Arfecha.Value.Date <= fin.Date)
+                .ToList();
+            var agrupadasPorDia = asistenciasFiltradas
+                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
+                .Select(g => new { g.Key.IdCargoR, g.Key.Dia })
+                .ToList();
+            var asistenciaPorCargo = agrupadasPorDia
+                .GroupBy(x => x.IdCargoR)
+                .Select(g => new
+                {
+                    IdCargoR = g.Key,
+                    DiasAsistidos = g.Count()
+                })
+                .ToList();
+            var unionCargoIds = cargos.Select(c => c.IdCargoR)
+                                        .Union(asistenciaPorCargo.Select(a => a.IdCargoR))
+                                        .Distinct();
+            var detallePorCargo = unionCargoIds.Select(id =>
+            {
+                int diasAsistidos = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.DiasAsistidos ?? 0;
+                double porcentaje = ((double)diasAsistidos / totalDias) * 100;
+                return new
+                {
+                    IdCargoR = id,
+                    ReunionesProgramadas = totalDias,
+                    ReunionesAsistidas = diasAsistidos,
+                    PorcentajeAsistencia = porcentaje
+                };
+            }).ToList();
+            int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
+            int totalReunionesEsperadas = unionCargoIds.Count() * totalDias;
+            double porcentajeGlobal = totalReunionesEsperadas > 0 ?
+                ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+            return Ok(new
+            {
+                PorcentajeGlobal = porcentajeGlobal,
+                DetallePorCargo = detallePorCargo
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+        }
     }
 }
 
