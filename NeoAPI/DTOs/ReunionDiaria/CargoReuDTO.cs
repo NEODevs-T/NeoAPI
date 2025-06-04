@@ -20,3 +20,12 @@ public partial class CargoReuDTO
 
     public int Crbloque { get; set; }
 }
+
+public partial class CargReuDTO
+{
+    public string Crnombre { get; set; } = null!;
+    public bool Cresta { get; set; }
+    public string Crempresa { get; set; } = null!;
+    public string Crarea { get; set; } = null!;
+    public int IdTipReu { get; set; }
+}

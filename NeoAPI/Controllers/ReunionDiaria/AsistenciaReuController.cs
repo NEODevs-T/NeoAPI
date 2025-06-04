@@ -154,5 +154,56 @@ public class AsistenciaReuController : ControllerBase
             return Ok(_mapper.Map<List<AsistenReuDTO>>(result));
         }
 
-    } 
+    }
+    [HttpGet("GetCargoReuDiaria")]
+    public async Task<ActionResult<List<CargReuDTO>>> GetCargoReuDiaria()
+    {
+        try
+        {
+            List<CargReuDTO> cargoreus = await _context.CargoReus
+                .Where(c => c.Cresta == true
+                        && c.IdTipReu == 1)
+                .OrderByDescending(c => c.Crnombre)
+                .Select(c => new CargReuDTO
+                {
+                    Crnombre = c.Crnombre,
+                    Cresta = c.Cresta,
+                    Crempresa = c.Crempresa,
+                    Crarea = c.Crarea,
+                    IdTipReu = c.IdTipReu
+                })
+                .ToListAsync();
+            return Ok(cargoreus);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+        }
+    }
+
+    [HttpGet("GetAsisReuDiaria")]
+    public async Task<ActionResult<List<AsistenReuDTO>>> GetAsisReuDiaria()
+    {
+        try
+        {
+            List<AsistenReuDTO> asisreu = await _context.AsistenReus
+            .OrderByDescending(a => a.Ararea)
+            .Select(a => new AsistenReuDTO
+            {
+                Ararea = a.Ararea,
+                IdAsistencia = a.IdAsistencia,
+                Arfecha = a.Arfecha,
+                IdCargoR = a.IdCargoR,
+                ArAsistente = a.ArAsistente,
+                ArSuplente = a.ArSuplente,
+                ArObser = a.ArObser,
+                ArIdEmpresa = a.ArIdEmpresa
+            }).ToListAsync();
+        return Ok(asisreu);
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+        } 
+    }
 }
