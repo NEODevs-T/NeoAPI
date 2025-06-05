@@ -178,7 +178,7 @@ public class AsistenciaReuController : ControllerBase
     }
 
     [HttpGet("GetPorcentajeAsistencia")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistencia(string fechaInicio, string fechaFin)
+    public async Task<ActionResult<object>> GetPorcentajeAsistencia(string fechaInicio, string fechaFin, string empresa)
     {
         try
         {
@@ -232,6 +232,12 @@ public class AsistenciaReuController : ControllerBase
             {
                 return StatusCode(500, "Error al obtener datos de los cargos.");
             }
+            if (!string.IsNullOrWhiteSpace(empresa))
+            {
+                cargos = cargos
+                .Where(c => c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase))
+                .ToList();
+            }
             List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
             if (asistencias == null)
             {
@@ -269,7 +275,9 @@ public class AsistenciaReuController : ControllerBase
                     ReunionesAsistidas = diasAsistidos,
                     PorcentajeAsistencia = porcentaje
                 };
-            }).ToList();
+            })
+            .OrderByDescending(X => X.IdCargoR)
+            .ToList();
             int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
             int totalReunionesEsperadas = unionCargoIds.Count() * reunionesProgramadas;
             double porcentajeGlobal = totalReunionesEsperadas > 0 ?
@@ -284,39 +292,6 @@ public class AsistenciaReuController : ControllerBase
         {
             return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
-    }
-
-     [HttpGet("FeriadosDeVenezuela2025ConSemanaSanta")]
-    public ActionResult<IEnumerable<string>> FeriadosDeVenezuela2025ConSemanaSanta()
-    {
-        int year = 2025;
-        // Obtiene la lista de feriados para Venezuela usando Nager.Date versión 1.30.0
-        var feriados = DateSystem.GetPublicHolidays(year, CountryCode.VE).ToList();
-
-        // Para 2025, se asume que el Domingo de Pascua cae el 20 de abril,
-        // por lo que se derivan:
-        var juevesSanto = new DateTime(year, 4, 17); // Jueves Santo
-        var viernesSanto = new DateTime(year, 4, 18); // Viernes Santo
-
-        // Agrega Jueves Santo si no está ya en la lista
-        if (!feriados.Any(h => h.Date.Date == juevesSanto))
-        {
-            // El constructor puede variar; en esta versión se usa:
-            feriados.Add(new PublicHoliday(juevesSanto, "Jueves Santo", "Holy Thursday", CountryCode.VE, null));
-        }
-
-        // Agrega Viernes Santo si no está ya en la lista
-        if (!feriados.Any(h => h.Date.Date == viernesSanto))
-        {
-            feriados.Add(new PublicHoliday(viernesSanto, "Viernes Santo", "Good Friday", CountryCode.VE, null));
-        }
-
-        // Ordena la lista por fecha (opcional)
-        var resultado = feriados
-            .OrderBy(h => h.Date)
-            .Select(h => $"{h.Date.ToShortDateString()} - {h.LocalName}");
-
-        return Ok(resultado);
     }
 }
 
