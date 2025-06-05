@@ -8,6 +8,11 @@ using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Logic.ReunionDia;
 using NeoAPI.Interface;
+using Nager.Date;
+using Nager.Date.Model;
+using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+
+
 namespace NeoAPI.Controllers.AsistenciaReuControllers;
 
 [ApiController]
@@ -171,7 +176,7 @@ public class AsistenciaReuController : ControllerBase
         var asistencia = await _reunionesLogic.GetAsisReuDiaria();
         return Ok(asistencia);
     }
-    
+
     [HttpGet("GetPorcentajeAsistencia")]
     public async Task<ActionResult<object>> GetPorcentajeAsistencia(string fechaInicio, string fechaFin)
     {
@@ -194,6 +199,34 @@ public class AsistenciaReuController : ControllerBase
                 return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
             }
             int totalDias = (fin.Date - inicio.Date).Days + 1;
+            var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
+            var requireHolidayNames = new List<string>
+            {"Día de Año Nuevo","Carnaval","Jueves Santo","Viernes Santo"
+            ,"Diez y nueve de abril","Día del Trabajador","Día de San Juan Bautista y aniversario de la Batalla de Carabobo","Cinco de julio"
+            ,"Natalicio del Libertador, Dia de la Armada Nacional","Día de la Resistencia Indígena","Nochebuena","Navidad","Nochevieja"
+            };
+            var selectHolidays = allHolidays
+            .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
+            && h.Date >= inicio.Date && h.Date <= fin.Date)
+            .Select(h => h.Date)
+            .ToList();
+            DateTime juevesSanto = new DateTime(inicio.Year, 4, 17);
+            DateTime viernesSanto = new DateTime(inicio.Year, 4, 18);
+            if (!selectHolidays.Any(d => d.Date == juevesSanto.Date))
+            {
+                selectHolidays.Add(juevesSanto.Date);
+            }
+            if (!selectHolidays.Any(d => d.Date == viernesSanto.Date))
+            {
+                selectHolidays.Add(viernesSanto.Date);
+            }
+            int reunionesProgramadas = Enumerable.Range(0, totalDias)
+            .Select(i => inicio.AddDays(i))
+            .Count(fecha =>
+                fecha.DayOfWeek != DayOfWeek.Saturday &&
+                fecha.DayOfWeek != DayOfWeek.Sunday &&
+                !selectHolidays.Any(feriado => feriado == fecha)
+            );
             List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
             {
@@ -227,17 +260,18 @@ public class AsistenciaReuController : ControllerBase
             var detallePorCargo = unionCargoIds.Select(id =>
             {
                 int diasAsistidos = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.DiasAsistidos ?? 0;
-                double porcentaje = ((double)diasAsistidos / totalDias) * 100;
+                double porcentaje = reunionesProgramadas > 0 ?
+                    ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
                 return new
                 {
                     IdCargoR = id,
-                    ReunionesProgramadas = totalDias,
+                    ReunionesProgramadas = reunionesProgramadas,
                     ReunionesAsistidas = diasAsistidos,
                     PorcentajeAsistencia = porcentaje
                 };
             }).ToList();
             int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
-            int totalReunionesEsperadas = unionCargoIds.Count() * totalDias;
+            int totalReunionesEsperadas = unionCargoIds.Count() * reunionesProgramadas;
             double porcentajeGlobal = totalReunionesEsperadas > 0 ?
                 ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
             return Ok(new
@@ -250,6 +284,39 @@ public class AsistenciaReuController : ControllerBase
         {
             return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
+    }
+
+     [HttpGet("FeriadosDeVenezuela2025ConSemanaSanta")]
+    public ActionResult<IEnumerable<string>> FeriadosDeVenezuela2025ConSemanaSanta()
+    {
+        int year = 2025;
+        // Obtiene la lista de feriados para Venezuela usando Nager.Date versión 1.30.0
+        var feriados = DateSystem.GetPublicHolidays(year, CountryCode.VE).ToList();
+
+        // Para 2025, se asume que el Domingo de Pascua cae el 20 de abril,
+        // por lo que se derivan:
+        var juevesSanto = new DateTime(year, 4, 17); // Jueves Santo
+        var viernesSanto = new DateTime(year, 4, 18); // Viernes Santo
+
+        // Agrega Jueves Santo si no está ya en la lista
+        if (!feriados.Any(h => h.Date.Date == juevesSanto))
+        {
+            // El constructor puede variar; en esta versión se usa:
+            feriados.Add(new PublicHoliday(juevesSanto, "Jueves Santo", "Holy Thursday", CountryCode.VE, null));
+        }
+
+        // Agrega Viernes Santo si no está ya en la lista
+        if (!feriados.Any(h => h.Date.Date == viernesSanto))
+        {
+            feriados.Add(new PublicHoliday(viernesSanto, "Viernes Santo", "Good Friday", CountryCode.VE, null));
+        }
+
+        // Ordena la lista por fecha (opcional)
+        var resultado = feriados
+            .OrderBy(h => h.Date)
+            .Select(h => $"{h.Date.ToShortDateString()} - {h.LocalName}");
+
+        return Ok(resultado);
     }
 }
 
