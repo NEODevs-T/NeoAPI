@@ -291,6 +291,117 @@ public class AsistenciaReuController : ControllerBase
         }
     }
 
+    [HttpGet("GetPorcentajeAsistenciaTurno")]
+    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(string fechaInicio, string fechaFin, string empresa, string area)
+    {
+        try
+        {
+            string[] partsInicio = fechaInicio.Split('-');
+            string[] partsFin = fechaFin.Split('-');
+            DateTime inicio = new DateTime(
+                int.Parse(partsInicio[2]),
+                int.Parse(partsInicio[1]),
+                int.Parse(partsInicio[0])
+            );
+            DateTime fin = new DateTime(
+                int.Parse(partsFin[2]),
+                int.Parse(partsFin[1]),
+                int.Parse(partsFin[0])
+            );
+            if (inicio > fin)
+            {
+                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
+            }
+            int totalDias = (fin.Date - inicio.Date).Days + 1;
+            var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
+            var requireHolidayNames = new List<string>
+        {
+            "Día de Año Nuevo", "Carnaval", "Jueves Santo", "Viernes Santo",
+            "Diez y nueve de abril", "Día del Trabajador",
+            "Día de San Juan Bautista y aniversario de la Batalla de Carabobo",
+            "Cinco de julio", "Natalicio del Libertador, Dia de la Armada Nacional",
+            "Día de la Resistencia Indígena", "Nochebuena", "Navidad", "Nochevieja"
+        };
+            var selectHolidays = allHolidays
+                .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
+                            && h.Date >= inicio.Date && h.Date <= fin.Date)
+                .Select(h => h.Date)
+                .ToList();
+            DateTime juevesSanto = new DateTime(inicio.Year, 4, 17);
+            DateTime viernesSanto = new DateTime(inicio.Year, 4, 18);
+            if (!selectHolidays.Any(d => d.Date == juevesSanto.Date))
+                selectHolidays.Add(juevesSanto.Date);
+            if (!selectHolidays.Any(d => d.Date == viernesSanto.Date))
+                selectHolidays.Add(viernesSanto.Date);
+            int diasLaborales = Enumerable.Range(0, totalDias)
+                .Select(i => inicio.AddDays(i))
+                .Count(fecha =>
+                    fecha.DayOfWeek != DayOfWeek.Saturday &&
+                    fecha.DayOfWeek != DayOfWeek.Sunday &&
+                    !selectHolidays.Any(feriado => feriado == fecha)
+                );
+            int reunionesProgramadas = diasLaborales * 2;
+            List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
+            if (cargos == null)
+            {
+                return StatusCode(500, "Error al obtener datos de los cargos.");
+            }
+            cargos = cargos
+                .Where(c => c.IdTipReu == 2 &&
+                            (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
+                            (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+            List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
+            if (asistencias == null)
+            {
+                return StatusCode(500, "Error al obtener datos de la asistencia.");
+            }
+            var asistenciasFiltradas = asistencias
+                .Where(a => a.Arfecha.HasValue &&
+                            a.Arfecha.Value.Date >= inicio.Date &&
+                            a.Arfecha.Value.Date <= fin.Date)
+                .ToList();
+            var asistenciaPorCargo = asistenciasFiltradas
+                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
+                .Select(g => new { g.Key.IdCargoR, Count = g.Count() })
+                .GroupBy(x => x.IdCargoR)
+                .Select(g => new
+                {
+                    IdCargoR = g.Key,
+                    ReunionesAsistidas = g.Sum(x => Math.Min(x.Count, 2))
+                })
+                .ToList();
+            var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
+            var detallePorCargo = cargoIds.Select(id =>
+            {
+                int reunionesAsistidas = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.ReunionesAsistidas ?? 0;
+                double porcentaje = reunionesProgramadas > 0 ?
+                    ((double)reunionesAsistidas / reunionesProgramadas) * 100 : 0;
+                return new
+                {
+                    IdCargoR = id,
+                    ReunionesProgramadas = reunionesProgramadas,
+                    ReunionesAsistidas = reunionesAsistidas,
+                    PorcentajeAsistencia = porcentaje
+                };
+            })
+            .OrderByDescending(x => x.IdCargoR)
+            .ToList();
+            int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.ReunionesAsistidas);
+            int totalReunionesEsperadas = cargoIds.Count() * reunionesProgramadas;
+            double porcentajeGlobal = totalReunionesEsperadas > 0 ?
+                ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+            return Ok(new
+            {
+                // PorcentajeGlobal = porcentajeGlobal,
+                DetallePorCargo = detallePorCargo
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+        }
+    }
     
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
     public async Task<ActionResult<object>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa, string area)
