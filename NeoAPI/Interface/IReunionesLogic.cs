@@ -10,6 +10,7 @@ namespace NeoAPI.Interface
         Task<List<CargoReuDTO>> GetCargoReuDiaria();
         Task<List<AsistenReuDTO>> GetAsisReuDiaria();
         public DateTime GetClosetThursday(DateTime candidate);
+        public List<DateTime> ObtenerJuevesObjetivo(DateTime inicio, DateTime final);   
 }
 }
 
