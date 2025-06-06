@@ -6,9 +6,10 @@ using NeoAPI.Models.Neo;
 namespace NeoAPI.Interface
 {
     public interface IReunionesLogic
-{
-    Task<List<CargoReuDTO>> GetCargoReuDiaria();
-    Task<List<AsistenReuDTO>> GetAsisReuDiaria();
+    {
+        Task<List<CargoReuDTO>> GetCargoReuDiaria();
+        Task<List<AsistenReuDTO>> GetAsisReuDiaria();
+        public DateTime GetClosetThursday(DateTime candidate);
 }
 }
 

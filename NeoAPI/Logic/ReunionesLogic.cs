@@ -23,7 +23,7 @@ namespace NeoAPI.Logic.Reuniones
             try
             {
                 var cargos = await _context.CargoReus
-                    .Where(c => c.Cresta && c.IdTipReu == 1)
+                    .Where(c => c.Cresta)
                     .OrderByDescending(c => c.Crnombre)
                     .Select(c => new CargoReuDTO
                     {
@@ -67,6 +67,62 @@ namespace NeoAPI.Logic.Reuniones
             {
                 throw new Exception($"Error interno del servidor en GetAsisReuDiariaAsync: {ex.Message}", ex);
             }
+        }
+
+        public DateTime GetClosetThursday(DateTime candidate)
+        {
+            if (candidate.DayOfWeek == DayOfWeek.Thursday)
+                return candidate;
+            int bestOffset = 0;
+            int bestDiff = int.MaxValue;
+            for (int offset = -6; offset <= 6; offset++)
+            {
+                DateTime testDay = candidate.AddDays(offset);
+                if (testDay.DayOfWeek == DayOfWeek.Thursday)
+                {
+                    int diff = Math.Abs(offset);
+                    if (diff < bestDiff)
+                    {
+                        bestDiff = diff;
+                        bestOffset = offset;
+                    }
+                    else if (diff == bestDiff && offset < bestOffset)
+                    {
+                        bestOffset = offset;
+                    }
+                }
+            }
+            return candidate.AddDays(bestOffset);
+        }
+
+        public List<DateTime> ObtenerJuevesObjetivo(DateTime inicio, DateTime final)
+        {
+            List<DateTime> targetThursdays = new List<DateTime>();
+            DateTime currentMonth = new DateTime(inicio.Year, inicio.Month, 1);
+            while (currentMonth <= final)
+            {
+                int year = currentMonth.Year;
+                int month = currentMonth.Month;
+                DateTime candidate15 = new DateTime(year, month, 15);
+                DateTime closestThursday15 = GetClosetThursday(candidate15);
+                if (closestThursday15 >= inicio && closestThursday15 <= final)
+                {
+                    targetThursdays.Add(closestThursday15);
+                }
+                int candidate30 = DateTime.DaysInMonth(year, month) >= 30
+                                    ? 30
+                                    : DateTime.DaysInMonth(year, month);
+                DateTime cadidate30 = new DateTime(year, month, candidate30);
+                DateTime closetThursday30 = GetClosetThursday(cadidate30);
+                if (closetThursday30 >= inicio && closetThursday30 <= final &&
+                closetThursday30 != closestThursday15)
+                {
+                    targetThursdays.Add(closetThursday30);
+                }
+
+                currentMonth = currentMonth.AddMonths(1);
+            }
+            return targetThursdays;
         }
     }
 }

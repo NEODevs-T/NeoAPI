@@ -250,7 +250,7 @@ public class AsistenciaReuController : ControllerBase
                 .ToList();
             var agrupadasPorDia = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
-                .Select(g => new { g.Key.IdCargoR})
+                .Select(g => new { g.Key.IdCargoR })
                 .ToList();
             var asistenciaPorCargo = agrupadasPorDia
                 .GroupBy(x => x.IdCargoR)
