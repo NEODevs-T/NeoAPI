@@ -323,8 +323,7 @@ public class AsistenciaReuController : ControllerBase
             {
                 selectHolidays = new List<DateTime>();
             }
-            else
-            {
+            else{
                 selectHolidays = allHolidays
                 .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
                             && h.Date >= inicio.Date && h.Date <= fin.Date)
@@ -423,13 +422,21 @@ public class AsistenciaReuController : ControllerBase
             var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
             var requireHolidayNames = new List<string>
         {
-            "Día de Año Nuevo", "Navidad"
+            "Día de Año Nuevo"
         };
-            var selectHolidays = allHolidays
+            List<DateTime> selectHolidays;
+            if (diasExcepcionalesLaborables)
+            {
+                selectHolidays = new List<DateTime>();
+            }
+            else
+            {
+                selectHolidays = allHolidays
                 .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
                             && h.Date >= inicio.Date && h.Date <= fin.Date)
                 .Select(h => h.Date)
                 .ToList();
+            }
             int diasLaborales = Enumerable.Range(0, totalDias)
                 .Select(i => inicio.AddDays(i))
                 .Count(fecha => !selectHolidays.Any(feriado => feriado == fecha)
@@ -439,10 +446,15 @@ public class AsistenciaReuController : ControllerBase
             {
                 for (int i = 0; i < meetingDays.Count; i++)
                 {
-                    if (selectHolidays.Contains(meetingDays[i]))
+                    // Normalizamos la fecha para evitar comparar horas
+                    DateTime meetingDate = meetingDays[i].Date;
+                    DateTime meetingDateMasUno = meetingDate.AddDays(1);
+
+                    // Si la fecha de la reunión o el día siguiente es feriado, se hace el ajuste
+                    if (selectHolidays.Any(feriado => feriado.Date == meetingDate || feriado.Date == meetingDateMasUno))
                     {
-                        DateTime diaMiercoles = meetingDays[i].AddDays(-1);
-                        if (diaMiercoles >= inicio && diaMiercoles <= fin)
+                        DateTime diaMiercoles = meetingDate.AddDays(-1);
+                        if (diaMiercoles >= inicio.Date && diaMiercoles <= fin.Date)
                         {
                             meetingDays[i] = diaMiercoles;
                         }
