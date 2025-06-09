@@ -292,7 +292,7 @@ public class AsistenciaReuController : ControllerBase
     }
 
     [HttpGet("GetPorcentajeAsistenciaTurno")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(string fechaInicio, string fechaFin, string empresa, string area)
+    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(string fechaInicio, string fechaFin, string empresa, string area, bool diasExcepcionalesLaborables = false)
     {
         try
         {
@@ -316,29 +316,24 @@ public class AsistenciaReuController : ControllerBase
             var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
             var requireHolidayNames = new List<string>
         {
-            "Día de Año Nuevo", "Carnaval", "Jueves Santo", "Viernes Santo",
-            "Diez y nueve de abril", "Día del Trabajador",
-            "Día de San Juan Bautista y aniversario de la Batalla de Carabobo",
-            "Cinco de julio", "Natalicio del Libertador, Dia de la Armada Nacional",
-            "Día de la Resistencia Indígena", "Nochebuena", "Navidad", "Nochevieja"
+            "Día de Año Nuevo", "Navidad"
         };
-            var selectHolidays = allHolidays
+            List<DateTime> selectHolidays;
+            if (diasExcepcionalesLaborables)
+            {
+                selectHolidays = new List<DateTime>();
+            }
+            else
+            {
+                selectHolidays = allHolidays
                 .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
                             && h.Date >= inicio.Date && h.Date <= fin.Date)
                 .Select(h => h.Date)
                 .ToList();
-            DateTime juevesSanto = new DateTime(inicio.Year, 4, 17);
-            DateTime viernesSanto = new DateTime(inicio.Year, 4, 18);
-            if (!selectHolidays.Any(d => d.Date == juevesSanto.Date))
-                selectHolidays.Add(juevesSanto.Date);
-            if (!selectHolidays.Any(d => d.Date == viernesSanto.Date))
-                selectHolidays.Add(viernesSanto.Date);
+            }
             int diasLaborales = Enumerable.Range(0, totalDias)
                 .Select(i => inicio.AddDays(i))
-                .Count(fecha =>
-                    fecha.DayOfWeek != DayOfWeek.Saturday &&
-                    fecha.DayOfWeek != DayOfWeek.Sunday &&
-                    !selectHolidays.Any(feriado => feriado == fecha)
+                .Count(fecha => !selectHolidays.Any(feriado => feriado == fecha)
                 );
             int reunionesProgramadas = diasLaborales * 2;
             List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
@@ -404,7 +399,7 @@ public class AsistenciaReuController : ControllerBase
     }
     
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa, string area)
+    public async Task<ActionResult<object>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa, string area, bool diasExcepcionalesLaborables = false)
     {
         try
         {
@@ -424,7 +419,36 @@ public class AsistenciaReuController : ControllerBase
             {
                 return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
             }
+            int totalDias = (fin.Date - inicio.Date).Days + 1;
+            var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
+            var requireHolidayNames = new List<string>
+        {
+            "Día de Año Nuevo", "Navidad"
+        };
+            var selectHolidays = allHolidays
+                .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
+                            && h.Date >= inicio.Date && h.Date <= fin.Date)
+                .Select(h => h.Date)
+                .ToList();
+            int diasLaborales = Enumerable.Range(0, totalDias)
+                .Select(i => inicio.AddDays(i))
+                .Count(fecha => !selectHolidays.Any(feriado => feriado == fecha)
+                );
             var meetingDays = _reunionesLogic.ObtenerJuevesObjetivo(inicio, fin);
+            if (!diasExcepcionalesLaborables)
+            {
+                for (int i = 0; i < meetingDays.Count; i++)
+                {
+                    if (selectHolidays.Contains(meetingDays[i]))
+                    {
+                        DateTime diaMiercoles = meetingDays[i].AddDays(-1);
+                        if (diaMiercoles >= inicio && diaMiercoles <= fin)
+                        {
+                            meetingDays[i] = diaMiercoles;
+                        }
+                    }
+                }
+            }
             int reunionesProgramadas = meetingDays.Count;
             List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
