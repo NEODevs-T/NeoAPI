@@ -11,6 +11,7 @@ using NeoAPI.Interface;
 using Nager.Date;
 using Nager.Date.Model;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
+using System.Data;
 
 
 namespace NeoAPI.Controllers.AsistenciaReuControllers;
@@ -177,6 +178,25 @@ public class AsistenciaReuController : ControllerBase
         return Ok(asistencia);
     }
 
+    private static DateTime GetEasterSunday(int year)
+        {
+            int a = year % 19;
+            int b = year / 100;
+            int c = year % 100;
+            int d = b / 4;
+            int e = b % 4;
+            int f = (b + 8) / 25;
+            int g = (b - f + 1) / 3;
+            int h = (19 * a + b - d - g + 15) % 30;
+            int i = c / 4;
+            int k = c % 4;
+            int l = (32 + 2 * e + 2 * i - h - k) % 7;
+            int m = (a + 11 * h + 22 * l) / 451;
+            int month = (h + l - 7 * m + 114) / 31;
+            int day = ((h + l - 7 * m + 114) % 31) + 1;
+            return new DateTime(year, month, day);
+        }
+
     [HttpGet("GetPorcentajeAsistencia")]
     public async Task<ActionResult<object>> GetPorcentajeAsistencia(string fechaInicio, string fechaFin, string empresa, string area)
     {
@@ -199,44 +219,55 @@ public class AsistenciaReuController : ControllerBase
                 return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
             }
             int totalDias = (fin.Date - inicio.Date).Days + 1;
-            var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
+            var allHolidays = new List<PublicHoliday>();
+            for (int year = inicio.Year; year <= fin.Year; year++)
+            {
+                allHolidays.AddRange(DateSystem.GetPublicHolidays(year, CountryCode.VE));
+            }
             var requireHolidayNames = new List<string>
-            {"Día de Año Nuevo","Carnaval","Jueves Santo","Viernes Santo"
-            ,"Diez y nueve de abril","Día del Trabajador","Día de San Juan Bautista y aniversario de la Batalla de Carabobo","Cinco de julio"
-            ,"Natalicio del Libertador, Dia de la Armada Nacional","Día de la Resistencia Indígena","Nochebuena","Navidad","Nochevieja"
+            {
+                "Día de Año Nuevo", "Carnaval", "Jueves Santo", "Viernes Santo",
+                "Diez y nueve de abril", "Día del Trabajador",
+                "Día de San Juan Bautista y aniversario de la Batalla de Carabobo", "Cinco de julio",
+                "Natalicio del Libertador, Dia de la Armada Nacional", "Día de la Resistencia Indígena",
+                "Nochebuena", "Navidad", "Nochevieja"
             };
             var selectHolidays = allHolidays
-            .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
-            && h.Date >= inicio.Date && h.Date <= fin.Date)
-            .Select(h => h.Date)
-            .ToList();
-            DateTime juevesSanto = new DateTime(inicio.Year, 4, 17);
-            DateTime viernesSanto = new DateTime(inicio.Year, 4, 18);
-            if (!selectHolidays.Any(d => d.Date == juevesSanto.Date))
+                .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
+                        && h.Date >= inicio.Date && h.Date <= fin.Date)
+                .Select(h => h.Date)
+                .ToList();
+            for (int year = inicio.Year; year <= fin.Year; year++)
             {
-                selectHolidays.Add(juevesSanto.Date);
-            }
-            if (!selectHolidays.Any(d => d.Date == viernesSanto.Date))
-            {
-                selectHolidays.Add(viernesSanto.Date);
+                DateTime easterSunday = GetEasterSunday(year);
+                DateTime juevesSanto = easterSunday.AddDays(-3);
+                DateTime viernesSanto = easterSunday.AddDays(-2);
+                if (juevesSanto >= inicio.Date && juevesSanto <= fin.Date && !selectHolidays.Contains(juevesSanto))
+                {
+                    selectHolidays.Add(juevesSanto);
+                }
+                if (viernesSanto >= inicio.Date && viernesSanto <= fin.Date && !selectHolidays.Contains(viernesSanto))
+                {
+                    selectHolidays.Add(viernesSanto);
+                }
             }
             int reunionesProgramadas = Enumerable.Range(0, totalDias)
-            .Select(i => inicio.AddDays(i))
-            .Count(fecha =>
-                fecha.DayOfWeek != DayOfWeek.Saturday &&
-                fecha.DayOfWeek != DayOfWeek.Sunday &&
-                !selectHolidays.Any(feriado => feriado == fecha)
-            );
+                .Select(i => inicio.AddDays(i))
+                .Count(fecha =>
+                    fecha.DayOfWeek != DayOfWeek.Saturday &&
+                    fecha.DayOfWeek != DayOfWeek.Sunday &&
+                    !selectHolidays.Contains(fecha)
+                );
             List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
             {
                 return StatusCode(500, "Error al obtener datos de los cargos.");
             }
-            {
-                cargos = cargos
-                .Where(c => c.IdTipReu == 1 && (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) && (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+            cargos = cargos
+                .Where(c => c.IdTipReu == 1 &&
+                            (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
+                            (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
-            }
             List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
             if (asistencias == null)
             {
@@ -273,7 +304,7 @@ public class AsistenciaReuController : ControllerBase
                     PorcentajeAsistencia = porcentaje
                 };
             })
-            .OrderByDescending(X => X.IdCargoR)
+            .OrderByDescending(x => x.IdCargoR)
             .ToList();
             int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
             int totalReunionesEsperadas = cargoIds.Count() * reunionesProgramadas;
@@ -290,9 +321,10 @@ public class AsistenciaReuController : ControllerBase
             return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
-
+    
     [HttpGet("GetPorcentajeAsistenciaTurno")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(string fechaInicio, string fechaFin, string empresa, string area, bool diasExcepcionalesLaborables = false)
+    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(string fechaInicio, string fechaFin, string empresa, string area,
+    bool diasExcepcionalesLaborables = false)
     {
         try
         {
@@ -313,7 +345,11 @@ public class AsistenciaReuController : ControllerBase
                 return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
             }
             int totalDias = (fin.Date - inicio.Date).Days + 1;
-            var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
+            var allHolidays = new List<PublicHoliday>();
+            for (int year = inicio.Year; year <= fin.Year; year++)
+            {
+                allHolidays.AddRange(DateSystem.GetPublicHolidays(year, CountryCode.VE));
+            }
             var requireHolidayNames = new List<string>
         {
             "Día de Año Nuevo", "Navidad"
@@ -323,17 +359,17 @@ public class AsistenciaReuController : ControllerBase
             {
                 selectHolidays = new List<DateTime>();
             }
-            else{
+            else
+            {
                 selectHolidays = allHolidays
-                .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
-                            && h.Date >= inicio.Date && h.Date <= fin.Date)
-                .Select(h => h.Date)
-                .ToList();
+                    .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
+                                && h.Date >= inicio.Date && h.Date <= fin.Date)
+                    .Select(h => h.Date)
+                    .ToList();
             }
             int diasLaborales = Enumerable.Range(0, totalDias)
                 .Select(i => inicio.AddDays(i))
-                .Count(fecha => !selectHolidays.Any(feriado => feriado == fecha)
-                );
+                .Count(fecha => !selectHolidays.Any(feriado => feriado == fecha));
             int reunionesProgramadas = diasLaborales * 2;
             List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
@@ -353,7 +389,8 @@ public class AsistenciaReuController : ControllerBase
             var asistenciasFiltradas = asistencias
                 .Where(a => a.Arfecha.HasValue &&
                             a.Arfecha.Value.Date >= inicio.Date &&
-                            a.Arfecha.Value.Date <= fin.Date)
+                            a.Arfecha.Value.Date <= fin.Date &&
+                            (diasExcepcionalesLaborables || !selectHolidays.Contains(a.Arfecha.Value.Date)))
                 .ToList();
             var asistenciaPorCargo = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
@@ -396,9 +433,10 @@ public class AsistenciaReuController : ControllerBase
             return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
-    
+
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa, string area, bool diasExcepcionalesLaborables = false)
+    public async Task<ActionResult<object>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa,
+    string area, bool diasExcepcionalesLaborables = false)
     {
         try
         {
@@ -419,7 +457,11 @@ public class AsistenciaReuController : ControllerBase
                 return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
             }
             int totalDias = (fin.Date - inicio.Date).Days + 1;
-            var allHolidays = DateSystem.GetPublicHolidays(inicio.Year, CountryCode.VE);
+            var allHolidays = new List<PublicHoliday>();
+            for (int year = inicio.Year; year <= fin.Year; year++)
+            {
+                allHolidays.AddRange(DateSystem.GetPublicHolidays(year, CountryCode.VE));
+            }
             var requireHolidayNames = new List<string>
         {
             "Día de Año Nuevo"
@@ -446,17 +488,21 @@ public class AsistenciaReuController : ControllerBase
             {
                 for (int i = 0; i < meetingDays.Count; i++)
                 {
-                    // Normalizamos la fecha para evitar comparar horas
                     DateTime meetingDate = meetingDays[i].Date;
-                    DateTime meetingDateMasUno = meetingDate.AddDays(1);
-
-                    // Si la fecha de la reunión o el día siguiente es feriado, se hace el ajuste
-                    if (selectHolidays.Any(feriado => feriado.Date == meetingDate || feriado.Date == meetingDateMasUno))
+                    if (meetingDate.Month == 1 && meetingDate.Day == 1 && selectHolidays.Contains(meetingDate))
                     {
-                        DateTime diaMiercoles = meetingDate.AddDays(-1);
-                        if (diaMiercoles >= inicio.Date && diaMiercoles <= fin.Date)
+                        DateTime adjustedDate = meetingDate.AddDays(-1);
+                        if (adjustedDate >= inicio.Date && adjustedDate <= fin.Date)
                         {
-                            meetingDays[i] = diaMiercoles;
+                            meetingDays[i] = adjustedDate;
+                        }
+                    }
+                    else if (selectHolidays.Any(feriado => feriado.Date == meetingDate || feriado.Date == meetingDate.AddDays(1)))
+                    {
+                        DateTime adjustedDate = meetingDate.AddDays(-1);
+                        if (adjustedDate >= inicio.Date && adjustedDate <= fin.Date)
+                        {
+                            meetingDays[i] = adjustedDate;
                         }
                     }
                 }
@@ -469,7 +515,10 @@ public class AsistenciaReuController : ControllerBase
             }
             {
                 cargos = cargos
-                .Where(c => c.IdTipReu == 3 && (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) && (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+                .Where(c => c.IdTipReu == 3 && (string.IsNullOrWhiteSpace(area)
+                || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase))
+                && (string.IsNullOrWhiteSpace(empresa)
+                || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
             }
             List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
