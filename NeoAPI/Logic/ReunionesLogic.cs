@@ -94,35 +94,63 @@ namespace NeoAPI.Logic.Reuniones
             }
             return candidate.AddDays(bestOffset);
         }
-
-        public List<DateTime> ObtenerJuevesObjetivo(DateTime inicio, DateTime final)
+        public List<DateTime> ObtenerJuevesObjetivo(DateTime inicio, DateTime fin)
         {
-            List<DateTime> targetThursdays = new List<DateTime>();
+            List<DateTime> targetDates = new List<DateTime>();
             DateTime currentMonth = new DateTime(inicio.Year, inicio.Month, 1);
-            while (currentMonth <= final)
+            while (currentMonth <= fin)
             {
                 int year = currentMonth.Year;
                 int month = currentMonth.Month;
                 DateTime candidate15 = new DateTime(year, month, 15);
-                DateTime closestThursday15 = GetClosetThursday(candidate15);
-                if (closestThursday15 >= inicio && closestThursday15 <= final)
+                DateTime computedThursday15 = GetClosetThursday(candidate15); // Lógica ya definida
+                if (computedThursday15 >= inicio && computedThursday15 <= fin && RegistroExiste(computedThursday15))
                 {
-                    targetThursdays.Add(closestThursday15);
+                    targetDates.Add(computedThursday15);
                 }
-                int candidate30 = DateTime.DaysInMonth(year, month) >= 30
-                                    ? 30
-                                    : DateTime.DaysInMonth(year, month);
-                DateTime cadidate30 = new DateTime(year, month, candidate30);
-                DateTime closetThursday30 = GetClosetThursday(cadidate30);
-                if (closetThursday30 >= inicio && closetThursday30 <= final &&
-                closetThursday30 != closestThursday15)
+                int lastDayOfMonth = DateTime.DaysInMonth(year, month);
+                int candidateDay = lastDayOfMonth >= 30 ? 30 : lastDayOfMonth;
+                DateTime candidate30Date = new DateTime(year, month, candidateDay);
+                DateTime computedThursday30;
+                if (candidate30Date.DayOfWeek < DayOfWeek.Thursday)
                 {
-                    targetThursdays.Add(closetThursday30);
+                    int daysBack = ((int)candidate30Date.DayOfWeek - (int)DayOfWeek.Thursday + 7) % 7;
+                    computedThursday30 = candidate30Date.AddDays(-daysBack);
                 }
-
+                else
+                {
+                    computedThursday30 = GetClosetThursday(candidate30Date);
+                    if (computedThursday30.Month != month)
+                    {
+                        int daysBack = ((int)candidate30Date.DayOfWeek - (int)DayOfWeek.Thursday + 7) % 7;
+                        computedThursday30 = candidate30Date.AddDays(-daysBack);
+                    }
+                }
+                if (!RegistroExiste(computedThursday30))
+                {
+                    DateTime tempDate = computedThursday30;
+                    while (tempDate <= candidate30Date)
+                    {
+                        if (RegistroExiste(tempDate))
+                        {
+                            computedThursday30 = tempDate;
+                            break;
+                        }
+                        tempDate = tempDate.AddDays(1);
+                    }
+                }
+                if (computedThursday30 >= inicio && computedThursday30 <= fin &&
+                    computedThursday30 != computedThursday15 && RegistroExiste(computedThursday30))
+                {
+                    targetDates.Add(computedThursday30);
+                }
                 currentMonth = currentMonth.AddMonths(1);
             }
-            return targetThursdays;
+            return targetDates;
+        }
+        public bool RegistroExiste(DateTime fecha)
+        {
+            return true;
         }
     }
 }
