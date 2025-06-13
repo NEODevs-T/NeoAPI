@@ -321,10 +321,15 @@ public class AsistenciaReuController : ControllerBase
             return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
-    
+
     [HttpGet("GetPorcentajeAsistenciaTurno")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(string fechaInicio, string fechaFin, string empresa, string area,
-    bool diasExcepcionalesLaborables = false)
+    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(
+    string fechaInicio,
+    string fechaFin,
+    string empresa,
+    string area,
+    bool diasExcepcionalesLaborables = false,
+    [FromQuery] List<string> eventosExternos = null) // Recibimos las fechas en formato "dd-MM-yyyy"
     {
         try
         {
@@ -354,6 +359,23 @@ public class AsistenciaReuController : ControllerBase
         {
             "Día de Año Nuevo", "Navidad"
         };
+            List<DateTime> fechasEventosExternos = new List<DateTime>();
+            if (eventosExternos != null)
+            {
+                foreach (var fechaEvento in eventosExternos)
+                {
+                    string[] partesEvento = fechaEvento.Split('-');
+                    DateTime evento = new DateTime(
+                        int.Parse(partesEvento[2]),
+                        int.Parse(partesEvento[1]),
+                        int.Parse(partesEvento[0])
+                    );
+                    if (evento >= inicio.Date && evento <= fin.Date)
+                    {
+                        fechasEventosExternos.Add(evento);
+                    }
+                }
+            }
             List<DateTime> selectHolidays;
             if (diasExcepcionalesLaborables)
             {
@@ -366,6 +388,10 @@ public class AsistenciaReuController : ControllerBase
                                 && h.Date >= inicio.Date && h.Date <= fin.Date)
                     .Select(h => h.Date)
                     .ToList();
+                if (fechasEventosExternos.Any())
+                {
+                    selectHolidays = selectHolidays.Union(fechasEventosExternos).ToList();
+                }
             }
             int diasLaborales = Enumerable.Range(0, totalDias)
                 .Select(i => inicio.AddDays(i))
@@ -433,6 +459,7 @@ public class AsistenciaReuController : ControllerBase
             return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
+
 
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
     public async Task<ActionResult<object>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa,
