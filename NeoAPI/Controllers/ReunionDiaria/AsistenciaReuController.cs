@@ -393,10 +393,19 @@ public class AsistenciaReuController : ControllerBase
                     selectHolidays = selectHolidays.Union(fechasEventosExternos).ToList();
                 }
             }
+            int horaActual = DateTime.Now.Hour;
             int diasLaborales = Enumerable.Range(0, totalDias)
-                .Select(i => inicio.AddDays(i))
-                .Count(fecha => !selectHolidays.Any(feriado => feriado == fecha));
-            int reunionesProgramadas = diasLaborales * 2;
+            .Select(i => inicio.AddDays(i))
+            .Count(fecha => !selectHolidays.Any(feriado => feriado == fecha));
+            int reunionesProgramadas = 0;
+            if (horaActual >= 6 && horaActual < 18)
+            {
+                reunionesProgramadas = (diasLaborales * 2) - 1;
+            }
+            else
+            {
+                reunionesProgramadas = diasLaborales * 2;
+            }
             List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
             {
