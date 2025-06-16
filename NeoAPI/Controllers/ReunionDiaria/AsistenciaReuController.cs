@@ -277,7 +277,8 @@ public class AsistenciaReuController : ControllerBase
             var asistenciasFiltradas = asistencias
                 .Where(a => a.Arfecha.HasValue &&
                             a.Arfecha.Value.Date >= inicio.Date &&
-                            a.Arfecha.Value.Date <= fin.Date)
+                            a.Arfecha.Value.Date <= fin.Date &&
+                            cargoIds.Contains(a.IdCargoR))
                 .ToList();
             var agrupadasPorDia = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
@@ -312,7 +313,7 @@ public class AsistenciaReuController : ControllerBase
                 ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
             return Ok(new
             {
-                //PorcentajeGlobal = porcentajeGlobal,
+                PorcentajeGlobal = porcentajeGlobal,
                 DetallePorCargo = detallePorCargo
             });
         }
@@ -416,6 +417,7 @@ public class AsistenciaReuController : ControllerBase
                             (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
                             (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
+            var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
             List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
             if (asistencias == null)
             {
@@ -425,7 +427,8 @@ public class AsistenciaReuController : ControllerBase
                 .Where(a => a.Arfecha.HasValue &&
                             a.Arfecha.Value.Date >= inicio.Date &&
                             a.Arfecha.Value.Date <= fin.Date &&
-                            (diasExcepcionalesLaborables || !selectHolidays.Contains(a.Arfecha.Value.Date)))
+                            (diasExcepcionalesLaborables || !selectHolidays.Contains(a.Arfecha.Value.Date)) &&
+                            cargoIds.Contains(a.IdCargoR))
                 .ToList();
             var asistenciaPorCargo = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
@@ -437,7 +440,6 @@ public class AsistenciaReuController : ControllerBase
                     ReunionesAsistidas = g.Sum(x => Math.Min(x.Count, 2))
                 })
                 .ToList();
-            var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
             var detallePorCargo = cargoIds.Select(id =>
             {
                 int reunionesAsistidas = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.ReunionesAsistidas ?? 0;
@@ -459,7 +461,7 @@ public class AsistenciaReuController : ControllerBase
                 ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
             return Ok(new
             {
-                // PorcentajeGlobal = porcentajeGlobal,
+                PorcentajeGlobal = porcentajeGlobal,
                 DetallePorCargo = detallePorCargo
             });
         }
@@ -563,8 +565,9 @@ public class AsistenciaReuController : ControllerBase
                 return StatusCode(500, "Error al obtener datos de la asistencia.");
             }
             var meetingDaysSet = meetingDays.Select(md => md.Date).ToHashSet();
+            var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
             var asistenciasFiltradas = asistencias
-                .Where(a => a.Arfecha.HasValue && meetingDaysSet.Contains(a.Arfecha.Value.Date))
+                .Where(a => a.Arfecha.HasValue && meetingDaysSet.Contains(a.Arfecha.Value.Date) && cargoIds.Contains(a.IdCargoR))
                 .ToList();
             var agrupadasPorDia = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
@@ -578,7 +581,6 @@ public class AsistenciaReuController : ControllerBase
                     DiasAsistidos = g.Count()
                 })
                 .ToList();
-            var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
             var detallePorCargo = cargoIds.Select(id =>
             {
                 int diasAsistidos = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.DiasAsistidos ?? 0;
@@ -600,7 +602,7 @@ public class AsistenciaReuController : ControllerBase
                 ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
             return Ok(new
             {
-                //PorcentajeGlobal = porcentajeGlobal,
+                PorcentajeGlobal = porcentajeGlobal,
                 DetallePorCargo = detallePorCargo
             });
         }
