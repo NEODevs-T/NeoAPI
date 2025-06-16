@@ -296,7 +296,7 @@ public class AsistenciaReuController : ControllerBase
                 int diasAsistidos = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.DiasAsistidos ?? 0;
                 double porcentaje = reunionesProgramadas > 0 ?
                     ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
-                return new
+                return new AsistenReuPorcetanjeDTO
                 {
                     IdCargoR = id,
                     ReunionesProgramadas = reunionesProgramadas,
@@ -443,7 +443,7 @@ public class AsistenciaReuController : ControllerBase
                 int reunionesAsistidas = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.ReunionesAsistidas ?? 0;
                 double porcentaje = reunionesProgramadas > 0 ?
                     ((double)reunionesAsistidas / reunionesProgramadas) * 100 : 0;
-                return new
+                return new AsistenReuPorcetanjeDTO
                 {
                     IdCargoR = id,
                     ReunionesProgramadas = reunionesProgramadas,
@@ -584,7 +584,7 @@ public class AsistenciaReuController : ControllerBase
                 int diasAsistidos = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.DiasAsistidos ?? 0;
                 double porcentaje = reunionesProgramadas > 0 ?
                     ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
-                return new
+                return new AsistenReuPorcetanjeDTO
                 {
                     IdCargoR = id,
                     ReunionesProgramadas = reunionesProgramadas,
