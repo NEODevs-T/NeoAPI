@@ -197,8 +197,8 @@ public class AsistenciaReuController : ControllerBase
             return new DateTime(year, month, day);
         }
 
-    [HttpGet("GetPorcentajeAsistencia")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistencia(string fechaInicio, string fechaFin, string empresa, string area)
+    [HttpGet("GetPorcentajeAsistenciaDiaria")]
+    public async Task<ActionResult<object>> GetPorcentajeAsistenciaDiaria(string fechaInicio, string fechaFin, string empresa, string area)
     {
         try
         {
