@@ -18,6 +18,8 @@ public partial class AsistenReuDTO
     public int? ArSuplente { get; set; }
 
     public string? ArObser { get; set; }
+    
+    public int ArIdEmpresa { get; set; }
 
-    public CargoReuDTO? Cargo {get; set; }
+    public CargoReuDTO? Cargo { get; set; }
 }

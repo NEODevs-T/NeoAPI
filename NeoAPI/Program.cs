@@ -11,6 +11,7 @@ using NeoAPI.Models.SPI;
 using NeoAPI.Models.Gespline;
 using NeoAPI.Interface;
 using NeoAPI.Logic.MaquinasGespline;
+using NeoAPI.Logic.Reuniones;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -19,6 +20,8 @@ var builder = WebApplication.CreateBuilder(args);
 
 builder.Services.AddControllers();
 builder.Services.AddScoped<IMaquinasGesplineLogic, MaquinasGesplineLogic>();
+builder.Services.AddScoped<IReunionesLogic, ReunionesLogic>();
+
 
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
