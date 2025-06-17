@@ -216,7 +216,7 @@ public class AsistenciaReuController : ControllerBase
             );
             if (inicio > fin)
             {
-                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
+                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
             }
             int totalDias = (fin.Date - inicio.Date).Days + 1;
             var allHolidays = new List<PublicHoliday>();
@@ -229,7 +229,7 @@ public class AsistenciaReuController : ControllerBase
                 "Día de Año Nuevo", "Carnaval", "Jueves Santo", "Viernes Santo",
                 "Diez y nueve de abril", "Día del Trabajador",
                 "Día de San Juan Bautista y aniversario de la Batalla de Carabobo", "Cinco de julio",
-                "Natalicio del Libertador, Dia de la Armada Nacional", "Día de la Resistencia Indígena",
+                "Natalicio del Libertador, Dia de la Armada Nacional",
                 "Nochebuena", "Navidad", "Nochevieja"
             };
             var selectHolidays = allHolidays
@@ -348,7 +348,7 @@ public class AsistenciaReuController : ControllerBase
             );
             if (inicio > fin)
             {
-                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
+                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
             }
             int totalDias = (fin.Date - inicio.Date).Days + 1;
             var allHolidays = new List<PublicHoliday>();
@@ -492,7 +492,7 @@ public class AsistenciaReuController : ControllerBase
             );
             if (inicio > fin)
             {
-                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha fin.");
+                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
             }
             int totalDias = (fin.Date - inicio.Date).Days + 1;
             var allHolidays = new List<PublicHoliday>();
