@@ -191,7 +191,17 @@ namespace NeoAPI.Controllers.Maestras
 
             var result = await _context.EquipoEams
                 .Where(x => x.IdLineaNavigation.IdLinea == idlinea)
-                .AsNoTracking()
+                .Select(x => new EquipoEamDTO
+                {
+                    IdEquipo = x.IdEquipo,
+                    IdLinea = x.IdLinea,
+                    Linea = x.IdLineaNavigation.Lnom,
+                    EcodEquiEam = x.EcodEquiEam,
+                    EnombreEam = x.EnombreEam,
+                    EdescriEam = x.EdescriEam,
+                    EestaEam = x.EestaEam,
+                    Efecha = x.Efecha,
+                })
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<EquipoEamDTO>>(result));

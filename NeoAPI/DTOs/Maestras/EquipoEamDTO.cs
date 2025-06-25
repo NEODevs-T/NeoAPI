@@ -10,6 +10,8 @@ public class EquipoEamDTO
 
     public int IdLinea { get; set; }
 
+    public string Linea { get; set; } = null;
+
     public string EcodEquiEam { get; set; } = null!;
 
     public string EnombreEam { get; set; } = null!;
@@ -19,8 +21,6 @@ public class EquipoEamDTO
     public bool EestaEam { get; set; }
 
     public DateTime Efecha { get; set; }
-
-    public LineaDTO? Linea { get; set; } = null;
 
     public int? IdEmpresa { get; set; } = null;
 }
