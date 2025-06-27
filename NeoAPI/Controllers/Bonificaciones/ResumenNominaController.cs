@@ -46,12 +46,8 @@ namespace NeoAPI.Controllers.Bonificaciones
                 Centro = r.IdMontosNavigation.IdLineaNavigation.Master.IdCentroNavigation.Cnom,
                 Linea = r.IdMontosNavigation.IdLineaNavigation.Lnom,
                 PuestoTrabajo = r.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre,
-                Monto = r.IdMontosNavigation.Mmonto,
-                Moneda = r.IdMontosNavigation.IdMonedaNavigation.Mtipo,
                 FechaResumen = r.Rfecha,
-                FechaPago = r.RfecPago,
                 FichaResumen = r.RuserVali,
-                FichaPago = r.RuserPago
             })
              .AsNoTracking()
              .ToListAsync();
@@ -76,8 +72,7 @@ namespace NeoAPI.Controllers.Bonificaciones
                 r.IdPersonalNavigation.PeApellido,
                 r.IdMontosNavigation.IdLineaNavigation.Master.IdPaisNavigation.Pnombre,
                 r.IdMontosNavigation.IdLineaNavigation.Master.IdEmpresaNavigation.Enombre,
-                r.IdMontosNavigation.IdLineaNavigation.Master.IdCentroNavigation.Cnom,
-                r.IdMontosNavigation.IdMonedaNavigation.Mtipo
+                r.IdMontosNavigation.IdLineaNavigation.Master.IdCentroNavigation.Cnom
 
             })
             .Select(g => new
@@ -88,8 +83,6 @@ namespace NeoAPI.Controllers.Bonificaciones
                 Pais = g.Key.Pnombre,
                 Empresa = g.Key.Enombre,
                 Centro = g.Key.Cnom,
-                Moneda = g.Key.Mtipo,
-                Monto = g.Sum(x => x.IdMontosNavigation.Mmonto),
 
             })
             .AsNoTracking()

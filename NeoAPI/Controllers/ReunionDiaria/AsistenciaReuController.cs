@@ -92,7 +92,7 @@ public class AsistenciaReuController : ControllerBase
         {
             var result = await _context.AsistenReus
             .Include(x => x.IdCargoRNavigation)
-            .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
+            .Where(x => x.Arfecha.Date >= date1 & x.Arfecha.Date <= date2)
             .GroupBy(x => x.IdCargoRNavigation.Crnombre)
             .ToListAsync();
 
@@ -111,7 +111,7 @@ public class AsistenciaReuController : ControllerBase
         {
             var result = await _context.AsistenReus
             .Include(x => x.IdCargoRNavigation)
-            .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
+            .Where(x => (x.Arfecha.Date >= date1 & x.Arfecha.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
             .GroupBy(x => x.IdCargoRNavigation.Crnombre)
             .ToListAsync();
 
@@ -145,7 +145,7 @@ public class AsistenciaReuController : ControllerBase
         {
             var result = await _context.AsistenReus
             .Include(x => x.IdCargoRNavigation)
-            .Where(x => x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2)
+            .Where(x => x.Arfecha.Date >= date1 & x.Arfecha.Date <= date2)
             .GroupBy(x => x.IdCargoRNavigation.Crnombre)
             .ToListAsync();
 
@@ -157,7 +157,7 @@ public class AsistenciaReuController : ControllerBase
         {
             var result = await _context.AsistenReus
             .Include(x => x.IdCargoRNavigation)
-            .Where(x => (x.Arfecha.Value.Date >= date1 & x.Arfecha.Value.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
+            .Where(x => (x.Arfecha.Date >= date1 & x.Arfecha.Date <= date2) && x.Ararea == cent && x.IdCargoRNavigation.Crempresa == empresa)
             .ToListAsync();
 
             return Ok(_mapper.Map<List<AsistenReuDTO>>(result));
@@ -275,13 +275,13 @@ public class AsistenciaReuController : ControllerBase
             }
             var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
             var asistenciasFiltradas = asistencias
-                .Where(a => a.Arfecha.HasValue &&
-                            a.Arfecha.Value.Date >= inicio.Date &&
-                            a.Arfecha.Value.Date <= fin.Date &&
+                .Where(a => 
+                            a.Arfecha.Date >= inicio.Date &&
+                            a.Arfecha.Date <= fin.Date &&
                             cargoIds.Contains(a.IdCargoR))
                 .ToList();
             var agrupadasPorDia = asistenciasFiltradas
-                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
+                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Date })
                 .Select(g => new { g.Key.IdCargoR })
                 .ToList();
             var asistenciaPorCargo = agrupadasPorDia
@@ -424,14 +424,14 @@ public class AsistenciaReuController : ControllerBase
                 return StatusCode(500, "Error al obtener datos de la asistencia.");
             }
             var asistenciasFiltradas = asistencias
-                .Where(a => a.Arfecha.HasValue &&
-                            a.Arfecha.Value.Date >= inicio.Date &&
-                            a.Arfecha.Value.Date <= fin.Date &&
-                            (diasExcepcionalesLaborables || !selectHolidays.Contains(a.Arfecha.Value.Date)) &&
+                .Where(a => 
+                            a.Arfecha.Date >= inicio.Date &&
+                            a.Arfecha.Date <= fin.Date &&
+                            (diasExcepcionalesLaborables || !selectHolidays.Contains(a.Arfecha.Date)) &&
                             cargoIds.Contains(a.IdCargoR))
                 .ToList();
             var asistenciaPorCargo = asistenciasFiltradas
-                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
+                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Date })
                 .Select(g => new { g.Key.IdCargoR, Count = g.Count() })
                 .GroupBy(x => x.IdCargoR)
                 .Select(g => new
@@ -567,10 +567,10 @@ public class AsistenciaReuController : ControllerBase
             var meetingDaysSet = meetingDays.Select(md => md.Date).ToHashSet();
             var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
             var asistenciasFiltradas = asistencias
-                .Where(a => a.Arfecha.HasValue && meetingDaysSet.Contains(a.Arfecha.Value.Date) && cargoIds.Contains(a.IdCargoR))
+                .Where(a => meetingDaysSet.Contains(a.Arfecha.Date) && cargoIds.Contains(a.IdCargoR))
                 .ToList();
             var agrupadasPorDia = asistenciasFiltradas
-                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Value.Date })
+                .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Date })
                 .Select(g => new { g.Key.IdCargoR })
                 .ToList();
             var asistenciaPorCargo = agrupadasPorDia

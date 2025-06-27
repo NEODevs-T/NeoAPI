@@ -141,7 +141,7 @@ public class ReunionDiaLogic : IReunionDiaLogic
         List<Reunion> disc = await _neocontext.Reunions
             .Include(b => b.IdksfNavigation)
             .Include(b => b.IdResReuNavigation)
-            .Where(h => h.RdcodDis == "2" && h.RdfecReu.Date == FechaP.Date)
+            .Where(h => h.RdcodDis == "2" && h.RdfecReu.Value.Date == FechaP.Date)
             .ToListAsync();
         if (disc == null)
             throw new Exception("not found!");

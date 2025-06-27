@@ -19,6 +19,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Area> Areas { get; set; }
 
+    public virtual DbSet<AreaBon> AreaBons { get; set; }
+
     public virtual DbSet<AreaCarga> AreaCargas { get; set; }
 
     public virtual DbSet<AsentamientosFueraRangoV> AsentamientosFueraRangoVs { get; set; }
@@ -65,11 +67,15 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<CorteDi> CorteDis { get; set; }
 
+    public virtual DbSet<DeparBon> DeparBons { get; set; }
+
     public virtual DbSet<DispDefi> DispDefis { get; set; }
 
     public virtual DbSet<Division> Divisions { get; set; }
 
     public virtual DbSet<DivisionesV> DivisionesVs { get; set; }
+
+    public virtual DbSet<Eficiencium> Eficiencia { get; set; }
 
     public virtual DbSet<Empresa> Empresas { get; set; }
 
@@ -80,6 +86,8 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<EquipoEam> EquipoEams { get; set; }
 
     public virtual DbSet<EquiposEamV> EquiposEamVs { get; set; }
+
+    public virtual DbSet<Escalon> Escalons { get; set; }
 
     public virtual DbSet<Estado> Estados { get; set; }
 
@@ -111,13 +119,21 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Master> Masters { get; set; }
 
-    public virtual DbSet<Monedum> Moneda { get; set; }
+    public virtual DbSet<MonedBon> MonedBons { get; set; }
 
     public virtual DbSet<Monto> Montos { get; set; }
 
+    public virtual DbSet<MontoBon> MontoBons { get; set; }
+
     public virtual DbSet<MontosEscalonV> MontosEscalonVs { get; set; }
 
+    public virtual DbSet<NivePue> NivePues { get; set; }
+
     public virtual DbSet<Nivel> Nivels { get; set; }
+
+    public virtual DbSet<Objetivo> Objetivos { get; set; }
+
+    public virtual DbSet<Pago> Pagos { get; set; }
 
     public virtual DbSet<Pai> Pais { get; set; }
 
@@ -163,11 +179,15 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<SeccionesV> SeccionesVs { get; set; }
 
+    public virtual DbSet<TabuladoresBonoV> TabuladoresBonoVs { get; set; }
+
     public virtual DbSet<TiParTp> TiParTps { get; set; }
 
     public virtual DbSet<TieEjeTp> TieEjeTps { get; set; }
 
     public virtual DbSet<TieParTp> TieParTps { get; set; }
+
+    public virtual DbSet<TieProgr> TieProgrs { get; set; }
 
     public virtual DbSet<TipIncen> TipIncens { get; set; }
 
@@ -182,6 +202,8 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<TipoVar> TipoVars { get; set; }
 
     public virtual DbSet<TurnoTp> TurnoTps { get; set; }
+
+    public virtual DbSet<UnidaObj> UnidaObjs { get; set; }
 
     public virtual DbSet<Unidad> Unidads { get; set; }
 
@@ -237,6 +259,27 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("ANom");
+        });
+
+        modelBuilder.Entity<AreaBon>(entity =>
+        {
+            entity.HasKey(e => e.IdAreaBon);
+
+            entity.ToTable("AreaBon", "bon", tb => tb.HasComment("Area de los escalones del bono"));
+
+            entity.Property(e => e.Abdescrip)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasComment("Descripcion del Area")
+                .HasColumnName("ABDescrip");
+            entity.Property(e => e.Abestado)
+                .HasComment("Estado del Area (1:Activo, 0:Inactivo)")
+                .HasColumnName("ABEstado");
+            entity.Property(e => e.Abnombre)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Nombre del Area")
+                .HasColumnName("ABNombre");
         });
 
         modelBuilder.Entity<AreaCarga>(entity =>
@@ -429,9 +472,7 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.Cffec)
                 .HasColumnType("datetime")
                 .HasColumnName("CFFec");
-            entity.Property(e => e.CffecNew)
-                .HasColumnType("datetime")
-                .HasColumnName("CFFecNew");
+            entity.Property(e => e.CffecNew).HasColumnName("CFFecNew");
             entity.Property(e => e.Cfuser)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -790,6 +831,20 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_CorteDis_Categori");
         });
 
+        modelBuilder.Entity<DeparBon>(entity =>
+        {
+            entity.HasKey(e => e.IdDeparBon);
+
+            entity.ToTable("DeparBon", "bon", tb => tb.HasComment("Departamentos de los montos"));
+
+            entity.Property(e => e.Dbestado).HasColumnName("DBEstado");
+            entity.Property(e => e.Dbnombre)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("Departamento del monto del Bono")
+                .HasColumnName("DBNombre");
+        });
+
         modelBuilder.Entity<DispDefi>(entity =>
         {
             entity.HasKey(e => e.IdDisDefi);
@@ -837,6 +892,59 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("NDivision");
+        });
+
+        modelBuilder.Entity<Eficiencium>(entity =>
+        {
+            entity.HasKey(e => e.IdEficienc);
+
+            entity.ToTable("Eficiencia", "efi", tb =>
+                {
+                    tb.HasComment("Tabla de eficiencia de producción");
+                    tb.HasTrigger("TR_Eficiencia_UpdateFechaAct");
+                });
+
+            entity.Property(e => e.IdEficienc).HasComment("identificación de la eficiencia");
+            entity.Property(e => e.EfechaAct)
+                .HasComment("Fecha de actualización del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("EFechaAct");
+            entity.Property(e => e.EfechaCrea)
+                .HasComment("Fecha de creacion del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("EFechaCrea");
+            entity.Property(e => e.EfechaEfic)
+                .HasComment("Fecha de la eficiencia")
+                .HasColumnName("EFechaEfic");
+            entity.Property(e => e.Egrupo)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .HasComment("Grupo al cual se le asinga la eficiencia")
+                .HasColumnName("EGrupo");
+            entity.Property(e => e.Eobjetivo)
+                .HasComment("Objetivo resultante teniendo en cuenta los tiempos programados")
+                .HasColumnName("EObjetivo");
+            entity.Property(e => e.EprodAdici).HasColumnName("EProdAdici");
+            entity.Property(e => e.EprodReal).HasColumnName("EProdReal");
+            entity.Property(e => e.Eturno)
+                .HasMaxLength(3)
+                .IsUnicode(false)
+                .HasComment("Turno rotativo")
+                .HasColumnName("ETurno");
+            entity.Property(e => e.Eusuario)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Ficha del usuario creador del registro")
+                .HasColumnName("EUsuario");
+            entity.Property(e => e.Evalor)
+                .HasComment("Porcentaje de la eficiencia")
+                .HasColumnName("EValor");
+            entity.Property(e => e.IdMaster).HasComment("identificacion de la maestra");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.Eficiencia)
+                .HasForeignKey(d => d.IdMaster)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Eficiencia_Master");
         });
 
         modelBuilder.Entity<Empresa>(entity =>
@@ -950,6 +1058,55 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(10)
                 .IsUnicode(false)
                 .HasColumnName("LOFIC");
+        });
+
+        modelBuilder.Entity<Escalon>(entity =>
+        {
+            entity.HasKey(e => e.IdEscalon);
+
+            entity.ToTable("Escalon", "bon", tb => tb.HasComment("Escalones del Bono de Produccion"));
+
+            entity.Property(e => e.Eactualiz)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Actualizador del registro")
+                .HasColumnName("EActualiz");
+            entity.Property(e => e.Ecreador)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Creador del registro")
+                .HasColumnName("ECreador");
+            entity.Property(e => e.Eestado)
+                .HasComment("1 activo 0 inactivo")
+                .HasColumnName("EEstado");
+            entity.Property(e => e.EfechaActu)
+                .HasComment("Fecha de actualizacion del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("EFechaActu");
+            entity.Property(e => e.EfechaCrea)
+                .HasComment("Fecha de creacion del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("EFechaCrea");
+            entity.Property(e => e.EmotDesc)
+                .HasMaxLength(250)
+                .IsUnicode(false)
+                .HasComment("Motivo de la desactivacion")
+                .HasColumnName("EMotDesc");
+            entity.Property(e => e.EporcenMax)
+                .HasComment("porcentaje maximo para alcanzar el escalon")
+                .HasColumnName("EPorcenMax");
+            entity.Property(e => e.EporcenMin)
+                .HasComment("porcentaje minimo para alcanzar el escalon")
+                .HasColumnName("EPorcenMin");
+            entity.Property(e => e.Eposicion)
+                .HasComment("Numero de escalon")
+                .HasColumnName("EPosicion");
+            entity.Property(e => e.IdAreaBon).HasComment("id del area de bonificacion");
+
+            entity.HasOne(d => d.IdAreaBonNavigation).WithMany(p => p.Escalons)
+                .HasForeignKey(d => d.IdAreaBon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Escalon_AreaBon");
         });
 
         modelBuilder.Entity<Estado>(entity =>
@@ -1400,21 +1557,28 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_Master_Pais");
         });
 
-        modelBuilder.Entity<Monedum>(entity =>
+        modelBuilder.Entity<MonedBon>(entity =>
         {
-            entity.HasKey(e => e.IdMoneda);
+            entity.HasKey(e => e.IdMonedBon);
 
-            entity.ToTable("Moneda", "per");
+            entity.ToTable("MonedBon", "bon", tb => tb.HasComment("Tipo de moneda"));
 
-            entity.Property(e => e.Mestado).HasColumnName("MEstado");
-            entity.Property(e => e.Mpais)
-                .HasMaxLength(50)
+            entity.Property(e => e.Mbdescri)
+                .HasMaxLength(250)
                 .IsUnicode(false)
-                .HasColumnName("MPais");
-            entity.Property(e => e.Mtipo)
+                .HasComment("Descripción")
+                .HasColumnName("MBDescri");
+            entity.Property(e => e.Mbestado)
+                .HasComment("1 activo, 0 inactivo")
+                .HasColumnName("MBEstado");
+            entity.Property(e => e.Mbfcrea)
+                .HasColumnType("datetime")
+                .HasColumnName("MBFCrea");
+            entity.Property(e => e.Mbtipo)
                 .HasMaxLength(10)
                 .IsUnicode(false)
-                .HasColumnName("MTipo");
+                .HasComment("tipo de moneda")
+                .HasColumnName("MBTipo");
         });
 
         modelBuilder.Entity<Monto>(entity =>
@@ -1423,12 +1587,10 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Montos", "per");
 
-            entity.Property(e => e.Mescalon).HasColumnName("MEscalon");
             entity.Property(e => e.Mesta).HasColumnName("MEsta");
             entity.Property(e => e.MfecAct)
                 .HasColumnType("datetime")
                 .HasColumnName("MFecAct");
-            entity.Property(e => e.Mmonto).HasColumnName("MMonto");
             entity.Property(e => e.Muser)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -1439,14 +1601,77 @@ public partial class DbNeoIiContext : DbContext
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Montos_Linea");
 
-            entity.HasOne(d => d.IdMonedaNavigation).WithMany(p => p.Montos)
-                .HasForeignKey(d => d.IdMoneda)
-                .HasConstraintName("FK_Montos_Moneda");
-
             entity.HasOne(d => d.IdPuesTrabNavigation).WithMany(p => p.Montos)
                 .HasForeignKey(d => d.IdPuesTrab)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Montos_PuesTrab");
+        });
+
+        modelBuilder.Entity<MontoBon>(entity =>
+        {
+            entity.HasKey(e => e.IdMontoBon);
+
+            entity.ToTable("MontoBon", "bon", tb => tb.HasComment("Montos de Bonificacion"));
+
+            entity.Property(e => e.IdEscalon).HasComment("Id del escalon");
+            entity.Property(e => e.IdMaster).HasComment("Id maestra");
+            entity.Property(e => e.IdMonedBon).HasComment("Id Moneda");
+            entity.Property(e => e.IdNivePues).HasComment("Id Nivel de puesto");
+            entity.Property(e => e.IdTipIncen).HasComment("Id de tipo de incidencia");
+            entity.Property(e => e.Mestado)
+                .HasComment("1 activo, 0: Inactivo")
+                .HasColumnName("MEstado");
+            entity.Property(e => e.Mfcreacion)
+                .HasComment("Fecha de creacion del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("MFCreacion");
+            entity.Property(e => e.Mfdesac)
+                .HasComment("Fecha de desactivación")
+                .HasColumnType("datetime")
+                .HasColumnName("MFDesac");
+            entity.Property(e => e.Mmonto)
+                .HasComment("Monto a cancelar")
+                .HasColumnName("MMonto");
+            entity.Property(e => e.MmotDesac)
+                .HasMaxLength(250)
+                .IsUnicode(false)
+                .HasComment("Motivo de la desactivación")
+                .HasColumnName("MMotDesac");
+            entity.Property(e => e.MusuaCread)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("usuario creador del registro")
+                .HasColumnName("MUsuaCread");
+            entity.Property(e => e.MusuaDesac)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Usuario que desactivo el registro")
+                .HasColumnName("MUsuaDesac");
+
+            entity.HasOne(d => d.IdEscalonNavigation).WithMany(p => p.MontoBons)
+                .HasForeignKey(d => d.IdEscalon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_MontoBon_Escalon");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.MontoBons)
+                .HasForeignKey(d => d.IdMaster)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_MontoBon_Master");
+
+            entity.HasOne(d => d.IdMonedBonNavigation).WithMany(p => p.MontoBons)
+                .HasForeignKey(d => d.IdMonedBon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_MontoBon_MonedBon");
+
+            entity.HasOne(d => d.IdNivePuesNavigation).WithMany(p => p.MontoBons)
+                .HasForeignKey(d => d.IdNivePues)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_MontoBon_NivePues");
+
+            entity.HasOne(d => d.IdTipIncenNavigation).WithMany(p => p.MontoBons)
+                .HasForeignKey(d => d.IdTipIncen)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_MontoBon_TipIncen");
         });
 
         modelBuilder.Entity<MontosEscalonV>(entity =>
@@ -1472,6 +1697,26 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<NivePue>(entity =>
+        {
+            entity.HasKey(e => e.IdNivePues);
+
+            entity.ToTable("NivePues", "bon", tb => tb.HasComment("Nivel de los puestos de trabako"));
+
+            entity.Property(e => e.Npdescrip)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("descripcion de los puestos de trabajo")
+                .HasColumnName("NPDescrip");
+            entity.Property(e => e.Npestado)
+                .HasComment("1 activo , 0 inactivo")
+                .HasColumnName("NPEstado");
+            entity.Property(e => e.Npfcreaci)
+                .HasComment("fecha de creacion del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("NPFCreaci");
+        });
+
         modelBuilder.Entity<Nivel>(entity =>
         {
             entity.HasKey(e => e.IdNivel).HasName("PK_Nivel_1");
@@ -1495,6 +1740,114 @@ public partial class DbNeoIiContext : DbContext
                 .HasForeignKey(d => d.IdUsuario)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Nivel_Usuario");
+        });
+
+        modelBuilder.Entity<Objetivo>(entity =>
+        {
+            entity.HasKey(e => e.IdObjetivo);
+
+            entity.ToTable("Objetivos", "efi", tb => tb.HasComment("Tabla de Objetivos de Produccion"));
+
+            entity.Property(e => e.IdObjetivo).HasComment("Identificacion del objetivo");
+            entity.Property(e => e.IdMaster).HasComment("Identificacion de la mestra");
+            entity.Property(e => e.IdUnidaObj).HasComment("unidad");
+            entity.Property(e => e.Ocargador)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Ficha de la persona que cargo el objetivo")
+                .HasColumnName("OCargador");
+            entity.Property(e => e.OcodProd)
+                .HasMaxLength(9)
+                .IsUnicode(false)
+                .HasComment("Codigo del producto")
+                .HasColumnName("OCodProd");
+            entity.Property(e => e.OcodSustit)
+                .HasComment("identificacion del objetivo a la que sustituyo este registro")
+                .HasColumnName("OCodSustit");
+            entity.Property(e => e.Oestado)
+                .HasComment("Estado del objetivo (1: Activo, 0: Inactivo)")
+                .HasColumnName("OEstado");
+            entity.Property(e => e.OfechCrea)
+                .HasComment("Fecha de Creación del objetivo")
+                .HasColumnType("datetime")
+                .HasColumnName("OFechCrea");
+            entity.Property(e => e.OrazDesac)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasComment("Razon por lo cual se desactivo")
+                .HasColumnName("ORazDesac");
+            entity.Property(e => e.Osolicitante)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Ficha de la persona que solicito la creacion del objetivo")
+                .HasColumnName("OSolicitante");
+            entity.Property(e => e.Ovalor)
+                .HasComment("Valor del objetivo")
+                .HasColumnName("OValor");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.Objetivos)
+                .HasForeignKey(d => d.IdMaster)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Objetivos_Master");
+
+            entity.HasOne(d => d.IdUnidaObjNavigation).WithMany(p => p.Objetivos)
+                .HasForeignKey(d => d.IdUnidaObj)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Objetivos_UnidaObj");
+        });
+
+        modelBuilder.Entity<Pago>(entity =>
+        {
+            entity.HasKey(e => e.IdPago);
+
+            entity.ToTable("Pago", "bon", tb => tb.HasComment("Pago finales del Bono"));
+
+            entity.Property(e => e.IdMonedBon).HasComment("Tipo de moneda del monto");
+            entity.Property(e => e.Pdia)
+                .HasComment("dia que corresponde el pago")
+                .HasColumnName("PDia");
+            entity.Property(e => e.Pficha)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasComment("Ficha de la persona que recibe el pago")
+                .HasColumnName("PFicha");
+            entity.Property(e => e.Pfregistro)
+                .HasComment("Fecha en la que se realizo el registro")
+                .HasColumnType("datetime")
+                .HasColumnName("PFRegistro");
+            entity.Property(e => e.Pgrupo)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasComment("Grupo del dia")
+                .HasColumnName("PGrupo");
+            entity.Property(e => e.Pmonto)
+                .HasComment("Monto del dia")
+                .HasColumnName("PMonto");
+            entity.Property(e => e.Pnombre)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasComment("Nombre de la persona que recibe el pago")
+                .HasColumnName("PNombre");
+            entity.Property(e => e.Pturno)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasComment("Turno del dia")
+                .HasColumnName("PTurno");
+
+            entity.HasOne(d => d.IdDeparBonNavigation).WithMany(p => p.Pagos)
+                .HasForeignKey(d => d.IdDeparBon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Pago_DeparBon");
+
+            entity.HasOne(d => d.IdMonedBonNavigation).WithMany(p => p.Pagos)
+                .HasForeignKey(d => d.IdMonedBon)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Pago_MonedBon");
+
+            entity.HasOne(d => d.IdTipIncenNavigation).WithMany(p => p.Pagos)
+                .HasForeignKey(d => d.IdTipIncen)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_Pago_TipIncen");
         });
 
         modelBuilder.Entity<Pai>(entity =>
@@ -1849,6 +2202,11 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("PTNombre");
             entity.Property(e => e.Ptorden).HasColumnName("PTOrden");
+
+            entity.HasOne(d => d.IdNivePuesNavigation).WithMany(p => p.PuesTrabs)
+                .HasForeignKey(d => d.IdNivePues)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_PuesTrab_NivePues");
         });
 
         modelBuilder.Entity<Rango>(entity =>
@@ -1978,8 +2336,6 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.Mes)
                 .HasMaxLength(2)
                 .IsUnicode(false);
-            entity.Property(e => e.Mescalon).HasColumnName("MEscalon");
-            entity.Property(e => e.Mmonto).HasColumnName("MMonto");
             entity.Property(e => e.Nombre)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -2026,38 +2382,30 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Resumen", "per");
 
-            entity.Property(e => e.RaprNom)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("RAprNom");
-            entity.Property(e => e.RaproJef).HasColumnName("RAproJef");
-            entity.Property(e => e.RfecPago)
-                .HasColumnType("datetime")
-                .HasColumnName("RFecPago");
             entity.Property(e => e.Rfecha)
                 .HasColumnType("datetime")
                 .HasColumnName("RFecha");
+            entity.Property(e => e.RfechaReal)
+                .HasColumnType("datetime")
+                .HasColumnName("RFechaReal");
             entity.Property(e => e.Rgrupo)
                 .HasMaxLength(1)
                 .IsUnicode(false)
                 .HasColumnName("RGrupo");
+            entity.Property(e => e.RhoraTrab).HasColumnName("RHoraTrab");
             entity.Property(e => e.Rsuplido)
                 .HasMaxLength(8)
                 .IsUnicode(false)
                 .HasColumnName("RSuplido");
             entity.Property(e => e.Rturno).HasColumnName("RTurno");
-            entity.Property(e => e.RuserPago)
-                .HasMaxLength(50)
-                .IsUnicode(false)
-                .HasColumnName("RUserPago");
             entity.Property(e => e.RuserVali)
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("RUserVali");
-            entity.Property(e => e.Rvalido).HasColumnName("RValido");
 
             entity.HasOne(d => d.IdMontosNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdMontos)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Resumen_Montos");
 
             entity.HasOne(d => d.IdPersonalNavigation).WithMany(p => p.Resumen)
@@ -2067,10 +2415,12 @@ public partial class DbNeoIiContext : DbContext
 
             entity.HasOne(d => d.IdTipIncenNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdTipIncen)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Resumen_TipIncen");
 
             entity.HasOne(d => d.IdTipSupleNavigation).WithMany(p => p.Resumen)
                 .HasForeignKey(d => d.IdTipSuple)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Resumen_TipSuple");
         });
 
@@ -2284,6 +2634,36 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<TabuladoresBonoV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("TabuladoresBono_V");
+
+            entity.Property(e => e.AreaEscalon)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Area Escalon");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Moneda)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Planta)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.PorcentajeMax).HasColumnName("Porcentaje Max");
+            entity.Property(e => e.PorcentajeMin).HasColumnName("Porcentaje Min");
+            entity.Property(e => e.Puesto)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.TipoIncidencia)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Tipo Incidencia");
+        });
+
         modelBuilder.Entity<TiParTp>(entity =>
         {
             entity.HasKey(e => e.IdTiParTp).HasName("PK_TiParTP_1");
@@ -2363,6 +2743,52 @@ public partial class DbNeoIiContext : DbContext
                 .HasForeignKey(d => d.IdParsiOee)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_TieParTP_ParsiOEE");
+        });
+
+        modelBuilder.Entity<TieProgr>(entity =>
+        {
+            entity.HasKey(e => e.IdTieProgr);
+
+            entity.ToTable("TieProgr", "efi", tb =>
+                {
+                    tb.HasComment("Tiempo programdos de las maquina");
+                    tb.HasTrigger("TR_TieProgr_UpdateFechaAct");
+                });
+
+            entity.Property(e => e.IdTieProgr).HasComment("identificacion del tiempo programado");
+            entity.Property(e => e.IdMaster).HasComment("identificacion de la maestra");
+            entity.Property(e => e.TpfechaAct)
+                .HasComment("Fecha de modificacion del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("TPFechaAct");
+            entity.Property(e => e.TpfechaPro)
+                .HasComment("Fecha de las horas programadas")
+                .HasColumnName("TPFechaPro");
+            entity.Property(e => e.TpfechaReg)
+                .HasComment("Fecha de creción del registro")
+                .HasColumnType("datetime")
+                .HasColumnName("TPFechaReg");
+            entity.Property(e => e.TphorasPro)
+                .HasComment("Horas programadas")
+                .HasColumnName("TPHorasPro");
+            entity.Property(e => e.Tpjustific)
+                .IsUnicode(false)
+                .HasComment("Justificacion de las horas programadas")
+                .HasColumnName("TPJustific");
+            entity.Property(e => e.Tpturno)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("TPTurno");
+            entity.Property(e => e.Tpusuario)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Ficha del usuario que creo el registro")
+                .HasColumnName("TPUsuario");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.TieProgrs)
+                .HasForeignKey(d => d.IdMaster)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_TieProgr_Master");
         });
 
         modelBuilder.Entity<TipIncen>(entity =>
@@ -2509,6 +2935,27 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(1)
                 .IsUnicode(false);
             entity.Property(e => e.Tvelocidad).HasColumnName("TVelocidad");
+        });
+
+        modelBuilder.Entity<UnidaObj>(entity =>
+        {
+            entity.HasKey(e => e.IdUnidaObj);
+
+            entity.ToTable("UnidaObj", "efi", tb => tb.HasComment("Unidades de los objetivos de produccion"));
+
+            entity.Property(e => e.Uodescri)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasComment("Descripción de la unidad")
+                .HasColumnName("UODescri");
+            entity.Property(e => e.Uoestado)
+                .HasComment("1 activo , 0 Inactivo")
+                .HasColumnName("UOEstado");
+            entity.Property(e => e.Uotipo)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasComment("Unidad")
+                .HasColumnName("UOTipo");
         });
 
         modelBuilder.Entity<Unidad>(entity =>
