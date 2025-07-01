@@ -198,7 +198,7 @@ public class AsistenciaReuController : ControllerBase
         }
 
     [HttpGet("GetPorcentajeAsistenciaDiaria")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaDiaria(string fechaInicio, string fechaFin, string empresa, string area)
+    public async Task<ActionResult<AsistenReuPorcetanjeDTO>> GetPorcentajeAsistenciaDiaria(string fechaInicio, string fechaFin, string empresa, string area)
     {
         try
         {
@@ -324,7 +324,7 @@ public class AsistenciaReuController : ControllerBase
     }
 
     [HttpGet("GetPorcentajeAsistenciaTurno")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaTurno(
+    public async Task<ActionResult<AsistenReuPorcetanjeDTO>> GetPorcentajeAsistenciaTurno(
     string fechaInicio,
     string fechaFin,
     string empresa,
@@ -473,7 +473,7 @@ public class AsistenciaReuController : ControllerBase
 
 
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
-    public async Task<ActionResult<object>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa,
+    public async Task<ActionResult<AsistenReuPorcetanjeDTO>> GetPorcentajeAsistenciaQuincenal(string fechaInicio, string fechaFin, string empresa,
     string area, bool diasExcepcionalesLaborables = false)
     {
         try
