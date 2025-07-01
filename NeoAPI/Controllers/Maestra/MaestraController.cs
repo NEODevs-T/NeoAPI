@@ -216,6 +216,18 @@ namespace NeoAPI.Controllers.Maestras
             return Ok(_mapper.Map<List<LineaVDTO>>(data));
         }
 
+        [HttpGet("GetLineasConPuestosRM/{idDivision:int}")]
+        public async Task<ActionResult<List<LineaVDTO>>> GetLineasConPuestosRM(int idDivision)
+        {
+            List<int> data = await this._context.Masters.Where(l => l.IdDivision == idDivision && l.IdLineaNavigation.Lestado == true && l.IdLineaNavigation.Montos.Count >= 1)
+                                                            .Include(l =>l.IdLineaNavigation).Select(
+                                                                l => l.IdLineaNavigation.IdLinea
+                                                            ).ToListAsync();
+
+            List<LineaV> lineas = await this._context.LineaVs.Where(l => data.Contains(l.IdLinea)).ToListAsync();
+            return Ok(_mapper.Map<List<LineaVDTO>>(lineas));
+        }
+
         [HttpGet("GetLineaPorId/{idLineas:int}")]
         public async Task<ActionResult<LineaVDTO>> GetLineaPorId(int idLineas)
         {

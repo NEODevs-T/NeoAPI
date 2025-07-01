@@ -7,39 +7,35 @@ public partial class Resuman
 {
     public int IdResumen { get; set; }
 
-    public int? IdTipSuple { get; set; }
+    public int IdTipSuple { get; set; }
 
-    public DateTime? Rfecha { get; set; }
+    public DateTime Rfecha { get; set; }
 
-    public int? Rturno { get; set; }
+    public int Rturno { get; set; }
 
-    public string? Rgrupo { get; set; }
+    public string Rgrupo { get; set; } = null!;
 
     public int IdPersonal { get; set; }
 
     public string? Rsuplido { get; set; }
 
-    public int? IdMontos { get; set; }
+    public int IdMontos { get; set; }
 
-    public string? RuserVali { get; set; }
+    public string RuserVali { get; set; } = null!;
 
-    public string? RuserPago { get; set; }
+    public int IdTipIncen { get; set; }
 
-    public int? IdTipIncen { get; set; }
+    public bool RisMarcaje { get; set; }
 
-    public DateTime? RfecPago { get; set; }
+    public int RhoraTrab { get; set; }
 
-    public string? RaprNom { get; set; }
+    public DateTime? RfechaReal { get; set; }
 
-    public bool? RaproJef { get; set; }
-
-    public bool? Rvalido { get; set; }
-
-    public virtual Monto? IdMontosNavigation { get; set; }
+    public virtual Monto IdMontosNavigation { get; set; } = null!;
 
     public virtual Personal IdPersonalNavigation { get; set; } = null!;
 
-    public virtual TipIncen? IdTipIncenNavigation { get; set; }
+    public virtual TipIncen IdTipIncenNavigation { get; set; } = null!;
 
-    public virtual TipSuple? IdTipSupleNavigation { get; set; }
+    public virtual TipSuple IdTipSupleNavigation { get; set; } = null!;
 }

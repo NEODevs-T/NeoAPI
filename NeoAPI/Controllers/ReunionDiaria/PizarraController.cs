@@ -285,7 +285,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesTurno(string idce
         .Include(b => b.IdksfNavigation)
         .Include(b => b.IdResReuNavigation)
         .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno &&
-                    h.Rdstatus == "Pendiente" && h.RdfecReu.Date < DateTime.Now.Date)
+                    h.Rdstatus == "Pendiente" && h.RdfecReu.Value.Date < DateTime.Now.Date)
         .AsNoTracking()
         .ToListAsync();
 
@@ -329,7 +329,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendienteslibros(string idc
                     && h.Rddiv == div 
                     && h.IdTipReu == reunionDiaria 
                     && h.IdResReu == 11 
-                    && h.RdfecReu.Date >= DateTime.Now.AddMonths(-3)
+                    && h.RdfecReu.Value.Date >= DateTime.Now.AddMonths(-3)
                     && h.Rdstatus == "En Curso")
         .AsNoTracking()
         .ToListAsync();
@@ -402,8 +402,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
         .Where(h => h.Rdcentro == centro &&
                     h.Rddiv == div &&
                     h.IdTipReu == reunionDiaria &&
-                    h.RdfecReu.Date >= fechaInicioReu &&
-                    h.RdfecReu.Date <= fechaFinReu &&
+                    h.RdfecReu.Value.Date >= fechaInicioReu &&
+                    h.RdfecReu.Value.Date <= fechaFinReu &&
                     h.RdfecTra.Date >= fechaInicioTra &&
                     h.RdfecTra.Date >= fechaFinTra &&
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
@@ -445,7 +445,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
         List<Reunion> disc = await _context.Reunions
             .Include(b => b.IdksfNavigation)
             .Include(b => b.IdResReuNavigation)
-            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" && h.RdfecReu.Date < DateTime.Now.Date)
+            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionTurno && h.Rdstatus == "Pendiente" && h.RdfecReu.Value.Date < DateTime.Now.Date)
             .ToListAsync();
         if (disc == null)
             throw new Exception("not found!");
@@ -828,8 +828,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
                     h.Rddiv == div &&
                     h.RdcodDis == "3" &&
                     h.IdTipReu == reunionDiaria &&
-                    h.RdfecReu.Date >= fechaInicioReu &&
-                    h.RdfecReu.Date <= fechaFinReu &&
+                    h.RdfecReu.Value.Date >= fechaInicioReu &&
+                    h.RdfecReu.Value.Date <= fechaFinReu &&
                     h.RdfecTra.Date >= fechaInicioTra &&
                     h.RdfecTra.Date >= fechaFinTra &&
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Listo" || h.Rdstatus == "Pendiente/Responsable"))
