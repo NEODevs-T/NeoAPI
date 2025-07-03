@@ -37,7 +37,7 @@ public partial class Reunion
 
     public string? RdnumDis { get; set; }
 
-    public DateTime RdfecReu { get; set; }
+    public DateTime? RdfecReu { get; set; }
 
     public DateTime RdfecTra { get; set; }
 

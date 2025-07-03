@@ -5,7 +5,7 @@ namespace NeoAPI.Models.Neo;
 
 public partial class RegistroPersonalV
 {
-    public DateTime? FechaDeTrabajo { get; set; }
+    public DateTime FechaDeTrabajo { get; set; }
 
     public string? Dia { get; set; }
 
@@ -13,15 +13,15 @@ public partial class RegistroPersonalV
 
     public int? Ano { get; set; }
 
-    public int? Turno { get; set; }
+    public int Turno { get; set; }
 
-    public string? Grupo { get; set; }
+    public string Grupo { get; set; } = null!;
 
-    public string? Ficha { get; set; }
+    public string Ficha { get; set; } = null!;
 
-    public string? Nombre { get; set; }
+    public string Nombre { get; set; } = null!;
 
-    public string? Apellido { get; set; }
+    public string Apellido { get; set; } = null!;
 
     public string Centro { get; set; } = null!;
 
@@ -33,13 +33,9 @@ public partial class RegistroPersonalV
 
     public int IdPuesto { get; set; }
 
-    public int? Mescalon { get; set; }
+    public string TipoDeIncidencia { get; set; } = null!;
 
-    public double? Mmonto { get; set; }
-
-    public string? TipoDeIncidencia { get; set; }
-
-    public string? TipoDeSuplencia { get; set; }
+    public string TipoDeSuplencia { get; set; } = null!;
 
     public string? Suplido { get; set; }
 }

@@ -17,9 +17,9 @@ public partial class Plantilla
 
     public int? PidPuesto { get; set; }
 
-    public string? Pcentro { get; set; }
+    public string Pcentro { get; set; } = null!;
 
-    public int? PidCentro { get; set; }
+    public int PidCentro { get; set; }
 
     public int? PidMaestra { get; set; }
 

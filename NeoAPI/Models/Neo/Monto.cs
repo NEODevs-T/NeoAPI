@@ -11,21 +11,15 @@ public partial class Monto
 
     public int IdPuesTrab { get; set; }
 
-    public int? Mescalon { get; set; }
+    public bool Mesta { get; set; }
 
-    public double? Mmonto { get; set; }
+    public DateTime MfecAct { get; set; }
 
-    public bool? Mesta { get; set; }
+    public string Muser { get; set; } = null!;
 
-    public DateTime? MfecAct { get; set; }
-
-    public string? Muser { get; set; }
-
-    public int? IdMoneda { get; set; }
+    public int IdMaster { get; set; }
 
     public virtual Linea IdLineaNavigation { get; set; } = null!;
-
-    public virtual Monedum? IdMonedaNavigation { get; set; }
 
     public virtual PuesTrab IdPuesTrabNavigation { get; set; } = null!;
 

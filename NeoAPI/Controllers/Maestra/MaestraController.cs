@@ -191,7 +191,17 @@ namespace NeoAPI.Controllers.Maestras
 
             var result = await _context.EquipoEams
                 .Where(x => x.IdLineaNavigation.IdLinea == idlinea)
-                .AsNoTracking()
+                .Select(x => new EquipoEamDTO
+                {
+                    IdEquipo = x.IdEquipo,
+                    IdLinea = x.IdLinea,
+                    Linea = x.IdLineaNavigation.Lnom,
+                    EcodEquiEam = x.EcodEquiEam,
+                    EnombreEam = x.EnombreEam,
+                    EdescriEam = x.EdescriEam,
+                    EestaEam = x.EestaEam,
+                    Efecha = x.Efecha,
+                })
                 .ToListAsync();
 
             return Ok(_mapper.Map<List<EquipoEamDTO>>(result));
@@ -204,6 +214,18 @@ namespace NeoAPI.Controllers.Maestras
         {
             List<LineaV> data = await this._context.LineaVs.Where(l => l.IdDivision == idDivision && l.Estado == true).ToListAsync();
             return Ok(_mapper.Map<List<LineaVDTO>>(data));
+        }
+
+        [HttpGet("GetLineasConPuestosRM/{idDivision:int}")]
+        public async Task<ActionResult<List<LineaVDTO>>> GetLineasConPuestosRM(int idDivision)
+        {
+            List<int> data = await this._context.Masters.Where(l => l.IdDivision == idDivision && l.IdLineaNavigation.Lestado == true && l.IdLineaNavigation.Montos.Count >= 1)
+                                                            .Include(l =>l.IdLineaNavigation).Select(
+                                                                l => l.IdLineaNavigation.IdLinea
+                                                            ).ToListAsync();
+
+            List<LineaV> lineas = await this._context.LineaVs.Where(l => data.Contains(l.IdLinea)).ToListAsync();
+            return Ok(_mapper.Map<List<LineaVDTO>>(lineas));
         }
 
         [HttpGet("GetLineaPorId/{idLineas:int}")]

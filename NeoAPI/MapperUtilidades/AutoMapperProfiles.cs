@@ -115,12 +115,8 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.Centro, act => act.MapFrom(src => src.IdMontosNavigation.IdLineaNavigation.Master.IdCentroNavigation.Cnom))
                 .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdMontosNavigation.IdLineaNavigation.Lnom))
                 .ForMember(dest => dest.PuestoTrabajo, act => act.MapFrom(src => src.IdMontosNavigation.IdPuesTrabNavigation.Ptnombre))
-                .ForMember(dest => dest.Monto, act => act.MapFrom(src => src.IdMontosNavigation.Mmonto))
-                .ForMember(dest => dest.Moneda, act => act.MapFrom(src => src.IdMontosNavigation.IdMonedaNavigation.Mtipo))
                 .ForMember(dest => dest.FechaResumen, act => act.MapFrom(src => src.Rfecha))
-                .ForMember(dest => dest.FechaPago, act => act.MapFrom(src => src.RfecPago))
                 .ForMember(dest => dest.FichaResumen, act => act.MapFrom(src => src.RuserVali))
-                .ForMember(dest => dest.FichaPago, act => act.MapFrom(src => src.RuserPago))
                 .ReverseMap();
 
             CreateMap<LibroNove, LibroNoveDTO>()

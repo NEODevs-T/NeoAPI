@@ -7,15 +7,15 @@ public partial class Personal
 {
     public int IdPersonal { get; set; }
 
-    public string? PeNombre { get; set; }
+    public string PeNombre { get; set; } = null!;
 
-    public string? PeApellido { get; set; }
+    public string PeApellido { get; set; } = null!;
 
-    public string? PeFicha { get; set; }
+    public string PeFicha { get; set; } = null!;
 
-    public bool? PeEstado { get; set; }
+    public bool PeEstado { get; set; }
 
-    public string? PeGrupo { get; set; }
+    public string PeGrupo { get; set; } = null!;
 
     public virtual ICollection<Plantilla> Plantillas { get; set; } = new List<Plantilla>();
 

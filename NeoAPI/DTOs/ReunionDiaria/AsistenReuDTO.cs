@@ -9,13 +9,13 @@ public partial class AsistenReuDTO
 
     public int IdAsistencia { get; set; }
 
-    public DateTime? Arfecha { get; set; }
+    public DateTime Arfecha { get; set; }
 
     public int IdCargoR { get; set; }
 
     public int ArAsistente { get; set; }
 
-    public int? ArSuplente { get; set; }
+    public int ArSuplente { get; set; }
 
     public string? ArObser { get; set; }
     
