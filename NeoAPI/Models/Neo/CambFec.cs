@@ -11,7 +11,7 @@ public partial class CambFec
 
     public DateTime Cffec { get; set; }
 
-    public DateOnly CffecNew { get; set; }
+    public DateTime CffecNew { get; set; }
 
     public string Cfuser { get; set; } = null!;
 

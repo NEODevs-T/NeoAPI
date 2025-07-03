@@ -23,5 +23,5 @@ public partial class VariablesAsentamientosV
 
     public string EquipoDeMedición { get; set; } = null!;
 
-    public DateOnly FechaDeCreación { get; set; }
+    public DateTime FechaDeCreación { get; set; }
 }

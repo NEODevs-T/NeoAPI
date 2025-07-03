@@ -22,7 +22,7 @@ public partial class Pago
     /// <summary>
     /// dia que corresponde el pago
     /// </summary>
-    public DateOnly Pdia { get; set; }
+    public DateTime Pdia { get; set; }
 
     /// <summary>
     /// Ficha de la persona que recibe el pago

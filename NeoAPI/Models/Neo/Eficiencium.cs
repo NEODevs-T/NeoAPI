@@ -21,7 +21,7 @@ public partial class Eficiencium
     /// <summary>
     /// Fecha de la eficiencia
     /// </summary>
-    public DateOnly EfechaEfic { get; set; }
+    public DateTime EfechaEfic { get; set; }
 
     /// <summary>
     /// Grupo al cual se le asinga la eficiencia

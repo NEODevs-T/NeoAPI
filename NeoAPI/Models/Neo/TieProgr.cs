@@ -21,7 +21,7 @@ public partial class TieProgr
     /// <summary>
     /// Fecha de las horas programadas
     /// </summary>
-    public DateOnly TpfechaPro { get; set; }
+    public DateTime TpfechaPro { get; set; }
 
     public string Tpturno { get; set; } = null!;
 

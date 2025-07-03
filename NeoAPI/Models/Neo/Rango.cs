@@ -29,7 +29,7 @@ public partial class Rango
 
     public bool Ractivo { get; set; }
 
-    public DateOnly? RfechaDesa { get; set; }
+    public DateTime? RfechaDesa { get; set; }
 
     public string? RmotiDesa { get; set; }
 
