@@ -12,4 +12,5 @@ public class TiParTpDTO
     public string Tpnombre { get; set; } = null!;
 
     public bool Tpestado { get; set; }
+    public string Tpenglish { get; set; } = null!;
 }
