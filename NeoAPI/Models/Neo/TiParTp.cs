@@ -13,6 +13,8 @@ public partial class TiParTp
 
     public bool Tpestado { get; set; }
 
+    public string? Tpenglish { get; set; }
+
     public virtual ICollection<LibroNove> LibroNoves { get; set; } = new List<LibroNove>();
 
     public virtual ICollection<ParaTp> ParaTps { get; set; } = new List<ParaTp>();

@@ -13,5 +13,7 @@ public partial class AreaCarga
 
     public bool Acestado { get; set; }
 
+    public string? Acengllish { get; set; }
+
     public virtual ICollection<LibroNove> LibroNoves { get; set; } = new List<LibroNove>();
 }

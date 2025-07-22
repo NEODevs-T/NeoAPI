@@ -293,6 +293,10 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("ACDetalle");
+            entity.Property(e => e.Acengllish)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("ACEngllish");
             entity.Property(e => e.Acestado).HasColumnName("ACEstado");
             entity.Property(e => e.Acnombre)
                 .HasMaxLength(50)
@@ -2677,6 +2681,10 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(20)
                 .IsUnicode(false)
                 .HasColumnName("TPCodigo");
+            entity.Property(e => e.Tpenglish)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("TPEnglish");
             entity.Property(e => e.Tpestado).HasColumnName("TPEstado");
             entity.Property(e => e.Tpnombre)
                 .HasMaxLength(50)
