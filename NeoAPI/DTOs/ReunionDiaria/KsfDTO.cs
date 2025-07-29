@@ -6,8 +6,7 @@ namespace NeoAPI.DTOs.ReunionDiaria;
 public partial class KsfDTO
 {
     public int Idksf { get; set; }
-
     public string KsfNombre { get; set; } = null!;
-
     public bool KsfEsta { get; set; }
+    public string KsfEnglish { get; set; } = null!;
 }
