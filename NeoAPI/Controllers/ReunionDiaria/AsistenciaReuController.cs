@@ -198,119 +198,143 @@ public class AsistenciaReuController : ControllerBase
         }
 
     [HttpGet("GetPorcentajeAsistenciaDiaria")]
-public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaDiaria(
-    string fechaInicio, string fechaFin, string empresa, string area, [FromQuery] List<string> eventosExternos = null)
-{
-    try
+    public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaDiaria(
+        string fechaInicio, string fechaFin, string empresa, string area, [FromQuery] List<string> eventosExternos = null)
     {
-        // Parseo de fechas
-        string[] partsInicio = fechaInicio.Split('-');
-        string[] partsFin = fechaFin.Split('-');
-        DateTime inicio = new DateTime(int.Parse(partsInicio[2]), int.Parse(partsInicio[1]), int.Parse(partsInicio[0]));
-        DateTime fin = new DateTime(int.Parse(partsFin[2]), int.Parse(partsFin[1]), int.Parse(partsFin[0]));
-        if (inicio > fin)
-            return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
-        int totalDias = (fin.Date - inicio.Date).Days + 1;
-        // Feriados internacionales
-        var allHolidays = new List<PublicHoliday>();
-        for (int year = inicio.Year; year <= fin.Year; year++)
-            allHolidays.AddRange(DateSystem.GetPublicHolidays(year, CountryCode.VE));
-        var requireHolidayNames = new List<string>
+        try
         {
-            "Día de Año Nuevo", "Jueves Santo", "Viernes Santo",
-            "Nochebuena", "Navidad", "Nochevieja"
-        };
-        var selectHolidays = allHolidays
-            .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
-                        && h.Date >= inicio.Date && h.Date <= fin.Date)
-            .Select(h => h.Date)
-            .ToList();
-        // Eventos externos
-        if (eventosExternos != null)
-        {
-            foreach (var fechaEvento in eventosExternos)
+            // Parseo de fechas
+            string[] partsInicio = fechaInicio.Split('-');
+            string[] partsFin = fechaFin.Split('-');
+            DateTime inicio = new DateTime(int.Parse(partsInicio[2]), int.Parse(partsInicio[1]), int.Parse(partsInicio[0]));
+            DateTime fin = new DateTime(int.Parse(partsFin[2]), int.Parse(partsFin[1]), int.Parse(partsFin[0]));
+
+            if (inicio > fin)
+                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
+
+            // Hora pautada de la reunión (por ejemplo, 9:00 AM)
+            TimeSpan horaReunion = new TimeSpan(9, 0, 0);
+
+            // Si el día final es hoy y aún no ha pasado la hora de la reunión, exclúyelo
+            if (fin.Date == DateTime.Now.Date && DateTime.Now.TimeOfDay < horaReunion)
             {
-                string[] partesEvento = fechaEvento.Split('-');
-                DateTime evento = new DateTime(int.Parse(partesEvento[2]), int.Parse(partesEvento[1]), int.Parse(partesEvento[0]));
-                if (evento >= inicio.Date && evento <= fin.Date && !selectHolidays.Contains(evento))
-                    selectHolidays.Add(evento);
+                fin = fin.AddDays(-1);
             }
-        }
-        // Jueves y Viernes Santo
-        for (int year = inicio.Year; year <= fin.Year; year++)
-        {
-            DateTime easterSunday = GetEasterSunday(year);
-            DateTime juevesSanto = easterSunday.AddDays(-3);
-            DateTime viernesSanto = easterSunday.AddDays(-2);
-            if (juevesSanto >= inicio.Date && juevesSanto <= fin.Date && !selectHolidays.Contains(juevesSanto))
-                selectHolidays.Add(juevesSanto);
-            if (viernesSanto >= inicio.Date && viernesSanto <= fin.Date && !selectHolidays.Contains(viernesSanto))
-                selectHolidays.Add(viernesSanto);
-        }
-        // Cálculo de días hábiles (reuniones programadas)
-        int reunionesProgramadas = Enumerable.Range(0, totalDias)
-            .Select(i => inicio.AddDays(i))
-            .Count(fecha =>
-                fecha.DayOfWeek != DayOfWeek.Saturday &&
-                fecha.DayOfWeek != DayOfWeek.Sunday &&
-                !selectHolidays.Contains(fecha)
-            );
-        // Obtener cargos
-        var cargos = (await _reunionesLogic.GetCargoReuDiaria())
-            .Where(c => c.IdTipReu == 1 &&
-                        (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
-                        (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
-            .ToList();
-        if (!cargos.Any())
-            return StatusCode(500, "Error al obtener datos de los cargos.");
-        var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
-        // Obtener asistencias
-        var asistencias = (await _reunionesLogic.GetAsisReuDiaria())
-            .Where(a => a.Arfecha.Date >= inicio.Date &&
-                        a.Arfecha.Date <= fin.Date &&
-                        cargoIds.Contains(a.IdCargoR))
-            .ToList();
-        // Agrupar asistencias por cargo y fecha única
-        var asistenciaPorCargo = asistencias
-            .GroupBy(a => new { a.IdCargoR, Fecha = a.Arfecha.Date })
-            .GroupBy(g => g.Key.IdCargoR)
-            .Select(g => new
+
+            int totalDias = (fin.Date - inicio.Date).Days + 1;
+
+            // Feriados internacionales
+            var allHolidays = new List<PublicHoliday>();
+            for (int year = inicio.Year; year <= fin.Year; year++)
+                allHolidays.AddRange(DateSystem.GetPublicHolidays(year, CountryCode.VE));
+
+            var requireHolidayNames = new List<string>
             {
-                IdCargoR = g.Key,
-                DiasAsistidos = g.Select(x => x.Key.Fecha).Distinct().Count()
-            })
-            .ToList();
-        // Detalle por cargo
-        var detallePorCargo = cargoIds.Select(id =>
-        {
-            var asistencia = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id);
-            int diasAsistidos = asistencia?.DiasAsistidos ?? 0;
-            double porcentaje = reunionesProgramadas > 0 ? ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
-            string nombre = cargos.FirstOrDefault(c => c.IdCargoR == id)?.Crnombre ?? string.Empty;
-            return new AsistenReuPorcetanjeDTO
-            {
-                IdCargoR = id,
-                Nombre = nombre,
-                ReunionesProgramadas = reunionesProgramadas,
-                ReunionesAsistidas = diasAsistidos,
-                PorcentajeAsistencia = porcentaje
+                "Día de Año Nuevo", "Jueves Santo", "Viernes Santo",
+                "Nochebuena", "Navidad", "Nochevieja"
             };
-        }).OrderByDescending(x => x.IdCargoR).ToList();
-        // Porcentaje global
-        int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
-        int totalReunionesEsperadas = cargoIds.Count * reunionesProgramadas;
-        double porcentajeGlobal = totalReunionesEsperadas > 0 ? ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
-        return Ok(new PorcentajeAsistenciaDiariaResponseDTO
+
+            var selectHolidays = allHolidays
+                .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
+                            && h.Date >= inicio.Date && h.Date <= fin.Date)
+                .Select(h => h.Date)
+                .ToList();
+
+            // Eventos externos
+            if (eventosExternos != null)
+            {
+                foreach (var fechaEvento in eventosExternos)
+                {
+                    string[] partesEvento = fechaEvento.Split('-');
+                    DateTime evento = new DateTime(int.Parse(partesEvento[2]), int.Parse(partesEvento[1]), int.Parse(partesEvento[0]));
+                    if (evento >= inicio.Date && evento <= fin.Date && !selectHolidays.Contains(evento))
+                        selectHolidays.Add(evento);
+                }
+            }
+
+            // Jueves y Viernes Santo
+            for (int year = inicio.Year; year <= fin.Year; year++)
+            {
+                DateTime easterSunday = GetEasterSunday(year);
+                DateTime juevesSanto = easterSunday.AddDays(-3);
+                DateTime viernesSanto = easterSunday.AddDays(-2);
+                if (juevesSanto >= inicio.Date && juevesSanto <= fin.Date && !selectHolidays.Contains(juevesSanto))
+                    selectHolidays.Add(juevesSanto);
+                if (viernesSanto >= inicio.Date && viernesSanto <= fin.Date && !selectHolidays.Contains(viernesSanto))
+                    selectHolidays.Add(viernesSanto);
+            }
+
+            // Cálculo de días hábiles (reuniones programadas)
+            int reunionesProgramadas = Enumerable.Range(0, totalDias)
+                .Select(i => inicio.AddDays(i))
+                .Count(fecha =>
+                    fecha.DayOfWeek != DayOfWeek.Saturday &&
+                    fecha.DayOfWeek != DayOfWeek.Sunday &&
+                    !selectHolidays.Contains(fecha)
+                );
+
+            // Obtener cargos
+            var cargos = (await _reunionesLogic.GetCargoReuDiaria())
+                .Where(c => c.IdTipReu == 1 &&
+                            (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
+                            (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+                .ToList();
+
+            if (!cargos.Any())
+                return StatusCode(500, "Error al obtener datos de los cargos.");
+
+            var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
+
+            // Obtener asistencias
+            var asistencias = (await _reunionesLogic.GetAsisReuDiaria())
+                .Where(a => a.Arfecha.Date >= inicio.Date && a.Arfecha.Date <= fin.Date && cargoIds.Contains(a.IdCargoR))
+                .ToList();
+
+            // Agrupar asistencias por cargo y fecha única
+            var asistenciaPorCargo = asistencias
+                .GroupBy(a => new { a.IdCargoR, Fecha = a.Arfecha.Date })
+                .GroupBy(g => g.Key.IdCargoR)
+                .Select(g => new
+                {
+                    IdCargoR = g.Key,
+                    DiasAsistidos = g.Select(x => x.Key.Fecha).Distinct().Count()
+                })
+                .ToList();
+
+            // Detalle por cargo
+            var detallePorCargo = cargoIds.Select(id =>
+            {
+                var asistencia = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id);
+                int diasAsistidos = asistencia?.DiasAsistidos ?? 0;
+                double porcentaje = reunionesProgramadas > 0 ? ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
+                string nombre = cargos.FirstOrDefault(c => c.IdCargoR == id)?.Crnombre ?? string.Empty;
+                return new AsistenReuPorcetanjeDTO
+                {
+                    IdCargoR = id,
+                    Nombre = nombre,
+                    ReunionesProgramadas = reunionesProgramadas,
+                    ReunionesAsistidas = diasAsistidos,
+                    PorcentajeAsistencia = porcentaje
+                };
+            }).OrderByDescending(x => x.IdCargoR).ToList();
+
+            // Porcentaje global
+            int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
+            int totalReunionesEsperadas = cargoIds.Count * reunionesProgramadas;
+            double porcentajeGlobal = totalReunionesEsperadas > 0 ? ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+
+            return Ok(new PorcentajeAsistenciaDiariaResponseDTO
+            {
+                PorcentajeGlobal = porcentajeGlobal,
+                DetallePorCargo = detallePorCargo
+            });
+        }
+        catch (Exception ex)
         {
-            PorcentajeGlobal = porcentajeGlobal,
-            DetallePorCargo = detallePorCargo
-        });
+            return StatusCode(500, $"Error interno del servidor: {ex.Message}");
+        }
     }
-    catch (Exception ex)
-    {
-        return StatusCode(500, $"Error interno del servidor: {ex.Message}");
-    }
-}
+
 
     [HttpGet("GetPorcentajeAsistenciaTurno")]
     public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaTurno(
