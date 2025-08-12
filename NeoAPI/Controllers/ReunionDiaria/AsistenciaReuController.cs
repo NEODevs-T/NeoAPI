@@ -258,8 +258,8 @@ public class AsistenciaReuController : ControllerBase
                 );
             var cargos = (await _reunionesLogic.GetCargoReuDiaria())
                 .Where(c => c.IdTipReu == 1 &&
-                            (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
-                            (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+                            (string.IsNullOrWhiteSpace(area) || c.Centro.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
+                            (string.IsNullOrWhiteSpace(empresa) || c.Empresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
             if (!cargos.Any())
                 return StatusCode(500, "Error al obtener datos de los cargos.");
@@ -403,15 +403,15 @@ public class AsistenciaReuController : ControllerBase
                 }
             }
             }    
-            List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
+            List<CarReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
             {
                 return StatusCode(500, "Error al obtener datos de los cargos.");
             }
             cargos = cargos
                 .Where(c => c.IdTipReu == 2 &&
-                            (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
-                            (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+                            (string.IsNullOrWhiteSpace(area) || c.Centro.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
+                            (string.IsNullOrWhiteSpace(empresa) || c.Empresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
             var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
             List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
@@ -494,15 +494,15 @@ public class AsistenciaReuController : ControllerBase
             int totalDias = (fin.Date - inicio.Date).Days + 1;
             var meetingDays = _reunionesLogic.ObtenerJuevesObjetivo(inicio, fin);
             int reunionesProgramadas = meetingDays.Count;
-            List<CargoReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
+            List<CarReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
             {
                 return StatusCode(500, "Error al obtener datos de los cargos.");
             }
             cargos = cargos
                 .Where(c => c.IdTipReu == 3 &&
-                            (string.IsNullOrWhiteSpace(area) || c.Crarea.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
-                            (string.IsNullOrWhiteSpace(empresa) || c.Crempresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+                            (string.IsNullOrWhiteSpace(area) || c.Centro.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
+                            (string.IsNullOrWhiteSpace(empresa) || c.Empresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
                 .ToList();
             List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
             if (asistencias == null)

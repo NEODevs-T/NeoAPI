@@ -18,31 +18,41 @@ namespace NeoAPI.Logic.Reuniones
         {
             _context = context;
         }
-        public async Task<List<CargoReuDTO>> GetCargoReuDiaria()
+
+        public async Task<List<CarReuDTO>> GetCargoReuDiaria()
         {
             try
             {
-                var cargos = await _context.CargoReus
-                    .Where(c => c.Cresta)
-                    .OrderByDescending(c => c.Crnombre)
-                    .Select(c => new CargoReuDTO
+                var cargosRaw = await (
+                    from c in _context.MaestraVs
+                    join cr in _context.CargoReus
+                        on c.Centro equals cr.Crarea
+                    where cr.Cresta == true
+                    select new CarReuDTO
                     {
-                        IdCargoR = c.IdCargoR,
-                        Crnombre = c.Crnombre,
-                        Cresta = c.Cresta,
-                        Crempresa = c.Crempresa,
-                        Crarea = c.Crarea,
-                        IdTipReu = c.IdTipReu
-                    })
-                    .ToListAsync();
-
-                return cargos;
+                        Pais = c.Pais,
+                        Empresa = c.Empresa,
+                        IdCargoR = cr.IdCargoR,
+                        Centro = c.Centro,
+                        Crnombre = cr.Crnombre,
+                        Cresta = cr.Cresta,
+                        IdTipReu = cr.IdTipReu,
+                        IdPais = c.IdPais
+                    }
+                ).ToListAsync(); 
+                var cargosUnicos = cargosRaw
+                    .GroupBy(x => x.IdCargoR)
+                    .Select(g => g.First())
+                    .OrderBy(x => x.IdPais)
+                    .ToList();
+                return cargosUnicos;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error interno del servidor en GetCargoReuDiariaAsync: {ex.Message}", ex);
             }
         }
+
         public async Task<List<AsistenReuDTO>> GetAsisReuDiaria()
         {
             try

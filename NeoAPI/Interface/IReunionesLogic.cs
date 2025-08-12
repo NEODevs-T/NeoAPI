@@ -7,7 +7,7 @@ namespace NeoAPI.Interface
 {
     public interface IReunionesLogic
     {
-        Task<List<CargoReuDTO>> GetCargoReuDiaria();
+        Task<List<CarReuDTO>> GetCargoReuDiaria();
         Task<List<AsistenReuDTO>> GetAsisReuDiaria();
         public DateTime GetClosetThursday(DateTime candidate);
         public List<DateTime> ObtenerJuevesObjetivo(DateTime inicio, DateTime final);   
