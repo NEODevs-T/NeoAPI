@@ -386,20 +386,45 @@ public class AsistenciaReuController : ControllerBase
                 DateTime fecha = inicio.AddDays(i);
             if (!selectHolidays.Any(feriado => feriado.Date == fecha.Date))
             {
-                if(fecha.Date == hoy)
+                if (empresa == "PANASA" || empresa == "PAINSA" || empresa == "CHEMPRO")
                 {
-                    if (horaActual >= 6 && horaActual < 18)
+                    if (fecha.Date == hoy)
                     {
-                        reunionesProgramadas += 1;
+                        if (horaActual >= 6 && horaActual < 14)
+                        {
+                            reunionesProgramadas += 1; 
+                        }
+                        else if (horaActual >= 14 && horaActual < 22)
+                        {
+                            reunionesProgramadas += 2; 
+                        }
+                        else
+                        {
+                            reunionesProgramadas += 3; 
+                        }
+                    }
+                    else
+                    {
+                        reunionesProgramadas += 3;
+                    }
+                }
+                else
+                {
+                    if (fecha.Date == hoy)
+                    {
+                        if (horaActual >= 6 && horaActual < 18)
+                        {
+                            reunionesProgramadas += 1;
+                        }
+                        else
+                        {
+                            reunionesProgramadas += 2;
+                        }
                     }
                     else
                     {
                         reunionesProgramadas += 2;
                     }
-                }
-                else
-                {
-                    reunionesProgramadas +=2;
                 }
             }
             }    
@@ -470,23 +495,18 @@ public class AsistenciaReuController : ControllerBase
     }
 
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
-    public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaQuincenal(
-    string fechaInicio, string fechaFin, string empresa, string area)
+    public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaMensual(
+    string fechaMesAño, string empresa, string area)
     {
         try
         {
-            string[] partsInicio = fechaInicio.Split('-');
-            string[] partsFin = fechaFin.Split('-');
-            DateTime inicio = new DateTime(
-                int.Parse(partsInicio[2]),
-                int.Parse(partsInicio[1]),
-                int.Parse(partsInicio[0])
-            );
-            DateTime fin = new DateTime(
-                int.Parse(partsFin[2]),
-                int.Parse(partsFin[1]),
-                int.Parse(partsFin[0])
-            );
+            string[] parts = fechaMesAño.Split('-'); // formato esperado: "MM-YYYY"
+            int mes = int.Parse(parts[0]);
+            int año = int.Parse(parts[1]);
+
+            DateTime inicio = new DateTime(año, mes, 1);
+            DateTime fin = new DateTime(año, mes, DateTime.DaysInMonth(año, mes));
+
             if (inicio > fin)
             {
                 return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
