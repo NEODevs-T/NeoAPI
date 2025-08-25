@@ -386,7 +386,7 @@ public class AsistenciaReuController : ControllerBase
                 DateTime fecha = inicio.AddDays(i);
             if (!selectHolidays.Any(feriado => feriado.Date == fecha.Date))
             {
-                if (empresa == "PANASA" || empresa == "PAINSA" || empresa == "CHEMPRO")
+                if (empresa == "PANASA" || empresa == "PAINSA")
                 {
                     if (fecha.Date == hoy)
                     {
