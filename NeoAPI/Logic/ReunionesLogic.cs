@@ -18,40 +18,39 @@ namespace NeoAPI.Logic.Reuniones
         {
             _context = context;
         }
-
         public async Task<List<CarReuDTO>> GetCargoReuDiaria()
         {
             try
             {
                 var cargosRaw = await (
-                    from c in _context.MaestraVs
-                    join cr in _context.CargoReus
-                        on c.Centro equals cr.Crarea
-                    where cr.Cresta == true
+                    from e in _context.Empresas
+                    join cr in _context.CargoReus on e.Enombre equals cr.Crempresa into crGroup
+                    from cr in crGroup.DefaultIfEmpty()
+                    join c in _context.Centros on cr.Crarea equals c.Cnom into cGroup
+                    from c in cGroup.DefaultIfEmpty()
                     select new CarReuDTO
                     {
-                        Pais = c.Pais,
-                        Empresa = c.Empresa,
-                        IdCargoR = cr.IdCargoR,
-                        Centro = c.Centro,
-                        Crnombre = cr.Crnombre,
-                        Cresta = cr.Cresta,
-                        IdTipReu = cr.IdTipReu,
-                        IdPais = c.IdPais
+                        IdEmpresa = e.IdEmpresa,
+                        Empresa = e.Enombre,
+                        IdCargoR = cr != null ? cr.IdCargoR : 0,
+                        Centro = c != null ? c.Cnom : null,
+                        Crnombre = cr != null ? cr.Crnombre : null,
+                        Cresta = cr != null ? cr.Cresta : false,
+                        IdTipReu = cr != null ? cr.IdTipReu : 0
                     }
-                ).ToListAsync(); 
-                var cargosUnicos = cargosRaw
-                    .GroupBy(x => x.IdCargoR)
-                    .Select(g => g.First())
-                    .OrderBy(x => x.IdPais)
+                ).ToListAsync();
+                var cargosFinal = cargosRaw
+                    .OrderBy(x => x.IdEmpresa)
                     .ToList();
-                return cargosUnicos;
+                return cargosFinal;
             }
             catch (Exception ex)
             {
                 throw new Exception($"Error interno del servidor en GetCargoReuDiariaAsync: {ex.Message}", ex);
             }
         }
+
+
 
         public async Task<List<AsistenReuDTO>> GetAsisReuDiaria()
         {
