@@ -306,151 +306,121 @@ public class AsistenciaReuController : ControllerBase
         }
     }
 
-
     [HttpGet("GetPorcentajeAsistenciaTurno")]
     public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaTurno(
-    string fechaInicio,
-    string fechaFin,
-    string empresa,
-    string area,
-    bool diasExcepcionalesLaborables = false,
-    [FromQuery] List<string> eventosExternos = null)
+        string fechaInicio,
+        string fechaFin,
+        string empresa,
+        string area,
+        [FromQuery] List<string> eventosExternos = null)
     {
         try
         {
             string[] partsInicio = fechaInicio.Split('-');
             string[] partsFin = fechaFin.Split('-');
-            DateTime inicio = new DateTime(
-                int.Parse(partsInicio[2]),
-                int.Parse(partsInicio[1]),
-                int.Parse(partsInicio[0])
-            );
-            DateTime fin = new DateTime(
-                int.Parse(partsFin[2]),
-                int.Parse(partsFin[1]),
-                int.Parse(partsFin[0])
-            );
+            DateTime inicio = new DateTime(int.Parse(partsInicio[2]), int.Parse(partsInicio[1]), int.Parse(partsInicio[0]));
+            DateTime fin = new DateTime(int.Parse(partsFin[2]), int.Parse(partsFin[1]), int.Parse(partsFin[0]));
+
             if (inicio > fin)
-            {
                 return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
-            }
+
             int totalDias = (fin.Date - inicio.Date).Days + 1;
+
             var allHolidays = new List<PublicHoliday>();
             for (int year = inicio.Year; year <= fin.Year; year++)
-            {
                 allHolidays.AddRange(DateSystem.GetPublicHolidays(year, CountryCode.VE));
-            }
-            var requireHolidayNames = new List<string>
-        {
-            "Día de Año Nuevo", "Navidad"
-        };
-            List<DateTime> fechasEventosExternos = new List<DateTime>();
+
+            var requireHolidayNames = new List<string> { "Día de Año Nuevo", "Navidad" };
+
+            var selectHolidays = allHolidays
+                .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
+                            && h.Date >= inicio.Date && h.Date <= fin.Date)
+                .Select(h => h.Date)
+                .ToList();
+
             if (eventosExternos != null)
             {
                 foreach (var fechaEvento in eventosExternos)
                 {
                     string[] partesEvento = fechaEvento.Split('-');
-                    DateTime evento = new DateTime(
-                        int.Parse(partesEvento[2]),
-                        int.Parse(partesEvento[1]),
-                        int.Parse(partesEvento[0])
-                    );
-                    if (evento >= inicio.Date && evento <= fin.Date)
+                    if (partesEvento.Length == 3)
                     {
-                        fechasEventosExternos.Add(evento);
+                        DateTime evento = new DateTime(int.Parse(partesEvento[2]), int.Parse(partesEvento[1]), int.Parse(partesEvento[0]));
+                        if (evento >= inicio.Date && evento <= fin.Date && !selectHolidays.Contains(evento))
+                            selectHolidays.Add(evento);
                     }
                 }
             }
-            List<DateTime> selectHolidays;
-            if (diasExcepcionalesLaborables)
-            {
-                selectHolidays = new List<DateTime>();
-            }
-            else
-            {
-                selectHolidays = allHolidays
-                    .Where(h => requireHolidayNames.Contains(h.LocalName, StringComparer.OrdinalIgnoreCase)
-                                && h.Date >= inicio.Date && h.Date <= fin.Date)
-                    .Select(h => h.Date)
-                    .ToList();
-                if (fechasEventosExternos.Any())
-                {
-                    selectHolidays = selectHolidays.Union(fechasEventosExternos).ToList();
-                }
-            }
+
             int horaActual = DateTime.Now.Hour;
             DateTime hoy = DateTime.Today;
             int reunionesProgramadas = 0;
+
             for (int i = 0; i < totalDias; i++)
             {
                 DateTime fecha = inicio.AddDays(i);
-            if (!selectHolidays.Any(feriado => feriado.Date == fecha.Date))
-            {
-                if (empresa == "PANASA" || empresa == "PAINSA")
+                if (!selectHolidays.Any(feriado => feriado.Date == fecha.Date))
                 {
-                    if (fecha.Date == hoy)
+                    if (empresa == "PANASA" || empresa == "PAINSA")
                     {
-                        if (horaActual >= 6 && horaActual < 14)
+                        if (fecha.Date == hoy)
                         {
-                            reunionesProgramadas += 1; 
-                        }
-                        else if (horaActual >= 14 && horaActual < 22)
-                        {
-                            reunionesProgramadas += 2; 
+                            if (horaActual >= 6 && horaActual < 14)
+                                reunionesProgramadas += 1;
+                            else if (horaActual >= 14 && horaActual < 22)
+                                reunionesProgramadas += 2;
+                            else
+                                reunionesProgramadas += 3;
                         }
                         else
                         {
-                            reunionesProgramadas += 3; 
+                            reunionesProgramadas += 3;
                         }
                     }
                     else
                     {
-                        reunionesProgramadas += 3;
-                    }
-                }
-                else
-                {
-                    if (fecha.Date == hoy)
-                    {
-                        if (horaActual >= 6 && horaActual < 18)
+                        if (fecha.Date == hoy)
                         {
-                            reunionesProgramadas += 1;
+                            if (horaActual >= 6 && horaActual < 18)
+                                reunionesProgramadas += 1;
+                            else
+                                reunionesProgramadas += 2;
                         }
                         else
                         {
                             reunionesProgramadas += 2;
                         }
                     }
-                    else
-                    {
-                        reunionesProgramadas += 2;
-                    }
                 }
             }
-            }    
+
             List<CarReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
-            {
                 return StatusCode(500, "Error al obtener datos de los cargos.");
-            }
+
             cargos = cargos
-                .Where(c => c.IdTipReu == 2 &&
-                            (string.IsNullOrWhiteSpace(area) || c.Centro.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
-                            (string.IsNullOrWhiteSpace(empresa) || c.Empresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
-                .ToList();
+            .Where(c =>
+                c.IdTipReu == 2 &&
+                (string.IsNullOrWhiteSpace(area) || (c.Centro != null && c.Centro.Equals(area, StringComparison.OrdinalIgnoreCase))) &&
+                (string.IsNullOrWhiteSpace(empresa) || (c.Empresa != null && c.Empresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+            )
+            .ToList();
+
+
             var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
+
             List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
             if (asistencias == null)
-            {
                 return StatusCode(500, "Error al obtener datos de la asistencia.");
-            }
+
             var asistenciasFiltradas = asistencias
                 .Where(a =>
-                            a.Arfecha.Date >= inicio.Date &&
-                            a.Arfecha.Date <= fin.Date &&
-                            (diasExcepcionalesLaborables || !selectHolidays.Contains(a.Arfecha.Date)) &&
-                            cargoIds.Contains(a.IdCargoR))
+                    a.Arfecha.Date >= inicio.Date &&
+                    a.Arfecha.Date <= fin.Date &&
+                    !selectHolidays.Contains(a.Arfecha.Date) &&
+                    cargoIds.Contains(a.IdCargoR))
                 .ToList();
+
             var asistenciaPorCargo = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Date })
                 .Select(g => new { g.Key.IdCargoR, Count = g.Count() })
@@ -461,11 +431,11 @@ public class AsistenciaReuController : ControllerBase
                     ReunionesAsistidas = g.Sum(x => Math.Min(x.Count, 2))
                 })
                 .ToList();
+
             var detallePorCargo = cargoIds.Select(id =>
             {
                 int reunionesAsistidas = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.ReunionesAsistidas ?? 0;
-                double porcentaje = reunionesProgramadas > 0 ?
-                    ((double)reunionesAsistidas / reunionesProgramadas) * 100 : 0;
+                double porcentaje = reunionesProgramadas > 0 ? ((double)reunionesAsistidas / reunionesProgramadas) * 100 : 0;
                 string nombre = cargos.FirstOrDefault(c => c.IdCargoR == id)?.Crnombre ?? string.Empty;
                 return new AsistenReuPorcetanjeDTO
                 {
@@ -475,13 +445,12 @@ public class AsistenciaReuController : ControllerBase
                     ReunionesAsistidas = reunionesAsistidas,
                     PorcentajeAsistencia = porcentaje
                 };
-            })
-            .OrderByDescending(x => x.IdCargoR)
-            .ToList();
+            }).OrderByDescending(x => x.IdCargoR).ToList();
+
             int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.ReunionesAsistidas);
-            int totalReunionesEsperadas = cargoIds.Count() * reunionesProgramadas;
-            double porcentajeGlobal = totalReunionesEsperadas > 0 ?
-                ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+            int totalReunionesEsperadas = cargoIds.Count * reunionesProgramadas;
+            double porcentajeGlobal = totalReunionesEsperadas > 0 ? ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+
             return Ok(new PorcentajeAsistenciaDiariaResponseDTO
             {
                 PorcentajeGlobal = porcentajeGlobal,
