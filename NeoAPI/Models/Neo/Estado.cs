@@ -12,4 +12,6 @@ public partial class Estado
     public string? Edescri { get; set; }
 
     public bool Estatus { get; set; }
+
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

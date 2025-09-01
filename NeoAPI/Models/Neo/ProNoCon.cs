@@ -35,7 +35,7 @@ public partial class ProNoCon
 
     public int IdLugaEven { get; set; }
 
-    public DateOnly Pncfecha { get; set; }
+    public DateTime Pncfecha { get; set; }
 
     public string? PncordFabr { get; set; }
 
@@ -50,6 +50,8 @@ public partial class ProNoCon
     public virtual Estado IdEstadoNavigation { get; set; } = null!;
 
     public virtual Identifi? IdIdentifNavigation { get; set; }
+
+    public virtual Master IdLugaEvenNavigation { get; set; } = null!;
 
     public virtual PropDisp IdProDispNavigation { get; set; } = null!;
 

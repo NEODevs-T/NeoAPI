@@ -31,7 +31,7 @@ public partial class UsuariosV
 
     public string Centro { get; set; } = null!;
 
-    public string? División { get; set; }
+    public string División { get; set; } = null!;
 
     public string Linea { get; set; } = null!;
 
@@ -46,4 +46,6 @@ public partial class UsuariosV
     public int IdLinea { get; set; }
 
     public int IdMaster { get; set; }
+
+    public bool UsEstatus { get; set; }
 }

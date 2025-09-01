@@ -7,6 +7,8 @@ public partial class Linea
 {
     public int IdLinea { get; set; }
 
+    public int? IdMaster { get; set; }
+
     public string Lnom { get; set; } = null!;
 
     public string? Ldetalle { get; set; }

@@ -17,6 +17,8 @@ public partial class Master
 
     public int IdLinea { get; set; }
 
+    public virtual ICollection<FechaProg> FechaProgs { get; set; } = new List<FechaProg>();
+
     public virtual Centro IdCentroNavigation { get; set; } = null!;
 
     public virtual Division IdDivisionNavigation { get; set; } = null!;
@@ -31,5 +33,9 @@ public partial class Master
 
     public virtual ICollection<Nivel> Nivels { get; set; } = new List<Nivel>();
 
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
+
     public virtual ICollection<Rango> Rangos { get; set; } = new List<Rango>();
+
+    public virtual ICollection<Reunion> Reunions { get; set; } = new List<Reunion>();
 }

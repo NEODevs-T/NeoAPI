@@ -37,11 +37,17 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<CambStat> CambStats { get; set; }
 
+    public virtual DbSet<CambiReuV> CambiReuVs { get; set; }
+
     public virtual DbSet<CargoReu> CargoReus { get; set; }
 
     public virtual DbSet<Categori> Categoris { get; set; }
 
     public virtual DbSet<Causa> Causas { get; set; }
+
+    public virtual DbSet<CausaCal> CausaCals { get; set; }
+
+    public virtual DbSet<CausaCalidadV> CausaCalidadVs { get; set; }
 
     public virtual DbSet<Causante> Causantes { get; set; }
 
@@ -73,9 +79,13 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<EquipoEam> EquipoEams { get; set; }
 
+    public virtual DbSet<EquiposEamV> EquiposEamVs { get; set; }
+
     public virtual DbSet<Estado> Estados { get; set; }
 
     public virtual DbSet<Estandar> Estandars { get; set; }
+
+    public virtual DbSet<FechaProg> FechaProgs { get; set; }
 
     public virtual DbSet<GeneralGbV> GeneralGbVs { get; set; }
 
@@ -88,6 +98,8 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<Ksf> Ksfs { get; set; }
 
     public virtual DbSet<LibroNove> LibroNoves { get; set; }
+
+    public virtual DbSet<LibroNovedadesV> LibroNovedadesVs { get; set; }
 
     public virtual DbSet<LinAre> LinAres { get; set; }
 
@@ -102,6 +114,8 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<Monedum> Moneda { get; set; }
 
     public virtual DbSet<Monto> Montos { get; set; }
+
+    public virtual DbSet<MontosEscalonV> MontosEscalonVs { get; set; }
 
     public virtual DbSet<Nivel> Nivels { get; set; }
 
@@ -119,6 +133,8 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<Producto> Productos { get; set; }
 
+    public virtual DbSet<ProductoNoConformeV> ProductoNoConformeVs { get; set; }
+
     public virtual DbSet<ProductosV> ProductosVs { get; set; }
 
     public virtual DbSet<PropDisp> PropDisps { get; set; }
@@ -131,11 +147,15 @@ public partial class DbNeoIiContext : DbContext
 
     public virtual DbSet<RangoDeControlActivosV> RangoDeControlActivosVs { get; set; }
 
+    public virtual DbSet<RegistroPersonalV> RegistroPersonalVs { get; set; }
+
     public virtual DbSet<RespoReu> RespoReus { get; set; }
 
     public virtual DbSet<Resuman> Resumen { get; set; }
 
-    public virtual DbSet<ReuDium> ReuDia { get; set; }
+    public virtual DbSet<ReuDiaV> ReuDiaVs { get; set; }
+
+    public virtual DbSet<Reunion> Reunions { get; set; }
 
     public virtual DbSet<Rol> Rols { get; set; }
 
@@ -150,6 +170,8 @@ public partial class DbNeoIiContext : DbContext
     public virtual DbSet<TieParTp> TieParTps { get; set; }
 
     public virtual DbSet<TipIncen> TipIncens { get; set; }
+
+    public virtual DbSet<TipReu> TipReus { get; set; }
 
     public virtual DbSet<TipSuple> TipSuples { get; set; }
 
@@ -387,7 +409,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("CaUnidad", "pnc");
 
-            entity.Property(e => e.IdCaUnidad).ValueGeneratedNever();
             entity.Property(e => e.Udescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -446,6 +467,41 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_CambStat_ReuDia");
         });
 
+        modelBuilder.Entity<CambiReuV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("CambiReu_V");
+
+            entity.Property(e => e.Accion)
+                .HasMaxLength(200)
+                .IsUnicode(false);
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Discrepancia)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Division)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.EquipoCodigo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Estado)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("estado");
+            entity.Property(e => e.FechaCambio).HasColumnType("datetime");
+            entity.Property(e => e.FechaTrabajo).HasColumnType("datetime");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Responsable)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<CargoReu>(entity =>
         {
             entity.HasKey(e => e.IdCargoR).HasName("PK_CargoReu_1");
@@ -498,7 +554,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Causa", "pnc");
 
-            entity.Property(e => e.IdCausa).ValueGeneratedNever();
             entity.Property(e => e.Cdescri)
                 .HasMaxLength(500)
                 .IsUnicode(false)
@@ -515,13 +570,63 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_Causa_Causante");
         });
 
+        modelBuilder.Entity<CausaCal>(entity =>
+        {
+            entity.HasKey(e => e.IdCausaCal);
+
+            entity.ToTable("CausaCal", "reu");
+
+            entity.Property(e => e.IdCausaCal).HasColumnName("idCausaCal");
+            entity.Property(e => e.Ccdescri)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("CCDescri");
+            entity.Property(e => e.Ccenglish)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CCEnglish");
+            entity.Property(e => e.Ccestado).HasColumnName("CCEstado");
+            entity.Property(e => e.Ccfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("CCFecha");
+            entity.Property(e => e.Ccnombre)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CCNombre");
+        });
+
+        modelBuilder.Entity<CausaCalidadV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("CausaCalidad_V");
+
+            entity.Property(e => e.CausaDeLaCalidad)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Causa de la Calidad ");
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.División)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaDeReunion)
+                .HasColumnType("datetime")
+                .HasColumnName("Fecha de Reunion");
+            entity.Property(e => e.Idcausa).HasColumnName("IDCausa");
+            entity.Property(e => e.Idregistro).HasColumnName("IDRegistro");
+            entity.Property(e => e.Status)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<Causante>(entity =>
         {
             entity.HasKey(e => e.IdCausante);
 
             entity.ToTable("Causante", "pnc");
 
-            entity.Property(e => e.IdCausante).ValueGeneratedNever();
             entity.Property(e => e.Cdescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -610,6 +715,10 @@ public partial class DbNeoIiContext : DbContext
             entity.ToTable("ClasifiTPM", "lib");
 
             entity.Property(e => e.IdCtpm).HasColumnName("IdCTPM");
+            entity.Property(e => e.Ctpmenglis)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CTPMEnglis");
             entity.Property(e => e.Ctpmestado).HasColumnName("CTPMEstado");
             entity.Property(e => e.Ctpmnom)
                 .HasMaxLength(50)
@@ -687,7 +796,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("DispDefi", "pnc");
 
-            entity.Property(e => e.IdDisDefi).ValueGeneratedNever();
             entity.Property(e => e.Dddescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -726,7 +834,7 @@ public partial class DbNeoIiContext : DbContext
                 .ToView("Divisiones_V");
 
             entity.Property(e => e.Ndivision)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("NDivision");
         });
@@ -801,7 +909,7 @@ public partial class DbNeoIiContext : DbContext
                 .HasColumnType("datetime")
                 .HasColumnName("EFecha");
             entity.Property(e => e.EnombreEam)
-                .HasMaxLength(50)
+                .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("ENombreEAM");
 
@@ -811,13 +919,45 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_EquipoEAM_Linea");
         });
 
+        modelBuilder.Entity<EquiposEamV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("EquiposEAM_V");
+
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CodigoEq)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("codigoEq");
+            entity.Property(e => e.Desc)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Division)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Equipo)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaEq).HasColumnType("datetime");
+            entity.Property(e => e.IdMaster).HasColumnName("idMaster");
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Lofic)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("LOFIC");
+        });
+
         modelBuilder.Entity<Estado>(entity =>
         {
             entity.HasKey(e => e.IdEstado);
 
             entity.ToTable("Estado", "pnc");
 
-            entity.Property(e => e.IdEstado).ValueGeneratedNever();
             entity.Property(e => e.Edescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -849,6 +989,33 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("ENombre");
+        });
+
+        modelBuilder.Entity<FechaProg>(entity =>
+        {
+            entity.HasKey(e => e.IdFechaPr);
+
+            entity.ToTable("FechaProg", "reu");
+
+            entity.Property(e => e.Fpcrea)
+                .HasColumnType("datetime")
+                .HasColumnName("FPCrea");
+            entity.Property(e => e.Fpdesc)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("FPDesc");
+            entity.Property(e => e.Fpestado).HasColumnName("FPEstado");
+            entity.Property(e => e.Fpmodic)
+                .HasColumnType("datetime")
+                .HasColumnName("FPModic");
+            entity.Property(e => e.Fpprogra)
+                .HasColumnType("datetime")
+                .HasColumnName("FPProgra");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.FechaProgs)
+                .HasForeignKey(d => d.IdMaster)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_FechaProg_Master");
         });
 
         modelBuilder.Entity<GeneralGbV>(entity =>
@@ -902,7 +1069,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Identifi", "pnc");
 
-            entity.Property(e => e.IdIdentif).ValueGeneratedNever();
             entity.Property(e => e.Idescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -976,6 +1142,9 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("KSF", "reu");
 
+            entity.Property(e => e.KsfEnglish)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.KsfNombre)
                 .HasMaxLength(50)
                 .IsUnicode(false);
@@ -1001,6 +1170,10 @@ public partial class DbNeoIiContext : DbContext
             entity.Property(e => e.Lnfecha)
                 .HasColumnType("datetime")
                 .HasColumnName("LNFecha");
+            entity.Property(e => e.LnfichSupe)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("LNFichSupe");
             entity.Property(e => e.LnfichaRes)
                 .HasMaxLength(10)
                 .IsUnicode(false)
@@ -1032,12 +1205,82 @@ public partial class DbNeoIiContext : DbContext
 
             entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.LibroNoves)
                 .HasForeignKey(d => d.IdMaster)
+                .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LibroNove_Master");
 
             entity.HasOne(d => d.IdTipoNoveNavigation).WithMany(p => p.LibroNoves)
                 .HasForeignKey(d => d.IdTipoNove)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_LibroNove_TiParTP");
+        });
+
+        modelBuilder.Entity<LibroNovedadesV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("LibroNovedades_V");
+
+            entity.Property(e => e.AreaCargador)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Area cargador");
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.ClasificacionTpm)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Clasificacion TPM");
+            entity.Property(e => e.CodigoEquipo)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Codigo Equipo");
+            entity.Property(e => e.Discrepancia)
+                .HasMaxLength(250)
+                .IsUnicode(false);
+            entity.Property(e => e.Division)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Empresa)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Estado)
+                .HasMaxLength(12)
+                .IsUnicode(false);
+            entity.Property(e => e.FichaDelRegistrador)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("Ficha del Registrador");
+            entity.Property(e => e.Grupo)
+                .HasMaxLength(1)
+                .IsUnicode(false);
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.IdCentro).HasColumnName("idCentro");
+            entity.Property(e => e.IdDivision).HasColumnName("idDivision");
+            entity.Property(e => e.IdEmpresa).HasColumnName("idEmpresa");
+            entity.Property(e => e.IdLinea).HasColumnName("idLinea");
+            entity.Property(e => e.IdPais).HasColumnName("idPais");
+            entity.Property(e => e.IsReunion)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Lnfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("LNFecha");
+            entity.Property(e => e.Observacion).IsUnicode(false);
+            entity.Property(e => e.Pais)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.TiempoPerdido).HasColumnName("Tiempo Perdido");
+            entity.Property(e => e.TipoDeNovedad)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Novedad");
+            entity.Property(e => e.Turno)
+                .HasMaxLength(1)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<LinAre>(entity =>
@@ -1058,6 +1301,7 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Linea", "mae");
 
+            entity.Property(e => e.IdMaster).HasColumnName("idMaster");
             entity.Property(e => e.LcenCos)
                 .HasMaxLength(20)
                 .IsUnicode(false)
@@ -1086,8 +1330,12 @@ public partial class DbNeoIiContext : DbContext
                 .HasNoKey()
                 .ToView("Linea_V");
 
+            entity.Property(e => e.LcenCos)
+                .HasMaxLength(20)
+                .IsUnicode(false)
+                .HasColumnName("LCenCos");
             entity.Property(e => e.Linea)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
         });
 
@@ -1199,6 +1447,29 @@ public partial class DbNeoIiContext : DbContext
                 .HasForeignKey(d => d.IdPuesTrab)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_Montos_PuesTrab");
+        });
+
+        modelBuilder.Entity<MontosEscalonV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("MontosEscalon_V");
+
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CentroCosto)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Moneda)
+                .HasMaxLength(10)
+                .IsUnicode(false);
+            entity.Property(e => e.Puesto)
+                .HasMaxLength(50)
+                .IsUnicode(false);
         });
 
         modelBuilder.Entity<Nivel>(entity =>
@@ -1344,9 +1615,9 @@ public partial class DbNeoIiContext : DbContext
 
         modelBuilder.Entity<ProNoCon>(entity =>
         {
-            entity
-                .HasNoKey()
-                .ToTable("ProNoCon", "pnc");
+            entity.HasKey(e => e.IdProNoCon);
+
+            entity.ToTable("ProNoCon", "pnc");
 
             entity.Property(e => e.IdProNoCon).HasColumnName("idProNoCon");
             entity.Property(e => e.Pnccantida).HasColumnName("PNCCantida");
@@ -1365,7 +1636,9 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(500)
                 .IsUnicode(false)
                 .HasColumnName("PNCDesProd");
-            entity.Property(e => e.Pncfecha).HasColumnName("PNCFecha");
+            entity.Property(e => e.Pncfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("PNCFecha");
             entity.Property(e => e.PncindLibe)
                 .IsUnicode(false)
                 .HasColumnName("PNCIndLibe");
@@ -1378,36 +1651,41 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("PNCOrdFabr");
 
-            entity.HasOne(d => d.IdCaUnidadNavigation).WithMany()
+            entity.HasOne(d => d.IdCaUnidadNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCaUnidad)
                 .OnDelete(DeleteBehavior.ClientSetNull)
-                .HasConstraintName("FK_ProNoCon_Unidad");
+                .HasConstraintName("FK_ProNoCon_CaUnidad");
 
-            entity.HasOne(d => d.IdCausaNavigation).WithMany()
+            entity.HasOne(d => d.IdCausaNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdCausa)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_Causa");
 
-            entity.HasOne(d => d.IdDisDefiNavigation).WithMany()
+            entity.HasOne(d => d.IdDisDefiNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdDisDefi)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_DispDefi");
 
-            entity.HasOne(d => d.IdEstadoNavigation).WithMany()
+            entity.HasOne(d => d.IdEstadoNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdEstado)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_Estado");
 
-            entity.HasOne(d => d.IdIdentifNavigation).WithMany()
+            entity.HasOne(d => d.IdIdentifNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdIdentif)
                 .HasConstraintName("FK_ProNoCon_Identifi");
 
-            entity.HasOne(d => d.IdProDispNavigation).WithMany()
+            entity.HasOne(d => d.IdLugaEvenNavigation).WithMany(p => p.ProNoCons)
+                .HasForeignKey(d => d.IdLugaEven)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ProNoCon_Master1");
+
+            entity.HasOne(d => d.IdProDispNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdProDisp)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_PropDisp");
 
-            entity.HasOne(d => d.IdTipoNavigation).WithMany()
+            entity.HasOne(d => d.IdTipoNavigation).WithMany(p => p.ProNoCons)
                 .HasForeignKey(d => d.IdTipo)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ProNoCon_Tipo");
@@ -1442,6 +1720,71 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_Producto_TipoProd");
         });
 
+        modelBuilder.Entity<ProductoNoConformeV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("ProductoNoConforme_V");
+
+            entity.Property(e => e.AlternativaPropuestoDeDisposicion)
+                .HasMaxLength(80)
+                .IsUnicode(false)
+                .HasColumnName("Alternativa Propuesto De Disposicion");
+            entity.Property(e => e.CausaDeLiberación)
+                .IsUnicode(false)
+                .HasColumnName("Causa de Liberación");
+            entity.Property(e => e.Causante)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CodigoDeProducto)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Codigo de Producto");
+            entity.Property(e => e.DescripcionDeProducto)
+                .HasMaxLength(500)
+                .IsUnicode(false)
+                .HasColumnName("Descripcion de Producto");
+            entity.Property(e => e.DisposicionDefinitiva)
+                .HasMaxLength(80)
+                .IsUnicode(false)
+                .HasColumnName("Disposicion Definitiva");
+            entity.Property(e => e.Estado)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Fecha).HasColumnType("datetime");
+            entity.Property(e => e.FichaDelCargador)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Ficha del Cargador");
+            entity.Property(e => e.Identificacion)
+                .HasMaxLength(80)
+                .IsUnicode(false);
+            entity.Property(e => e.IndicacionDeLiberacion)
+                .IsUnicode(false)
+                .HasColumnName("Indicacion de Liberacion");
+            entity.Property(e => e.Lote)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.LugarEvento)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Lugar Evento");
+            entity.Property(e => e.NoConformidad)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("No Conformidad");
+            entity.Property(e => e.OrdenDeFabricacion)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("Orden de Fabricacion");
+            entity.Property(e => e.Tipo)
+                .HasMaxLength(80)
+                .IsUnicode(false);
+            entity.Property(e => e.Unidad)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<ProductosV>(entity =>
         {
             entity
@@ -1466,7 +1809,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("PropDisp", "pnc");
 
-            entity.Property(e => e.IdProDisp).ValueGeneratedNever();
             entity.Property(e => e.Pddescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -1506,6 +1848,7 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("PTNombre");
+            entity.Property(e => e.Ptorden).HasColumnName("PTOrden");
         });
 
         modelBuilder.Entity<Rango>(entity =>
@@ -1602,6 +1945,60 @@ public partial class DbNeoIiContext : DbContext
                 .IsUnicode(false);
         });
 
+        modelBuilder.Entity<RegistroPersonalV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("RegistroPersonal_V");
+
+            entity.Property(e => e.Apellido)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Centro)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.CentroCosto)
+                .HasMaxLength(20)
+                .IsUnicode(false);
+            entity.Property(e => e.Dia)
+                .HasMaxLength(2)
+                .IsUnicode(false);
+            entity.Property(e => e.FechaDeTrabajo)
+                .HasColumnType("datetime")
+                .HasColumnName("Fecha de Trabajo");
+            entity.Property(e => e.Ficha)
+                .HasMaxLength(6)
+                .IsUnicode(false);
+            entity.Property(e => e.Grupo)
+                .HasMaxLength(1)
+                .IsUnicode(false);
+            entity.Property(e => e.Linea)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Mes)
+                .HasMaxLength(2)
+                .IsUnicode(false);
+            entity.Property(e => e.Mescalon).HasColumnName("MEscalon");
+            entity.Property(e => e.Mmonto).HasColumnName("MMonto");
+            entity.Property(e => e.Nombre)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Puesto)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+            entity.Property(e => e.Suplido)
+                .HasMaxLength(8)
+                .IsUnicode(false);
+            entity.Property(e => e.TipoDeIncidencia)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Incidencia");
+            entity.Property(e => e.TipoDeSuplencia)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("Tipo de Suplencia");
+        });
+
         modelBuilder.Entity<RespoReu>(entity =>
         {
             entity.HasKey(e => e.IdResReu).HasName("PK_RespoReu_1");
@@ -1612,6 +2009,10 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("RRDesc");
+            entity.Property(e => e.Rrenglish)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RREnglish");
             entity.Property(e => e.Rresta).HasColumnName("RREsta");
             entity.Property(e => e.Rrnombre)
                 .HasMaxLength(50)
@@ -1673,12 +2074,15 @@ public partial class DbNeoIiContext : DbContext
                 .HasConstraintName("FK_Resumen_TipSuple");
         });
 
-        modelBuilder.Entity<ReuDium>(entity =>
+        modelBuilder.Entity<ReuDiaV>(entity =>
         {
-            entity.HasKey(e => e.IdReuDia).HasName("PK_ReuDia_1");
+            entity
+                .HasNoKey()
+                .ToView("ReuDia_V");
 
-            entity.ToTable("ReuDia", "reu");
-
+            entity.Property(e => e.KsfNombre)
+                .HasMaxLength(50)
+                .IsUnicode(false);
             entity.Property(e => e.Rdarea)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -1703,9 +2107,88 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("RDDiv");
-            entity.Property(e => e.RdfecCrea).HasColumnName("RDFecCrea");
-            entity.Property(e => e.RdfecReu).HasColumnName("RDFecReu");
-            entity.Property(e => e.RdfecTra).HasColumnName("RDFecTra");
+            entity.Property(e => e.RdfecCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecCrea");
+            entity.Property(e => e.RdfecReu)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecReu");
+            entity.Property(e => e.RdfecTra)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecTra");
+            entity.Property(e => e.RdnumDis)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDNumDis");
+            entity.Property(e => e.Rdobs)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("RDObs");
+            entity.Property(e => e.Rdodt)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDOdt");
+            entity.Property(e => e.RdplanAcc)
+                .HasMaxLength(200)
+                .IsUnicode(false)
+                .HasColumnName("RDPlanAcc");
+            entity.Property(e => e.Rdstatus)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDStatus");
+            entity.Property(e => e.Rdtiempo).HasColumnName("RDTiempo");
+            entity.Property(e => e.Rrnombre)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RRNombre");
+        });
+
+        modelBuilder.Entity<Reunion>(entity =>
+        {
+            entity.HasKey(e => e.IdReuDia).HasName("PK_ReuDia_1");
+
+            entity.ToTable("Reunion", "reu");
+
+            entity.Property(e => e.OrigenCal)
+                .HasMaxLength(100)
+                .IsUnicode(false);
+            entity.Property(e => e.Rdarea)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDArea");
+            entity.Property(e => e.Rdcentro)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDCentro");
+            entity.Property(e => e.RdcodDis)
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .HasColumnName("RDCodDis");
+            entity.Property(e => e.RdcodEq)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDCodEq");
+            entity.Property(e => e.RdcodRequi)
+                .HasMaxLength(15)
+                .IsUnicode(false)
+                .HasColumnName("RDCodRequi");
+            entity.Property(e => e.Rddisc)
+                .HasMaxLength(250)
+                .IsUnicode(false)
+                .HasColumnName("RDDisc");
+            entity.Property(e => e.Rddiv)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("RDDiv");
+            entity.Property(e => e.RdfecCrea)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecCrea");
+            entity.Property(e => e.RdfecReu)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecReu");
+            entity.Property(e => e.RdfecTra)
+                .HasColumnType("datetime")
+                .HasColumnName("RDFecTra");
             entity.Property(e => e.RdnumDis)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -1728,12 +2211,26 @@ public partial class DbNeoIiContext : DbContext
                 .HasColumnName("RDStatus");
             entity.Property(e => e.Rdtiempo).HasColumnName("RDTiempo");
 
-            entity.HasOne(d => d.IdResReuNavigation).WithMany(p => p.ReuDia)
+            entity.HasOne(d => d.IdCausaCalNavigation).WithMany(p => p.Reunions)
+                .HasForeignKey(d => d.IdCausaCal)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReuDia_CausaCal");
+
+            entity.HasOne(d => d.IdMasterNavigation).WithMany(p => p.Reunions)
+                .HasForeignKey(d => d.IdMaster)
+                .HasConstraintName("FK_ReuDia_Master");
+
+            entity.HasOne(d => d.IdResReuNavigation).WithMany(p => p.Reunions)
                 .HasForeignKey(d => d.IdResReu)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ReuDia_RespoReu");
 
-            entity.HasOne(d => d.IdksfNavigation).WithMany(p => p.ReuDia)
+            entity.HasOne(d => d.IdTipReuNavigation).WithMany(p => p.Reunions)
+                .HasForeignKey(d => d.IdTipReu)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ReuDia_TipReu");
+
+            entity.HasOne(d => d.IdksfNavigation).WithMany(p => p.Reunions)
                 .HasForeignKey(d => d.Idksf)
                 .OnDelete(DeleteBehavior.ClientSetNull)
                 .HasConstraintName("FK_ReuDia_KSF");
@@ -1885,6 +2382,27 @@ public partial class DbNeoIiContext : DbContext
                 .HasColumnName("TINombre");
         });
 
+        modelBuilder.Entity<TipReu>(entity =>
+        {
+            entity.HasKey(e => e.IdTipReu);
+
+            entity.ToTable("TipReu", "reu");
+
+            entity.Property(e => e.IdTipReu).HasColumnName("idTipReu");
+            entity.Property(e => e.Tpdescri)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("TPDescri");
+            entity.Property(e => e.Tpestado).HasColumnName("TPEstado");
+            entity.Property(e => e.Tpfecha)
+                .HasColumnType("datetime")
+                .HasColumnName("TPFecha");
+            entity.Property(e => e.Tpnombre)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("TPNombre");
+        });
+
         modelBuilder.Entity<TipSuple>(entity =>
         {
             entity.HasKey(e => e.IdTipSuple);
@@ -1908,7 +2426,6 @@ public partial class DbNeoIiContext : DbContext
 
             entity.ToTable("Tipo", "pnc");
 
-            entity.Property(e => e.IdTipo).ValueGeneratedNever();
             entity.Property(e => e.Tdescri)
                 .HasMaxLength(200)
                 .IsUnicode(false)
@@ -2057,19 +2574,19 @@ public partial class DbNeoIiContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Centro)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Contraseña)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.División)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Empresa)
                 .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Linea)
-                .HasMaxLength(500)
+                .HasMaxLength(50)
                 .IsUnicode(false);
             entity.Property(e => e.Nombre)
                 .HasMaxLength(200)

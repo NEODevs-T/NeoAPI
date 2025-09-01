@@ -37,17 +37,19 @@ public partial class ReuDium
 
     public string? RdnumDis { get; set; }
 
-    public DateOnly? RdfecReu { get; set; }
+    public DateTime? RdfecReu { get; set; }
 
-    public DateOnly? RdfecTra { get; set; }
+    public DateTime? RdfecTra { get; set; }
 
     public string? Rdobs { get; set; }
 
-    public DateOnly? RdfecCrea { get; set; }
+    public DateTime? RdfecCrea { get; set; }
 
     public virtual ICollection<CambFec> CambFecs { get; set; } = new List<CambFec>();
 
     public virtual ICollection<CambStat> CambStats { get; set; } = new List<CambStat>();
+
+    public virtual Master? IdMasterNavigation { get; set; }
 
     public virtual RespoReu IdResReuNavigation { get; set; } = null!;
 

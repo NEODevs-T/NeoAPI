@@ -19,5 +19,7 @@ public partial class AsistenReu
 
     public string? ArObser { get; set; }
 
+    public int ArIdEmpresa { get; set; }
+
     public virtual CargoReu IdCargoRNavigation { get; set; } = null!;
 }

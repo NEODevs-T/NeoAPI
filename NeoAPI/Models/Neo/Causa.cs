@@ -16,4 +16,6 @@ public partial class Causa
     public bool Cestado { get; set; }
 
     public virtual Causante IdCausanteNavigation { get; set; } = null!;
+
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

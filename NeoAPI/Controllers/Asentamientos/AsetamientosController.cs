@@ -6,7 +6,7 @@ using NeoAPI.Models.Neo;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Maestra;
-using NeoAPI.Logic;
+using NeoAPI.Logic.Global;
 using NeoAPI.Controllers.Maestras;
 using NeoAPI.Interface;
 
@@ -86,15 +86,8 @@ namespace NeoAPI.Controllers.Asentamientos
                 listaAsentamientos[i].Aobserv = listaAsentamientosDTO[i].Aobserv;
                 listaAsentamientos[i].IdInfoAseNavigation = informeDeAsentamientos;
             }
-
-            try{
-                
-                _context.Asenta.AddRange(listaAsentamientos);
-                return await _context.SaveChangesAsync() > 0;    
-            
-            }catch(Exception e){
-                return BadRequest(e);
-            }
+            _context.Asenta.AddRange(listaAsentamientos);
+            return await _context.SaveChangesAsync() > 0;    
         }
         
         [HttpGet("GetAsentamientosViews")]

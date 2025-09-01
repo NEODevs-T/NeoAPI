@@ -3,16 +3,25 @@ using NeoAPI.DTOs.Asentamientos;
 using NeoAPI.DTOs.Bonificaciones;
 using NeoAPI.DTOs.LibroNovedades;
 using NeoAPI.DTOs.BPSC;
+using NeoAPI.DTOs.Global;
 using NeoAPI.Models.Neo;
 using NeoAPI.Models.PolybaseBPCSVen;
 using NeoAPI.Models.PolybaseBPCSCol;
 using NeoAPI.Models.PolybaseBPCSCen;
 using System.Collections.Generic;
+using NeoAPI.DTOs.ReunionDiaria;
+using NeoAPI.DTOs.Maestra;
+using NeoAPI.DTOs.PNC;
+using NeoAPI.ModelsDOCIng;
+using Microsoft.VisualStudio.Web.CodeGenerators.Mvc.Templates.Blazor;
+
 
 namespace NeoAPI.AutoMapper
 {
     public class AutoMapperProfiles : Profile
     {
+        //TODO: Reordenar el MAPEO por grupos de DTO
+
         public AutoMapperProfiles()
         {
 
@@ -47,12 +56,52 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.CategoriaDTONavigation, opt => opt.MapFrom(src => src.IdCategoriNavigation))
                 .ForMember(dest => dest.AsentumDTONavigation, opt => opt.MapFrom(src => src.IdAsentaNavigation));
 
-            CreateMap<LibroNoveDTO,LibroNove>().ReverseMap();
+            CreateMap<LibroNoveDTO, LibroNove>().ReverseMap();
 
-            CreateMap<ClasifiTpmDTO,ClasifiTpm>().ReverseMap();
+            CreateMap<ClasifiTpmDTO, ClasifiTpm>().ReverseMap();
 
+            CreateMap<TiParTpDTO, TiParTp>().ReverseMap();
 
-            CreateMap<Resuman,ResumenGeneralDTO>()
+            CreateMap<CambStat, CambStatDTO>()
+                .ForMember(dest => dest.Reunions, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
+                
+            CreateMap<CambFec, CambFecDTO>()
+                .ForMember(dest => dest.Reunions, act => act.MapFrom(src => src.IdReuDiaNavigation)).ReverseMap();
+            
+
+            CreateMap<ReunionDTO, Reunion>().ReverseMap();
+
+            CreateMap<CentrosVDTO, CentrosV>().ReverseMap();
+
+            CreateMap<DivisionesVDTO, DivisionesV>().ReverseMap();
+
+            CreateMap<EmpresasVDTO, EmpresasV>().ReverseMap();
+
+            CreateMap<EquipoEamDTO, EquipoEam>().ReverseMap();
+
+            CreateMap<EquiposEamVDTO, EquiposEamV>().ReverseMap();
+
+            CreateMap<LineaVDTO, LineaV>().ReverseMap();
+
+            CreateMap<MasterDTO, Master>().ReverseMap();
+
+            CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
+            
+            CreateMap<CambiReuVDTO, CambiReuV>().ReverseMap();
+
+            CreateMap<PaiDTO, Pai>().ReverseMap();
+
+            CreateMap<FechaProgDTO, FechaProg>().ReverseMap();
+
+            CreateMap<CargoReuDTO, CargoReu>().ReverseMap();
+
+            CreateMap<KsfDTO, Ksf>().ReverseMap();
+
+            CreateMap<RespoReuDTO, RespoReu>().ReverseMap();
+
+            CreateMap<AsistenReuDTO, AsistenReu>().ReverseMap();
+
+            CreateMap<Resuman, ResumenGeneralDTO>()
                 .ForMember(dest => dest.Nombre, act => act.MapFrom(src => src.IdPersonalNavigation.PeNombre))
                 .ForMember(dest => dest.Apellido, act => act.MapFrom(src => src.IdPersonalNavigation.PeApellido))
                 .ForMember(dest => dest.Ficha, act => act.MapFrom(src => src.IdPersonalNavigation.PeFicha))
@@ -73,22 +122,95 @@ namespace NeoAPI.AutoMapper
                 .ForMember(dest => dest.FichaResumen, act => act.MapFrom(src => src.RuserVali))
                 .ForMember(dest => dest.FichaPago, act => act.MapFrom(src => src.RuserPago))
                 .ReverseMap();
+
+            CreateMap<LibroNove, LibroNoveDTO>()
+                .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdMasterNavigation.IdLineaNavigation.Lnom))
+                .ForMember(dest => dest.AreaCarga, act => act.MapFrom(src => src.IdAreaCarNavigation.Acnombre));
+
+            CreateMap<ReuDium, ReunionDTO>()            
+                .ForMember(dest => dest.Ksf, act => act.MapFrom(src => src.IdksfNavigation.KsfNombre))
+                .ForMember(dest => dest.Responsable, act => act.MapFrom(src => src.IdResReuNavigation.Rrnombre))
+                .ForMember(dest => dest.IdPais, act => act.MapFrom(src => src.IdMasterNavigation.IdPais));
+
+            CreateMap<EquipoEam, EquipoEamDTO>()
+                .ForMember(dest => dest.Linea, act => act.MapFrom(src => src.IdLineaNavigation));
+
+            CreateMap<Master, EquipoEamDTO>()
+                .ForMember(dest => dest.IdEmpresa, act => act.MapFrom(src => src.IdEmpresa));
+
+            CreateMap<AsistenReu, AsistenReuDTO>()
+                .ForMember(dest => dest.Cargo, act => act.MapFrom(src => src.IdCargoRNavigation));
+
+            CreateMap<MaestraV, LineaVDTO>()
+                .ForMember(dest => dest.IdCentro, act => act.MapFrom(src => src.IdCentro));
+
+            CreateMap<Models.PolybaseBPCSVen.Fso, OrdenFabricacionDTO>()
+                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
+                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
+                .ReverseMap();
+
+            CreateMap<Models.PolybaseBPCSCol.Fso, OrdenFabricacionDTO>()
+                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
+                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
+                .ReverseMap();
+
+            CreateMap<Models.PolybaseBPCSCen.Fso, OrdenFabricacionDTO>()
+                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
+                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
+                .ReverseMap();
+
+            CreateMap<RotaCalidumDTO, RotaCalidum>().ReverseMap();
+            //Producto No Conforme //
+
+            CreateMap<IdentifDTO, Identifi>().ReverseMap();
+            CreateMap<TipoDTO, Tipo>().ReverseMap();
+            CreateMap<DisDefiDTO, DispDefi>().ReverseMap();
+            CreateMap<CausanteDTO, Causante>().ReverseMap();
+            CreateMap<ProDispDTO, PropDisp>().ReverseMap();
+            CreateMap<CaUnidadDTO, CaUnidad>().ReverseMap();
+            CreateMap<causaDTO, Causa>().ReverseMap();
+            CreateMap<ProNoConDTO, ProNoCon>().ReverseMap()
+            .ForMember(dest => dest.NombreTipo, act => act.MapFrom(src => src.IdTipoNavigation.Tnombre))
+            .ForMember(dest => dest.Lugarnombre, act => act.MapFrom(src => src.IdLugaEvenNavigation.IdLineaNavigation.Lnom))
+            .ForMember(dest => dest.Causantenombre, act => act.MapFrom(src => src.IdCausaNavigation.IdCausanteNavigation.Cnombre))
+            .ForMember(dest => dest.UnidadNombre, act => act.MapFrom(src => src.IdCaUnidadNavigation.Unombre))
+            .ForMember(dest => dest.IdentifidNombre, act => act.MapFrom(src => src.IdIdentifNavigation.Inombre))
+            .ForMember(dest => dest.ProDisNombre, act => act.MapFrom(src => src.IdProDispNavigation.Pdnombre))
+            .ForMember(dest => dest.DisDefiNombre, act => act.MapFrom(src => src.IdDisDefiNavigation.Ddnombre))
+            .ForMember(dest => dest.Causanombre, act => act.MapFrom(src => src.IdCausaNavigation.Cnombre))
+            .ReverseMap();
+            CreateMap<MaestraVDTO, MaestraV>().ReverseMap();
+
+
+
+            CreateMap<EquipoEamDTO, EquipoEam>().ReverseMap();
+
+
+
+            // Reunion De Turno
+
+
+            CreateMap<CausaCalDTO, CausaCal>().ReverseMap();
+            
+            CreateMap<CausaCalDTO, CausaCal>().ReverseMap();
+        CreateMap<Reunion, CausaCalDTO>()
+            .ForMember(dest => dest.IdCausaCal, opt => opt.MapFrom(src => src.IdCausaCalNavigation.IdCausaCal))
+            .ForMember(dest => dest.Ccnombre, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccnombre))
+            .ForMember(dest => dest.Ccdescri, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccdescri))
+            .ForMember(dest => dest.Ccfecha, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccfecha))
+            .ForMember(dest => dest.Ccestado, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccestado))
+            .ForMember(dest => dest.Ccenglish, opt => opt.MapFrom(src => src.IdCausaCalNavigation.Ccenglish));
             
 
-            CreateMap<Models.PolybaseBPCSVen.Fso,OrdenFabricacionDTO>()
-                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
-                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
-                .ReverseMap();
+            CreateMap<CausaCalidadVDTO, CausaCalidadV>().ReverseMap();
 
-            CreateMap<Models.PolybaseBPCSCol.Fso,OrdenFabricacionDTO>()
-                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
-                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
-                .ReverseMap();
 
-            CreateMap<Models.PolybaseBPCSCen.Fso,OrdenFabricacionDTO>()
-                .ForMember(dest => dest.CodProducto, act => act.MapFrom(src => src.Sprod))
-                .ForMember(dest => dest.Status, act => act.MapFrom(src => src.Sstat))
-                .ReverseMap();
+
+
+
+            // CreateMap<List<NeoAPI.Models.Neo.Pai>, List<NeoAPI.DTOs.Maestra.PaiDTO>>()
+            //     .ConvertUsing(src => src.Select(pai => _mapper.Map<PaiDTO>(pai)));
+
             //https://www.youtube.com/watch?v=pr_pemcmVAs
         }
     }

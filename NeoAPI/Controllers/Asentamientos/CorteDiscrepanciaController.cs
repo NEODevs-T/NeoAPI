@@ -65,44 +65,44 @@ namespace NeoAPI.Controllers.Asentamientos
             {
                 //retorna fuera de rango de un centro
                 var result = await _context.Asenta
-                   .Include(r => r.IdRangoNavigation)
-                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
-                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
-                   .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
-                   .Include(r => r.CorteDis)
-                   .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
-                       && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-                       && f.AisActivo == true
-                       && f.IdInfoAseNavigation.Iaturno == turno
-                       && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-                       && f.IdRangoNavigation.IdProducto == idProducto
-                       //&& f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
-                       && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
-                       && f.CorteDis.Count == 0)
-                   .AsNoTracking()
-                   .ToListAsync();
+                    .Include(r => r.IdRangoNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
+                    .Include(r => r.CorteDis)
+                    .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                        && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                        && f.AisActivo == true
+                        && f.IdInfoAseNavigation.Iaturno == turno
+                        && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                        && f.IdRangoNavigation.IdProducto == idProducto
+                        //&& f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                        && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
+                        && f.CorteDis.Count == 0)
+                    .AsNoTracking()
+                    .ToListAsync();
                 var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
                 return Ok(corteDiscDTO);
             }
             else
             {
                 var result = await _context.Asenta
-                  .Include(r => r.IdRangoNavigation)
-                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
-                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
-                  .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
-                  .Include(r => r.CorteDis)
-                  .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
-                      && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
-                      && f.AisActivo == true
-                      && f.IdInfoAseNavigation.Iaturno == turno
-                      && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
-                      && f.IdRangoNavigation.IdProducto == idProducto
-                      && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
-                      && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
-                      && f.CorteDis.Count == 0)
-                  .AsNoTracking()
-                  .ToListAsync();
+                    .Include(r => r.IdRangoNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdUnidadNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdVariableNavigation).ThenInclude(r => r.IdSeccionNavigation)
+                    .Include(r => r.IdRangoNavigation).ThenInclude(r => r.IdProductoNavigation)
+                    .Include(r => r.CorteDis)
+                    .Where(f => (f.Avalor > f.IdRangoNavigation.Rmax || f.Avalor < f.IdRangoNavigation.Rmin)
+                        && f.IdInfoAseNavigation.IafechCrea.Date == fecha.Date
+                        && f.AisActivo == true
+                        && f.IdInfoAseNavigation.Iaturno == turno
+                        && f.IdRangoNavigation.IdMasterNavigation.IdLinea == idfiltrolinea
+                        && f.IdRangoNavigation.IdProducto == idProducto
+                        && f.IdRangoNavigation.IdVariableNavigation.IdSeccion == idSeccion
+                        && f.IdRangoNavigation.IdVariableNavigation.IdClasiVar == idClasiVar
+                        && f.CorteDis.Count == 0)
+                    .AsNoTracking()
+                    .ToListAsync();
                 var corteDiscDTO = _mapper.Map<List<AsentumDTO>>(result);
                 return Ok(corteDiscDTO);
             }
@@ -293,43 +293,27 @@ namespace NeoAPI.Controllers.Asentamientos
         {
             if (categori.IdCategori == 0)
             {
-                try
+                bool existe = _context.Categoris.Any(c => c.Ccodigo == categori.Ccodigo);
+                // Si no existe el codigo, insertar la nueva categor�a
+                if (!existe)
                 {
-                    bool existe = _context.Categoris.Any(c => c.Ccodigo == categori.Ccodigo);
-                    // Si no existe el codigo, insertar la nueva categor�a
-                    if (!existe)
-                    {
-                        var entity = _mapper.Map<Categori>(categori);
-                        _context.Categoris.Add(entity);
-                        await _context.SaveChangesAsync();
-                        return Ok("Registro exitoso");
-                    }
-                    else
-                    {
-                        // Mostrar un mensaje de error o hacer otra acci�n
-                        return BadRequest("Código ya registrado");
-                    }
+                    var entity = _mapper.Map<Categori>(categori);
+                    _context.Categoris.Add(entity);
+                    await _context.SaveChangesAsync();
+                    return Ok("Registro exitoso");
                 }
-                catch (Exception ex)
+                else
                 {
-                    return BadRequest("Error, intente nuevamente" + ex.Message);
+                    // Mostrar un mensaje de error o hacer otra acci�n
+                    return BadRequest("Código ya registrado");
                 }
             }
             else
             {
-                try
-                {
-                    var entity = _mapper.Map<Categori>(categori);
-                    _context.Entry(categori).State = EntityState.Modified;
-                    await _context.SaveChangesAsync();
-                    return Ok("Registro exitoso");
-
-                }
-                catch
-                {
-                    return BadRequest("Error, intente nuevamente");
-
-                }
+                var entity = _mapper.Map<Categori>(categori);
+                _context.Entry(categori).State = EntityState.Modified;
+                await _context.SaveChangesAsync();
+                return Ok("Registro exitoso");
             }
         }
 
@@ -339,34 +323,27 @@ namespace NeoAPI.Controllers.Asentamientos
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(CorteDiscDTO cortedis)
         {
-            try
+            var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsenta == cortedis.IdAsenta);
+            if (corte == null)
             {
-                var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsenta == cortedis.IdAsenta);
-                if (corte == null)
-                {
-                    var entity = _mapper.Map<CorteDi>(cortedis);
-                    _context.CorteDis.Add(entity);
+                var entity = _mapper.Map<CorteDi>(cortedis);
+                _context.CorteDis.Add(entity);
 
-                    //// Actualizar AsentumDTO
-                    //var asentum = await _context.Asenta.FirstOrDefaultAsync(a => a.IdAsenta == cortedis.IdAsenta);
-                    //if (asentum != null)
-                    //{
-                    //    _mapper.Map(cortedis.AsentumDTONavigation, asentum);
-                    //    _context.Entry(asentum).State = EntityState.Modified;
-                    //}
+                //// Actualizar AsentumDTO
+                //var asentum = await _context.Asenta.FirstOrDefaultAsync(a => a.IdAsenta == cortedis.IdAsenta);
+                //if (asentum != null)
+                //{
+                //    _mapper.Map(cortedis.AsentumDTONavigation, asentum);
+                //    _context.Entry(asentum).State = EntityState.Modified;
+                //}
 
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    return BadRequest(new { message = "Carte ya realizado" });
-                }
-                return Ok("Registro exitoso");
+                await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            else
             {
-                return Problem("Error, intente nuevamente" + ex.Message);
+                return BadRequest(new { message = "Carte ya realizado" });
             }
+            return Ok("Registro exitoso");
         }
         //insertarcorte como lista validando si existe uno
         [HttpPost("AddListaCortes")]
@@ -374,26 +351,18 @@ namespace NeoAPI.Controllers.Asentamientos
         [ProducesResponseType(StatusCodes.Status400BadRequest)]
         public async Task<ActionResult<bool>> AddCorte(List<CorteDiscDTO> cortedis, string turno, DateTime fecha) //TODO agrgar id del master del la linea
         {
-            try
+            var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno); // Si no existe el codigo, insertar la nueva categor�a
+            if (corte == null)
             {
-
-                var corte = await _context.CorteDis.FirstOrDefaultAsync(c => c.IdAsentaNavigation.IdInfoAseNavigation.IafechCrea.Date == fecha.Date && c.IdAsentaNavigation.IdInfoAseNavigation.Iaturno == turno); // Si no existe el codigo, insertar la nueva categor�a
-                if (corte == null)
-                {
-                    var lista = _mapper.Map<List<CorteDi>>(cortedis);
-                    _context.CorteDis.AddRange(lista);
-                    await _context.SaveChangesAsync();
-                }
-                else
-                {
-                    return BadRequest(new { message = "Carte ya realizado" });
-                }
-                return Ok("Registro exitoso");
+                var lista = _mapper.Map<List<CorteDi>>(cortedis);
+                _context.CorteDis.AddRange(lista);
+                await _context.SaveChangesAsync();
             }
-            catch (Exception ex)
+            else
             {
-                return Problem("Error, intente nuevamente" + ex.Message);
+                return BadRequest(new { message = "Carte ya realizado" });
             }
+            return Ok("Registro exitoso");
         }
 
         //PUTS

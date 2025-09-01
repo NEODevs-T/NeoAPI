@@ -12,4 +12,6 @@ public partial class CaUnidad
     public string? Udescri { get; set; }
 
     public bool Uestado { get; set; }
+
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

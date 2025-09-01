@@ -12,4 +12,6 @@ public partial class Identifi
     public string? Idescri { get; set; }
 
     public bool Iestado { get; set; }
+
+    public virtual ICollection<ProNoCon> ProNoCons { get; set; } = new List<ProNoCon>();
 }

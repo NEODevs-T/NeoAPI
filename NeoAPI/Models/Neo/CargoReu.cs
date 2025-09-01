@@ -13,9 +13,11 @@ public partial class CargoReu
 
     public string Crempresa { get; set; } = null!;
 
-    public string? Crarea { get; set; }
+    public string Crarea { get; set; } = null!;
 
-    public int? Crbloque { get; set; }
+    public int IdTipReu { get; set; }
+
+    public int Crbloque { get; set; }
 
     public virtual ICollection<AsistenReu> AsistenReus { get; set; } = new List<AsistenReu>();
 }

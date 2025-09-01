@@ -11,5 +11,7 @@ public partial class Ksf
 
     public bool KsfEsta { get; set; }
 
-    public virtual ICollection<ReuDium> ReuDia { get; set; } = new List<ReuDium>();
+    public string KsfEnglish { get; set; } = null!;
+
+    public virtual ICollection<Reunion> Reunions { get; set; } = new List<Reunion>();
 }

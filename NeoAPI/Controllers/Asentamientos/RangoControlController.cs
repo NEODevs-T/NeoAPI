@@ -23,41 +23,29 @@ namespace NeoAPI.Controllers.RangoControl
         [HttpGet("GetProductosPorLinea/{idLinea:int}")]
         public async Task<ActionResult<List<ProductosV>>> GetProductosPorLinea(int idLinea)
         {
-            try{
-                return await this._context.ProductosVs.Where(p => p.IdLinea == idLinea && p.Estado == true).ToListAsync();
-            }catch{
-                return NotFound();
-            }
+            
+            return await this._context.ProductosVs.Where(p => p.IdLinea == idLinea && p.Estado == true).ToListAsync();
+            
         }
 
         [HttpGet("GetSeccionesPorLinea/{idLinea:int}")]
         public async Task<ActionResult<List<SeccionesV>>> GetSeccionesPorLinea(int idLinea)
         {
-            try{
-                return await this._context.SeccionesVs.Where(s => s.IdLinea == idLinea && s.Estado == true).ToListAsync();
-            }catch{
-                return NotFound();
-            }
+            
+            return await this._context.SeccionesVs.Where(s => s.IdLinea == idLinea && s.Estado == true).ToListAsync();
+            
         }
 
         [HttpGet("GetTipoVariblePorLinea/{idLinea:int}")]
         public async Task<ActionResult<List<VarTipoV>>> GetTipoVariblePorLinea(int idLinea)
         {
-            try{
-                return await this._context.VarTipoVs.Where(t => t.IdLinea == idLinea && t.Estado == true).ToListAsync();
-            }catch{
-                return NotFound();
-            }
+            return await this._context.VarTipoVs.Where(t => t.IdLinea == idLinea && t.Estado == true).ToListAsync();
         }
 
         [HttpGet("GetClasificacionVariblePorLinea/{idLinea:int}")]
         public async Task<ActionResult<List<VarClasificacionV>>> GetClasificacionVariblePorLinea(int idLinea)
         {
-            try{
-                return await this._context.VarClasificacionVs.Where(c => c.IdLinea == idLinea && c.Estado == true).ToListAsync();
-            }catch{
-                return NotFound();
-            }
+            return await this._context.VarClasificacionVs.Where(c => c.IdLinea == idLinea && c.Estado == true).ToListAsync();
         }
 
         [HttpGet("GetRangoDeControl")]

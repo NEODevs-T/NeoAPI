@@ -3,7 +3,7 @@ using NeoAPI.Interface;
 using NeoAPI.ModelsDOCIng;
 using NeoAPI.Models;
 
-namespace NeoAPI.Logic
+namespace NeoAPI.Logic.Global
 {
     public class RotacionLogic : IRotacionLogic
     {
@@ -135,20 +135,12 @@ namespace NeoAPI.Logic
             }else{
                 return null;
             }
-
-            try
-            {
                 RotaCalidum rotaCalidum = new RotaCalidum();
                 rotaCalidum.RcidRotCal = 0;
                 rotaCalidum.Rcfecha = fecha;
                 rotaCalidum.Rcturno = turno;
                 rotaCalidum.Rcgrupo = "0";
                 return rotaCalidum;
-            }
-            catch
-            {
-                return null;
-            }
         }
     }
 }

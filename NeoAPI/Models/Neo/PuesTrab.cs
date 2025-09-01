@@ -13,5 +13,7 @@ public partial class PuesTrab
 
     public bool? Ptesta { get; set; }
 
+    public int Ptorden { get; set; }
+
     public virtual ICollection<Monto> Montos { get; set; } = new List<Monto>();
 }

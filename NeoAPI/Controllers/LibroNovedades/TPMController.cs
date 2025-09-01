@@ -16,23 +16,20 @@ namespace NeoAPI.Controllers.LibroNovedades
         private readonly DbNeoIiContext _context;
         private readonly IMapper _mapper;
 
-        public TPMController(DbNeoIiContext context,IMapper mapper)
+        public TPMController(DbNeoIiContext context, IMapper mapper)
         {
             _context = context;
             _mapper = mapper;
         }
 
         [HttpGet("GetClasificacionTPM")]
-        public async Task<ActionResult<List<ClasifiTpmDTO>>> GetClasificacionTPM(){
+        public async Task<ActionResult<List<ClasifiTpmDTO>>> GetClasificacionTPM()
+        {
             List<ClasifiTpm> listaClasiTPM;
-            try{
-                listaClasiTPM = await _context.ClasifiTpms.Where(c => c.Ctpmestado == true).ToListAsync();
-
-                return _mapper.Map<List<ClasifiTpmDTO>>(listaClasiTPM);
-            }catch(Exception e){
-                return BadRequest(e);
-            }
+            listaClasiTPM = await _context.ClasifiTpms.Where(c => c.Ctpmestado == true).ToListAsync();
+            return _mapper.Map<List<ClasifiTpmDTO>>(listaClasiTPM);
         }
-    }
 
+    }
 }
+

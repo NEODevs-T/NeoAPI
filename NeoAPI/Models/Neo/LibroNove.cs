@@ -13,7 +13,7 @@ public partial class LibroNove
 
     public string Lndiscrepa { get; set; } = null!;
 
-    public int LntiePerMi { get; set; }
+    public double LntiePerMi { get; set; }
 
     public string LnfichaRes { get; set; } = null!;
 
@@ -38,6 +38,8 @@ public partial class LibroNove
     public int? LnisResu { get; set; }
 
     public int IdMaster { get; set; }
+
+    public string? LnfichSupe { get; set; }
 
     public virtual AreaCarga IdAreaCarNavigation { get; set; } = null!;
 
