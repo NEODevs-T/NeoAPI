@@ -12,6 +12,7 @@ using Nager.Date;
 using Nager.Date.Model;
 using Microsoft.EntityFrameworkCore.Metadata.Conventions;
 using System.Data;
+using System.Text.RegularExpressions;
 
 
 namespace NeoAPI.Controllers.AsistenciaReuControllers;
@@ -165,7 +166,7 @@ public class AsistenciaReuController : ControllerBase
 
     }
     [HttpGet("GetCargoReuDiaria")]
-    public async Task<ActionResult<List<CargoReuDTO>>> GetCargoReuDiaria()
+    public async Task<ActionResult<List<CarReuDTO>>> GetCargoReuDiaria()
     {
         var cargos = await _reunionesLogic.GetCargoReuDiaria();
         return Ok(cargos);
@@ -179,23 +180,23 @@ public class AsistenciaReuController : ControllerBase
     }
 
     private static DateTime GetEasterSunday(int year)
-        {
-            int a = year % 19;
-            int b = year / 100;
-            int c = year % 100;
-            int d = b / 4;
-            int e = b % 4;
-            int f = (b + 8) / 25;
-            int g = (b - f + 1) / 3;
-            int h = (19 * a + b - d - g + 15) % 30;
-            int i = c / 4;
-            int k = c % 4;
-            int l = (32 + 2 * e + 2 * i - h - k) % 7;
-            int m = (a + 11 * h + 22 * l) / 451;
-            int month = (h + l - 7 * m + 114) / 31;
-            int day = ((h + l - 7 * m + 114) % 31) + 1;
-            return new DateTime(year, month, day);
-        }
+    {
+        int a = year % 19;
+        int b = year / 100;
+        int c = year % 100;
+        int d = b / 4;
+        int e = b % 4;
+        int f = (b + 8) / 25;
+        int g = (b - f + 1) / 3;
+        int h = (19 * a + b - d - g + 15) % 30;
+        int i = c / 4;
+        int k = c % 4;
+        int l = (32 + 2 * e + 2 * i - h - k) % 7;
+        int m = (a + 11 * h + 22 * l) / 451;
+        int month = (h + l - 7 * m + 114) / 31;
+        int day = ((h + l - 7 * m + 114) % 31) + 1;
+        return new DateTime(year, month, day);
+    }
 
     [HttpGet("GetPorcentajeAsistenciaDiaria")]
     public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaDiaria(
@@ -464,50 +465,48 @@ public class AsistenciaReuController : ControllerBase
     }
 
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
-    public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaMensual(
-    string fechaMesAño, string empresa, string area)
+    public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaQuincenal(
+    string mesAñoInicio, string mesAñoFin, string empresa, string area)
     {
         try
         {
-            string[] parts = fechaMesAño.Split('-'); // formato esperado: "MM-YYYY"
-            int mes = int.Parse(parts[0]);
-            int año = int.Parse(parts[1]);
+            DateTime fechaInicio = ParseMesAnio(mesAñoInicio);
+            DateTime fechaFin = ParseMesAnio(mesAñoFin, esFechaFin: true);
 
-            DateTime inicio = new DateTime(año, mes, 1);
-            DateTime fin = new DateTime(año, mes, DateTime.DaysInMonth(año, mes));
+            if (fechaFin > DateTime.Today)
+                fechaFin = DateTime.Today;
 
-            if (inicio > fin)
-            {
-                return BadRequest("La fecha de inicio debe ser anterior o igual a la fecha final.");
-            }
-            int totalDias = (fin.Date - inicio.Date).Days + 1;
-            var meetingDays = _reunionesLogic.ObtenerJuevesObjetivo(inicio, fin);
+            if (fechaInicio > fechaFin)
+                return BadRequest("La fecha de inicio no puede ser posterior a la fecha final.");
+
+            var meetingDays = _reunionesLogic.ObtenerJuevesObjetivo(fechaInicio, fechaFin);
             int reunionesProgramadas = meetingDays.Count;
-            List<CarReuDTO> cargos = await _reunionesLogic.GetCargoReuDiaria();
+
+            var cargos = await _reunionesLogic.GetCargoReuDiaria();
             if (cargos == null)
-            {
                 return StatusCode(500, "Error al obtener datos de los cargos.");
-            }
+
             cargos = cargos
                 .Where(c => c.IdTipReu == 3 &&
-                            (string.IsNullOrWhiteSpace(area) || c.Centro.Equals(area, StringComparison.OrdinalIgnoreCase)) &&
-                            (string.IsNullOrWhiteSpace(empresa) || c.Empresa.Equals(empresa, StringComparison.OrdinalIgnoreCase)))
+                            (string.IsNullOrWhiteSpace(area) || (c.Centro?.Equals(area, StringComparison.OrdinalIgnoreCase) ?? false)) &&
+                            (string.IsNullOrWhiteSpace(empresa) || (c.Empresa?.Equals(empresa, StringComparison.OrdinalIgnoreCase) ?? false)))
                 .ToList();
-            List<AsistenReuDTO> asistencias = await _reunionesLogic.GetAsisReuDiaria();
-            if (asistencias == null)
-            {
-                return StatusCode(500, "Error al obtener datos de la asistencia.");
-            }
-            var meetingDaysSet = meetingDays.Select(md => md.Date).ToHashSet();
+
             var cargoIds = cargos.Select(c => c.IdCargoR).ToList();
+
+            var asistencias = await _reunionesLogic.GetAsisReuDiaria();
+            if (asistencias == null)
+                return StatusCode(500, "Error al obtener datos de la asistencia.");
+
+            var meetingDaysSet = meetingDays.Select(d => d.Date).ToHashSet();
+
             var asistenciasFiltradas = asistencias
                 .Where(a => meetingDaysSet.Contains(a.Arfecha.Date) && cargoIds.Contains(a.IdCargoR))
                 .ToList();
-            var agrupadasPorDia = asistenciasFiltradas
+
+            var asistenciaPorCargo = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Date })
                 .Select(g => new { g.Key.IdCargoR })
-                .ToList();
-            var asistenciaPorCargo = agrupadasPorDia
                 .GroupBy(x => x.IdCargoR)
                 .Select(g => new
                 {
@@ -515,12 +514,13 @@ public class AsistenciaReuController : ControllerBase
                     DiasAsistidos = g.Count()
                 })
                 .ToList();
+
             var detallePorCargo = cargoIds.Select(id =>
             {
                 int diasAsistidos = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.DiasAsistidos ?? 0;
-                double porcentaje = reunionesProgramadas > 0 ?
-                    ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
+                double porcentaje = reunionesProgramadas > 0 ? ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
                 string nombre = cargos.FirstOrDefault(c => c.IdCargoR == id)?.Crnombre ?? string.Empty;
+
                 return new AsistenReuPorcetanjeDTO
                 {
                     IdCargoR = id,
@@ -529,23 +529,52 @@ public class AsistenciaReuController : ControllerBase
                     ReunionesAsistidas = diasAsistidos,
                     PorcentajeAsistencia = porcentaje
                 };
-            })
-            .OrderByDescending(x => x.IdCargoR)
-            .ToList();
+            }).OrderByDescending(x => x.IdCargoR).ToList();
+
             int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
-            int totalReunionesEsperadas = cargoIds.Count() * reunionesProgramadas;
-            double porcentajeGlobal = totalReunionesEsperadas > 0 ?
-                ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+            int totalReunionesEsperadas = cargoIds.Count * reunionesProgramadas;
+            double porcentajeGlobal = totalReunionesEsperadas > 0 ? ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+
+
             return Ok(new PorcentajeAsistenciaDiariaResponseDTO
             {
                 PorcentajeGlobal = porcentajeGlobal,
-                DetallePorCargo = detallePorCargo
+                DetallePorCargo = detallePorCargo,
             });
+
         }
         catch (Exception ex)
         {
             return StatusCode(500, $"Error interno del servidor: {ex.Message}");
         }
     }
+
+    private DateTime ParseMesAnio(string mesAnio, bool esFechaFin = false)
+    {
+        if (string.IsNullOrWhiteSpace(mesAnio))
+            throw new ArgumentException("El parámetro mesAño no puede estar vacío.");
+
+        var partes = mesAnio.Split('-');
+        if (partes.Length != 2 ||
+            !int.TryParse(partes[0], out int mes) ||
+            !int.TryParse(partes[1], out int año) ||
+            mes < 1 || mes > 12)
+        {
+            throw new ArgumentException("El formato de la fecha debe ser MM-YYYY y el mes debe estar entre 01 y 12.");
+        }
+
+        if (esFechaFin)
+        {
+            int ultimoDia = DateTime.DaysInMonth(año, mes);
+            return new DateTime(año, mes, ultimoDia);
+        }
+        else
+        {
+            return new DateTime(año, mes, 1);
+        }
+    }
+
+
+
 }
 
