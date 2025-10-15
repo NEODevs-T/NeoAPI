@@ -246,32 +246,30 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
 }
 
 
-    [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}/{reunion:int}")]
-    public async Task<ActionResult<List<ReunionDTO>>> GetByODT(string ODT, string idcentro, string iddiv)
-    {
-        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-        //Consultar nombre del centro y division  para insertarlos
-        CentroDivisionDTO centrodiv = new CentroDivisionDTO();
-        centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-        List<Reunion> reudiatablas = new List<Reunion>();
+[HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}/{reunion:int}")]
+public async Task<ActionResult<List<ReunionDTO>>> GetByODT(string ODT, string idcentro, string iddiv, int reunion)
+{
+    IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
 
+    // Consultar nombre del centro y división
+    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
+    string centro = centrodiv.Cnom;
+    string div = centrodiv.Dnombre;
 
-        string centro = centrodiv.Cnom;
-        string div = centrodiv.Dnombre;
-
-        reudiatablas = new List<Reunion>();
-
-        reudiatablas = await _context.Reunions
-        .Where(a => a.Rdodt.Contains(ODT) && (a.Rdcentro == centrodiv.Cnom && a.Rddiv == centrodiv.Dnombre && a.IdTipReu == 1))
+    List<Reunion> reudiatablas = await _context.Reunions
+        .Where(a => a.Rdodt.Contains(ODT) &&
+                    a.Rdcentro == centro &&
+                    a.Rddiv == div)
         .Include(b => b.IdksfNavigation)
         .Include(b => b.IdResReuNavigation)
         .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
         .OrderByDescending(b => b.RdfecReu)
         .ToListAsync();
 
-        return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
-    }
+    return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
+}
+
 [HttpGet("GetPendientesTurno/{idcentro}/{iddiv}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetPendientesTurno(string idcentro, string iddiv)
 {
