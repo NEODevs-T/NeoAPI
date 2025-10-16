@@ -251,23 +251,38 @@ public async Task<ActionResult<List<ReunionDTO>>> GetByODT(string ODT, string id
 {
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
 
-    // Consultar nombre del centro y división
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-
     string centro = centrodiv.Cnom;
     string div = centrodiv.Dnombre;
 
-    List<Reunion> reudiatablas = await _context.Reunions
+    var reudiatablas = await _context.Reunions
         .Where(a => a.Rdodt.Contains(ODT) &&
                     a.Rdcentro == centro &&
-                    a.Rddiv == div)
+                    a.Rddiv == div &&
+                    a.IdTipReu == reunion)
         .Include(b => b.IdksfNavigation)
         .Include(b => b.IdResReuNavigation)
         .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
         .OrderByDescending(b => b.RdfecReu)
         .ToListAsync();
 
-    return Ok(_mapper.Map<List<ReunionDTO>>(reudiatablas));
+    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reudiatablas);
+
+    foreach (var dto in reunionDtos)
+    {
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
+        {
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
+
+            if (equipo != null)
+            {
+                dto.EnombreEam = equipo.EnombreEam;
+            }
+        }
+    }
+
+    return Ok(reunionDtos);
 }
 
 [HttpGet("GetPendientesTurno/{idcentro}/{iddiv}")]
