@@ -8,6 +8,7 @@ public partial class RespoReuDTO
     public int IdResReu { get; set; }
 
     public string Rrnombre { get; set; } = null!;
+    public string Rrenglish { get; set; } 
 
     public bool Rresta { get; set; }
 
