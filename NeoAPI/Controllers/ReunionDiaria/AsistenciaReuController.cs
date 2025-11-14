@@ -306,11 +306,15 @@ public class AsistenciaReuController : ControllerBase
                 };
             }).OrderByDescending(x => x.IdCargoR).ToList();
             int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
+            int totalSuplenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasSuplencias);
             int totalReunionesEsperadas = cargoIds.Count * reunionesProgramadas;
+
             double porcentajeGlobal = totalReunionesEsperadas > 0 ? ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+            double porcentajeGlobalSuplencia = totalReunionesEsperadas > 0 ? ((double)totalSuplenciasGlobal / totalReunionesEsperadas) * 100 : 0;
             return Ok(new PorcentajeAsistenciaDiariaResponseDTO
             {
                 PorcentajeGlobal = porcentajeGlobal,
+                PorcentajeGlobalSuplencia = porcentajeGlobalSuplencia, 
                 DetallePorCargo = detallePorCargo
             });
         }
@@ -485,7 +489,7 @@ public class AsistenciaReuController : ControllerBase
             return Ok(new PorcentajeAsistenciaDiariaResponseDTO
             {
                 PorcentajeGlobal = porcentajeGlobal,
-                PorcentajeGlobalSuplencia = porcentajeGlobalSuplencia, // <-- Nuevo campo
+                PorcentajeGlobalSuplencia = porcentajeGlobalSuplencia, 
                 DetallePorCargo = detallePorCargo
             });
         }
@@ -497,7 +501,7 @@ public class AsistenciaReuController : ControllerBase
 
     [HttpGet("GetPorcentajeAsistenciaQuincenal")]
     public async Task<ActionResult<PorcentajeAsistenciaDiariaResponseDTO>> GetPorcentajeAsistenciaQuincenal(
-    string mesAñoInicio, string mesAñoFin, string empresa, string area)
+        string mesAñoInicio, string mesAñoFin, string empresa, string area)
     {
         try
         {
@@ -537,19 +541,32 @@ public class AsistenciaReuController : ControllerBase
 
             var asistenciaPorCargo = asistenciasFiltradas
                 .GroupBy(a => new { a.IdCargoR, Dia = a.Arfecha.Date })
-                .Select(g => new { g.Key.IdCargoR })
-                .GroupBy(x => x.IdCargoR)
+                .GroupBy(g => g.Key.IdCargoR)
                 .Select(g => new
                 {
                     IdCargoR = g.Key,
-                    DiasAsistidos = g.Count()
+                    DiasAsistidos = g
+                        .Where(grupo => grupo.Any(a => a.ArAsistente > 0))
+                        .Select(grupo => grupo.Key.Dia)
+                        .Distinct()
+                        .Count(),
+                    DiasSuplencias = g
+                        .Where(grupo => grupo.Any(a => a.ArSuplente > 0))
+                        .Select(grupo => grupo.Key.Dia)
+                        .Distinct()
+                        .Count()
                 })
                 .ToList();
 
             var detallePorCargo = cargoIds.Select(id =>
             {
-                int diasAsistidos = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id)?.DiasAsistidos ?? 0;
-                double porcentaje = reunionesProgramadas > 0 ? ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
+                var asistencia = asistenciaPorCargo.FirstOrDefault(x => x.IdCargoR == id);
+                int diasAsistidos = asistencia?.DiasAsistidos ?? 0;
+                int diasSuplencias = asistencia?.DiasSuplencias ?? 0;
+
+                double porcentajeAsistencia = reunionesProgramadas > 0 ? ((double)diasAsistidos / reunionesProgramadas) * 100 : 0;
+                double porcentajeSuplencia = reunionesProgramadas > 0 ? ((double)diasSuplencias / reunionesProgramadas) * 100 : 0;
+
                 string nombre = cargos.FirstOrDefault(c => c.IdCargoR == id)?.Crnombre ?? string.Empty;
 
                 return new AsistenReuPorcetanjeDTO
@@ -558,21 +575,25 @@ public class AsistenciaReuController : ControllerBase
                     Nombre = nombre,
                     ReunionesProgramadas = reunionesProgramadas,
                     ReunionesAsistidas = diasAsistidos,
-                    PorcentajeAsistencia = porcentaje
+                    PorcentajeAsistencia = porcentajeAsistencia,
+                    ReunionesSuplencias = diasSuplencias,
+                    PorcentajeSuplencia = porcentajeSuplencia
                 };
             }).OrderByDescending(x => x.IdCargoR).ToList();
 
             int totalAsistenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasAsistidos);
+            int totalSuplenciasGlobal = asistenciaPorCargo.Sum(x => x.DiasSuplencias);
             int totalReunionesEsperadas = cargoIds.Count * reunionesProgramadas;
-            double porcentajeGlobal = totalReunionesEsperadas > 0 ? ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
 
+            double porcentajeGlobal = totalReunionesEsperadas > 0 ? ((double)totalAsistenciasGlobal / totalReunionesEsperadas) * 100 : 0;
+            double porcentajeGlobalSuplencia = totalReunionesEsperadas > 0 ? ((double)totalSuplenciasGlobal / totalReunionesEsperadas) * 100 : 0;
 
             return Ok(new PorcentajeAsistenciaDiariaResponseDTO
             {
                 PorcentajeGlobal = porcentajeGlobal,
-                DetallePorCargo = detallePorCargo,
+                PorcentajeGlobalSuplencia = porcentajeGlobalSuplencia, 
+                DetallePorCargo = detallePorCargo
             });
-
         }
         catch (Exception ex)
         {
