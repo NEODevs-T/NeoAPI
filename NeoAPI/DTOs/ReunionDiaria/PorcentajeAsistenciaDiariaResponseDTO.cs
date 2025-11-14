@@ -7,5 +7,6 @@ public class PorcentajeAsistenciaDiariaResponseDTO
 {
     
     public double PorcentajeGlobal { get; set; }
+    public double PorcentajeGlobalSuplencia { get; set; }
     public List<AsistenReuPorcetanjeDTO> DetallePorCargo { get; set; }
 }
