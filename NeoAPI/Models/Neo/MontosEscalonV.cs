@@ -9,12 +9,6 @@ public partial class MontosEscalonV
 
     public string Puesto { get; set; } = null!;
 
-    public int? Escalon { get; set; }
-
-    public double? Monto { get; set; }
-
-    public string Moneda { get; set; } = null!;
-
     public string Linea { get; set; } = null!;
 
     public string? CentroCosto { get; set; }

@@ -102,7 +102,14 @@ public class ReunionDiaLogic : IReunionDiaLogic
         List<Reunion> discs = await _neocontext.Reunions
             .Include(b => b.IdksfNavigation)
             .Include(b => b.IdResReuNavigation)
-            .Where(h => h.Rdcentro == centro && h.Rddiv == div && h.IdTipReu == reunionDiaria && h.RdfecTra.Date < DateTime.Now.Date && h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo")
+
+.Where(h => h.Rdcentro == centro &&
+            h.Rddiv == div &&
+            h.IdTipReu == reunionDiaria &&
+            h.RdfecTra.HasValue &&
+            h.RdfecTra.Value.Date < DateTime.Now.Date &&
+            (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
+
             .ToListAsync();
 
         List<CambFec> result = new List<CambFec>();

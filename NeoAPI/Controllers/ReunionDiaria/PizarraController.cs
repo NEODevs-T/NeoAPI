@@ -58,7 +58,7 @@ public class PizarraController : ControllerBase
                 Rddisc = r.Rddisc,
                 Rdodt = r.Rdodt,
                 Rdtiempo = r.Rdtiempo.ToString(),
-                RdfecTra = r.RdfecTra //?? DateTime.Now
+                RdfecTra = r.RdfecTra ?? DateTime.Now
             });
 
             return Ok(result);
@@ -80,7 +80,8 @@ public class PizarraController : ControllerBase
                 Rddisc = r.Rddisc,
                 Rdodt = r.Rdodt,
                 Rdtiempo = r.Rdtiempo.ToString(),
-                RdfecTra = r.RdfecTra //?? DateTime.Now
+                RdfecTra = r.RdfecTra ?? DateTime.Now
+                
             });
 
             // return Ok(_mapper.Map<List<ReunionDTO>>(list));
@@ -418,8 +419,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientesQuincenal2(string
                     h.IdTipReu == reunionDiaria &&
                     h.RdfecReu.Value.Date >= fechaInicioReu &&
                     h.RdfecReu.Value.Date <= fechaFinReu &&
-                    h.RdfecTra.Date >= fechaInicioTra &&
-                    h.RdfecTra.Date >= fechaFinTra &&
+                    (h.RdfecTra ?? DateTime.MinValue).Date >= fechaInicioTra.Date &&
+                    (h.RdfecTra ?? DateTime.MinValue).Date >= fechaFinTra.Date &&
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
         .ToListAsync();
 
@@ -792,7 +793,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesTrabajoVencidas(st
         .Where(h => h.Rdcentro == centro &&
                     h.Rddiv == div &&
                     h.IdTipReu == reunionDiaria &&
-                    h.RdfecTra.Date < fechaActual && // Solo reuniones con fecha de trabajo vencida
+                    h.RdfecTra.Value.Date < fechaActual.Date && // Solo reuniones con fecha de trabajo vencida
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Pendiente/Responsable" || h.Rdstatus == "Listo"))
         .OrderBy(h => h.RdfecTra) // Ordena por fecha de trabajo de más viejo a más nuevo
         .AsNoTracking()
@@ -844,8 +845,8 @@ public async Task<ActionResult<List<ReunionDTO>>> GetReunionesPorCodigodeCompra(
                     h.IdTipReu == reunionDiaria &&
                     h.RdfecReu.Value.Date >= fechaInicioReu &&
                     h.RdfecReu.Value.Date <= fechaFinReu &&
-                    h.RdfecTra.Date >= fechaInicioTra &&
-                    h.RdfecTra.Date >= fechaFinTra &&
+                    h.RdfecTra.Value.Date >= fechaInicioTra.Date &&
+                    h.RdfecTra.Value.Date >= fechaFinTra.Date &&
                     (h.Rdstatus == "Pendiente" || h.Rdstatus == "Listo" || h.Rdstatus == "Pendiente/Responsable"))
         .ToListAsync();
 

@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NeoAPI.Models.Neo;
 
-public partial class Reunion
+public partial class Reunion2
 {
     public int IdReuDia { get; set; }
 
@@ -29,7 +29,7 @@ public partial class Reunion
 
     public string? RdplanAcc { get; set; }
 
-    public double? Rdtiempo { get; set; }
+    public string? Rdtiempo { get; set; }
 
     public string? Rdstatus { get; set; }
 
@@ -39,31 +39,17 @@ public partial class Reunion
 
     public DateTime? RdfecReu { get; set; }
 
-    public DateTime? RdfecTra { get; set; }
+    public DateTime RdfecTra { get; set; }
 
     public string? Rdobs { get; set; }
 
     public DateTime? RdfecCrea { get; set; }
 
-    public int IdCausaCal { get; set; }
+    public int? IdCausaCal { get; set; }
 
     public string? OrigenCal { get; set; }
 
-    public int IdTipReu { get; set; }
+    public int? IdTipReu { get; set; }
 
     public string? RdcodRequi { get; set; }
-
-    public virtual ICollection<CambFec> CambFecs { get; set; } = new List<CambFec>();
-
-    public virtual ICollection<CambStat> CambStats { get; set; } = new List<CambStat>();
-
-    public virtual CausaCal IdCausaCalNavigation { get; set; } = null!;
-
-    public virtual Master? IdMasterNavigation { get; set; }
-
-    public virtual RespoReu IdResReuNavigation { get; set; } = null!;
-
-    public virtual TipReu IdTipReuNavigation { get; set; } = null!;
-
-    public virtual Ksf IdksfNavigation { get; set; } = null!;
 }
