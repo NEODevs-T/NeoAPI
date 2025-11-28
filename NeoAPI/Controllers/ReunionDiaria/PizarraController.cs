@@ -100,20 +100,26 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
 
     List<Reunion> reudiatablas = new List<Reunion>();
 
-    if (tipo == "1")
+        if (tipo == "1")
     {
         if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro 
-                         && a.IdTipReu == reunion 
-                         && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"
-                         && a.Rdstatus != "Listo" 
-                         && a.Rdstatus != "Cerrado" 
-                         && a.Rdstatus != "Rechazada"
-                         && a.RdfecReu >= f1.AddDays(-3) 
-                         && a.RdfecReu <= f2.AddDays(+1))
+                .Where(a => a.Rdcentro == centro
+                        && a.IdTipReu == reunion
+                        && a.Rddiv == div
+                        && a.Rdstatus != "En Curso"
+                        && a.Rdstatus != "Listo"
+                        && a.Rdstatus != "Cerrado"
+                        && a.Rdstatus != "Rechazada"
+                        &&
+                        (
+                            // Fecha de reunión dentro del rango
+                            (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1)) ||
+                            // Fecha de trabajo dentro del rango
+                            (a.RdfecTra >= f1.AddDays(-3) && a.RdfecTra <= f2.AddDays(+1))
+                        )
+                )
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
@@ -123,22 +129,28 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
         else
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro 
-                         && a.IdTipReu == reunion 
-                         && a.Rddiv == div 
-                         && a.Rdstatus != "En Curso"
-                         && a.Rdstatus != "Listo" 
-                         && a.Rdstatus != "Cerrado" 
-                         && a.Rdstatus != "Rechazada"
-                         && a.RdfecReu >= f1.AddDays(-1)
-                         && a.RdfecReu <= f2.AddDays(+1))
+                .Where(a => a.Rdcentro == centro
+                        && a.IdTipReu == reunion
+                        && a.Rddiv == div
+                        && a.Rdstatus != "En Curso"
+                        && a.Rdstatus != "Listo"
+                        && a.Rdstatus != "Cerrado"
+                        && a.Rdstatus != "Rechazada"
+                        &&
+                        (
+
+                            (a.RdfecReu >= f1.AddDays(-1) && a.RdfecReu <= f2.AddDays(+1))                        
+                    
+                    )
+                )
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
                 .OrderByDescending(b => b.RdfecReu)
                 .ToListAsync();
         }
-    }
+        
+        }
     else if (tipo == "0")
     {
         if (estado == "Total Pendiente")
