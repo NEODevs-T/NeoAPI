@@ -130,7 +130,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                          && a.Rdstatus != "Listo" 
                          && a.Rdstatus != "Cerrado" 
                          && a.Rdstatus != "Rechazada"
-                         && a.RdfecReu >= f1.Date 
+                         && a.RdfecReu >= f1.AddDays(-1)
                          && a.RdfecReu <= f2.AddDays(+1))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
