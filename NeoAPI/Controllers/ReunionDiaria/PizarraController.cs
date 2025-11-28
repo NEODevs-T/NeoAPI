@@ -115,9 +115,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro,
                         &&
                         (
                             // Fecha de reunión dentro del rango
-                            (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1)) ||
-                            // Fecha de trabajo dentro del rango
-                            (a.RdfecTra >= f1.AddDays(-3) && a.RdfecTra <= f2.AddDays(+1))
+                            (a.RdfecReu >= f1.AddDays(-3) && a.RdfecReu <= f2.AddDays(+1))
                         )
                 )
                 .Include(b => b.IdksfNavigation)
