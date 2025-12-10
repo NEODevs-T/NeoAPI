@@ -89,16 +89,14 @@ public class PizarraController : ControllerBase
     }
 
 [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
-public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
-    string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
+public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
 {
     estado = Uri.UnescapeDataString(estado);
-
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
     string centro = centrodiv.Cnom;
-    string div    = centrodiv.Dnombre;
+    string div = centrodiv.Dnombre;
 
     List<Reunion> reudiatablas = new List<Reunion>();
 
@@ -107,36 +105,36 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
         if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus != "Listo"
-                            && a.Rdstatus != "Cerrado"
-                            && a.Rdstatus != "Rechazada"
-                            && a.RdfecReu >= f1.AddDays(-3)
-                            && a.RdfecReu <= f2.AddDays(+1))
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso"
+                         && a.Rdstatus != "Listo" 
+                         && a.Rdstatus != "Cerrado" 
+                         && a.Rdstatus != "Rechazada"
+                         && a.RdfecReu >= f1.AddDays(-3) 
+                         && a.RdfecReu <= f2.AddDays(+1))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
+                .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
                 .OrderByDescending(b => b.RdfecReu)
                 .ToListAsync();
         }
         else
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus != "Listo"
-                            && a.Rdstatus != "Cerrado"
-                            && a.Rdstatus != "Rechazada"
-                            && a.RdfecReu >= f1.Date
-                            && a.RdfecReu <= f2.AddDays(+1))
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso"
+                         && a.Rdstatus != "Listo" 
+                         && a.Rdstatus != "Cerrado" 
+                         && a.Rdstatus != "Rechazada"
+                         && a.RdfecReu >= f1.Date 
+                         && a.RdfecReu <= f2.AddDays(+1))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
+                .Include(b => b.IdMasterNavigation.IdEmpresaNavigation)
                 .OrderByDescending(b => b.RdfecReu)
                 .ToListAsync();
         }
@@ -146,29 +144,25 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
         if (estado == "Total Pendiente")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && (a.Rdstatus == "Pendiente"
-                                || a.Rdstatus == "Pendiente/Responsable"
-                                || a.Rdstatus == "No Conforme"))
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso"
+                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Conforme"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecReu)
                 .ToListAsync();
         }
         else if (estado == "Todo")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso")
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecReu)
                 .Take(500)
                 .ToListAsync();
@@ -176,14 +170,13 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
         else
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus == estado)
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso"
+                         && a.Rdstatus == estado)
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecReu)
                 .Take(350)
                 .ToListAsync();
@@ -194,29 +187,25 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
         if (estado == "Total Pendiente")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && (a.Rdstatus == "Pendiente"
-                                || a.Rdstatus == "Pendiente/Responsable"
-                                || a.Rdstatus == "No Conforme"))
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso"
+                         && (a.Rdstatus == "Pendiente" || a.Rdstatus == "Pendiente/Responsable" || a.Rdstatus == "No Conforme"))
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecTra)
                 .ToListAsync();
         }
         else if (estado == "Todo")
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso")
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso")
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecTra)
                 .Take(500)
                 .ToListAsync();
@@ -224,14 +213,13 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
         else
         {
             reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus == estado)
+                .Where(a => a.Rdcentro == centro 
+                         && a.IdTipReu == reunion 
+                         && a.Rddiv == div 
+                         && a.Rdstatus != "En Curso"
+                         && a.Rdstatus == estado)
                 .Include(b => b.IdksfNavigation)
                 .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecTra)
                 .Take(50)
                 .ToListAsync();
@@ -240,45 +228,16 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
 
     var reunionDtos = _mapper.Map<List<ReunionDTO>>(reudiatablas);
 
-    for (int i = 0; i < reunionDtos.Count; i++)
+    foreach (var dto in reunionDtos)
     {
-        var dto     = reunionDtos[i];
-        var entidad = reudiatablas[i];
-
-        if (entidad?.IdMasterNavigation != null)
+        if (!string.IsNullOrEmpty(dto.RdcodEq))
         {
-            dto.IdLinea   = entidad.IdMasterNavigation.IdLinea;
-            dto.IdEmpresa = entidad.IdMasterNavigation.IdEmpresa;
-            dto.IdPais    = entidad.IdMasterNavigation.IdPais;
-        }
-    }
+            var equipo = await _context.EquipoEams
+                .FirstOrDefaultAsync(e => e.EcodEquiEam == dto.RdcodEq);
 
-    var clavesCodLin = reunionDtos
-        .Where(d => !string.IsNullOrEmpty(d.RdcodEq) && d.IdLinea != 0)
-        .Select(d => new { d.RdcodEq, d.IdLinea })
-        .Distinct()
-        .ToList();
-
-    if (clavesCodLin.Count > 0)
-    {
-        var cods   = clavesCodLin.Select(k => k.RdcodEq).Distinct().ToList();
-        var lineas = clavesCodLin.Select(k => k.IdLinea).Distinct().ToList();
-
-        var equipos = await _context.EquipoEams
-            .Where(e => cods.Contains(e.EcodEquiEam) && lineas.Contains(e.IdLinea))
-            .Select(e => new { e.EcodEquiEam, e.IdLinea, e.EnombreEam })
-            .ToListAsync();
-
-        var lookup = equipos.ToDictionary(k => (k.EcodEquiEam, k.IdLinea), v => v.EnombreEam);
-
-        foreach (var dto in reunionDtos)
-        {
-            if (!string.IsNullOrEmpty(dto.RdcodEq) && dto.IdLinea != 0)
+            if (equipo != null)
             {
-                if (lookup.TryGetValue((dto.RdcodEq, dto.IdLinea), out var nombre))
-                    dto.EnombreEam = nombre;
-                else
-                    dto.EnombreEam = null; 
+                dto.EnombreEam = equipo.EnombreEam;
             }
         }
     }
