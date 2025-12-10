@@ -18,6 +18,7 @@ public partial class ReunionDTO
     public string? Rdcentro { get; set; }
 
     public string? Rddiv { get; set; }
+    public int IdLinea {get; set;}
 
     public string? Rdarea { get; set; }
 
