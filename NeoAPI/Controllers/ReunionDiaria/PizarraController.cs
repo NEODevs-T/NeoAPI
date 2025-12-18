@@ -265,7 +265,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
         var lineas = clavesCodLin.Select(k => k.IdLinea).Distinct().ToList();
 
         var equipos = await _context.EquipoEams
-            .Where(e => cods.Contains(e.EcodEquiEam) && lineas.Contains(e.IdLinea))
+            .Where(e => cods.Contains(e.EcodEquiEam) && lineas.Contains(e.IdLinea) && e.EestaEam == true)
             .Select(e => new { e.EcodEquiEam, e.IdLinea, e.EnombreEam })
             .ToListAsync();
 
