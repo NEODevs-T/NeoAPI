@@ -170,7 +170,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecReu)
-                .Take(500)
+                .Take(1500)
                 .ToListAsync();
         }
         else
@@ -185,7 +185,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecReu)
-                .Take(350)
+                .Take(900)
                 .ToListAsync();
         }
     }
@@ -218,7 +218,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecTra)
-                .Take(500)
+                .Take(1500)
                 .ToListAsync();
         }
         else
@@ -233,7 +233,7 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
                 .Include(b => b.IdResReuNavigation)
                 .Include(b => b.IdMasterNavigation)
                 .OrderByDescending(b => b.RdfecTra)
-                .Take(50)
+                .Take(150)
                 .ToListAsync();
         }
     }
