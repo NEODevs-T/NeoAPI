@@ -304,23 +304,32 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpPost("UpdateEquipo")]
-        public async Task<string> UpdateEquipo(EquipoEamDTO equipo)
+        public async Task<IActionResult> UpdateEquipo([FromBody] EquipoEamDTO dto)
         {
             try
             {
-                //No se porque pero asi funciona, no mover 
-                //ya lo movi XD
-                EquipoEamDTO _eq = _mapper.Map<EquipoEamDTO>(equipo);
-                // EquipoEam eq = new EquipoEam();
-                _eq = equipo;
+                var entity = await _context.EquipoEams.FindAsync(dto.IdEquipo);
+                if (entity is null)
+                    return NotFound("NOT_FOUND");
 
-                _context.Entry(_eq).State = EntityState.Modified;
+                // Mapear solo los campos permitidos (o usa AutoMapper: _mapper.Map(dto, entity);)
+                entity.IdLinea     = dto.IdLinea;
+                entity.EcodEquiEam = dto.EcodEquiEam;
+                entity.EnombreEam  = dto.EnombreEam;
+                entity.EdescriEam  = dto.EdescriEam;
+                entity.EestaEam    = dto.EestaEam;
+                entity.Efecha      = dto.Efecha;   // o DateTime.UtcNow si corresponde
+
                 await _context.SaveChangesAsync();
-                return "Registro Exitoso";
+                return Ok("Registro Exitoso");
             }
-            catch (Exception ex)
+            catch (DbUpdateConcurrencyException)
             {
-                return ex.Message;
+                return BadRequest("CONCURRENCY_ERROR");
+            }
+            catch (Exception)
+            {
+                return StatusCode(500, "SERVER_ERROR");
             }
         }
 
