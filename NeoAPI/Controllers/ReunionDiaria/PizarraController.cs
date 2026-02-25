@@ -9,6 +9,7 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Logic.ReunionDia;
 using NeoAPI.Interface;
+using System.Linq;
 
 
 namespace NeoAPI.Controllers.Pizarra;
@@ -88,11 +89,19 @@ public class PizarraController : ControllerBase
         }
     }
 
+
+
 [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
 public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
-    string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
+    string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion,
+    [FromQuery] int? pageSize = null,
+    [FromQuery] DateTime? lastDate = null,
+    [FromQuery] int? lastId = null)
 {
     estado = Uri.UnescapeDataString(estado);
+
+    // Lote interno (opcional, transparente al usuario)
+    int size = Math.Clamp(pageSize ?? 500, 1, 2000);
 
     IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
     CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
@@ -100,190 +109,194 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
     string centro = centrodiv.Cnom;
     string div    = centrodiv.Dnombre;
 
-    List<Reunion> reudiatablas = new List<Reunion>();
+    // 1) Filtro base
+    IQueryable<Reunion> q = _context.Reunions
+        .AsNoTracking()
+        .Where(a => a.Rdcentro == centro
+                 && a.IdTipReu == reunion
+                 && a.Rddiv == div
+                 && a.Rdstatus != "En Curso");
 
+    // 2) Filtros por tipo/estado (como el original)
     if (tipo == "1")
     {
-        if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
-        {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus != "Listo"
-                            && a.Rdstatus != "Cerrado"
-                            && a.Rdstatus != "Rechazada"
-                            && a.RdfecReu >= f1.AddDays(-3)
-                            && a.RdfecReu <= f2.AddDays(+1))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .ToListAsync();
-        }
-        else
-        {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus != "Listo"
-                            && a.Rdstatus != "Cerrado"
-                            && a.Rdstatus != "Rechazada"
-                            && a.RdfecReu >= f1.Date
-                            && a.RdfecReu <= f2.AddDays(+1))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .ToListAsync();
-        }
+        q = q.Where(a => a.Rdstatus != "Listo"
+                      && a.Rdstatus != "Cerrado"
+                      && a.Rdstatus != "Rechazada");
+
+        var desde = (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+            ? f1.AddDays(-3).Date
+            : f1.Date;
+        var hasta = f2.Date.AddDays(1); // <= inclusive
+
+        q = q.Where(a => a.RdfecReu >= desde && a.RdfecReu <= hasta);
     }
     else if (tipo == "0")
     {
         if (estado == "Total Pendiente")
         {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && (a.Rdstatus == "Pendiente"
-                                || a.Rdstatus == "Pendiente/Responsable"
-                                || a.Rdstatus == "No Conforme"))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .ToListAsync();
+            q = q.Where(a => a.Rdstatus == "Pendiente"
+                          || a.Rdstatus == "Pendiente/Responsable"
+                          || a.Rdstatus == "No Conforme");
         }
-        else if (estado == "Todo")
+        else if (estado != "Todo")
         {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso")
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .Take(1500)
-                .ToListAsync();
-        }
-        else
-        {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus == estado)
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecReu)
-                .Take(900)
-                .ToListAsync();
+            q = q.Where(a => a.Rdstatus == estado);
         }
     }
     else if (tipo == "2")
     {
         if (estado == "Total Pendiente")
         {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && (a.Rdstatus == "Pendiente"
-                                || a.Rdstatus == "Pendiente/Responsable"
-                                || a.Rdstatus == "No Conforme"))
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .ToListAsync();
+            q = q.Where(a => a.Rdstatus == "Pendiente"
+                          || a.Rdstatus == "Pendiente/Responsable"
+                          || a.Rdstatus == "No Conforme");
         }
-        else if (estado == "Todo")
+        else if (estado != "Todo")
         {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso")
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .Take(1500)
-                .ToListAsync();
-        }
-        else
-        {
-            reudiatablas = await _context.Reunions
-                .Where(a => a.Rdcentro == centro
-                            && a.IdTipReu == reunion
-                            && a.Rddiv == div
-                            && a.Rdstatus != "En Curso"
-                            && a.Rdstatus == estado)
-                .Include(b => b.IdksfNavigation)
-                .Include(b => b.IdResReuNavigation)
-                .Include(b => b.IdMasterNavigation)
-                .OrderByDescending(b => b.RdfecTra)
-                .Take(150)
-                .ToListAsync();
+            q = q.Where(a => a.Rdstatus == estado);
         }
     }
 
-    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reudiatablas);
+    // 3) Orden estable + seek
+    // tipo "1" y "0" → ordenar por RdfecReu (nullable en entidad, usar coalesce)
+    // tipo "2" → ordenar por RdfecTra (no-null en entidad, sin coalesce)
+    bool orderByReu = (tipo == "1") || (tipo == "0");
 
-    for (int i = 0; i < reunionDtos.Count; i++)
+    if (orderByReu)
     {
-        var dto     = reunionDtos[i];
-        var entidad = reudiatablas[i];
+        q = q.OrderByDescending(b => (b.RdfecReu ?? DateTime.MinValue))
+             .ThenByDescending(b => b.IdReuDia);
 
-        if (entidad?.IdMasterNavigation != null)
+        if (lastDate.HasValue)
         {
-            dto.IdLinea   = entidad.IdMasterNavigation.IdLinea;
-            dto.IdEmpresa = entidad.IdMasterNavigation.IdEmpresa;
-            dto.IdPais    = entidad.IdMasterNavigation.IdPais;
+            var ld = lastDate.Value;
+            if (lastId.HasValue)
+            {
+                q = q.Where(b =>
+                    ((b.RdfecReu ?? DateTime.MinValue) < ld)
+                    || ((b.RdfecReu ?? DateTime.MinValue) == ld && b.IdReuDia < lastId.Value));
+            }
+            else
+            {
+                q = q.Where(b => (b.RdfecReu ?? DateTime.MinValue) < ld);
+            }
+        }
+    }
+    else // tipo == "2" → RdfecTra (DateTime no-nullable)
+    {
+        q = q.OrderByDescending(b => b.RdfecTra)
+             .ThenByDescending(b => b.IdReuDia);
+
+        if (lastDate.HasValue)
+        {
+            var ld = lastDate.Value;
+            if (lastId.HasValue)
+            {
+                q = q.Where(b => (b.RdfecTra < ld) || (b.RdfecTra == ld && b.IdReuDia < lastId.Value));
+            }
+            else
+            {
+                q = q.Where(b => b.RdfecTra < ld);
+            }
         }
     }
 
-    var clavesCodLin = reunionDtos
+    // 4) Proyección directa a ReunionDTO (sin Include; LEFT JOIN implícito)
+    var pageDtos = await q
+        .Select(a => new ReunionDTO
+        {
+            IdReuDia  = a.IdReuDia,
+
+            IdMaster  = a.IdMaster,
+            IdEmpresa = a.IdMasterNavigation != null ? a.IdMasterNavigation.IdEmpresa : 0,
+            IdResReu  = a.IdResReu,
+            Idksf     = a.Idksf,
+
+            Rdcentro  = a.Rdcentro,
+            Rddiv     = a.Rddiv,
+            IdLinea   = a.IdMasterNavigation != null ? a.IdMasterNavigation.IdLinea : 0,
+
+            Rdarea    = a.Rdarea,
+            RdcodEq   = a.RdcodEq,
+            Rddisc    = a.Rddisc,
+            RdcodDis  = a.RdcodDis,
+            RdplanAcc = a.RdplanAcc,
+            Rdtiempo  = a.Rdtiempo,
+            Rdstatus  = a.Rdstatus,
+            Rdodt     = a.Rdodt,
+            RdnumDis  = a.RdnumDis,
+
+            // DTO no-nullables:
+            RdfecReu  = a.RdfecReu ?? DateTime.MinValue, // entidad es nullable
+            RdfecTra  = a.RdfecTra,                      // entidad no-nullable
+
+            Rdobs     = a.Rdobs,
+            RdfecCrea = a.RdfecCrea,
+
+            IdCausaCal = a.IdCausaCal,
+            OrigenCal  = a.OrigenCal ?? string.Empty, // DTO no-nullable
+
+            IdTipReu   = a.IdTipReu,
+            RdcodRequi = a.RdcodRequi,
+
+            // strings de navegaciones (ajusta si quieres traer nombres reales)
+            Ksf         = null,
+            Responsable = null,
+
+            IdPais = a.IdMasterNavigation != null ? (int?)a.IdMasterNavigation.IdPais : null,
+
+            EnombreEam = null
+        })
+        .Take(size)
+        .ToListAsync();
+
+    // 5) Resolver EnombreEam (lookup)
+    var clavesCodLin = pageDtos
         .Where(d => !string.IsNullOrEmpty(d.RdcodEq) && d.IdLinea != 0)
         .Select(d => new { d.RdcodEq, d.IdLinea })
         .Distinct()
         .ToList();
 
-    if (clavesCodLin.Count > 0)
+    if (clavesCodLin.Any())
     {
         var cods   = clavesCodLin.Select(k => k.RdcodEq).Distinct().ToList();
         var lineas = clavesCodLin.Select(k => k.IdLinea).Distinct().ToList();
 
         var equipos = await _context.EquipoEams
-            .Where(e => cods.Contains(e.EcodEquiEam) && lineas.Contains(e.IdLinea) && e.EestaEam == true)
+            .AsNoTracking()
+            .Where(e => cods.Contains(e.EcodEquiEam)
+                     && lineas.Contains(e.IdLinea)
+                     && e.EestaEam == true)
             .Select(e => new { e.EcodEquiEam, e.IdLinea, e.EnombreEam })
             .ToListAsync();
 
         var lookup = equipos.ToDictionary(k => (k.EcodEquiEam, k.IdLinea), v => v.EnombreEam);
 
-        foreach (var dto in reunionDtos)
+        foreach (var dto in pageDtos)
         {
             if (!string.IsNullOrEmpty(dto.RdcodEq) && dto.IdLinea != 0)
             {
-                if (lookup.TryGetValue((dto.RdcodEq, dto.IdLinea), out var nombre))
-                    dto.EnombreEam = nombre;
-                else
-                    dto.EnombreEam = null; 
+                dto.EnombreEam = lookup.TryGetValue((dto.RdcodEq, dto.IdLinea), out var nombre)
+                    ? nombre
+                    : null;
             }
         }
     }
 
-    return Ok(reunionDtos);
+    // 6) Cursor en headers (usa Any() y DTO ya es no-nullable)
+    if (pageDtos.Any())
+    {
+        var lastDto = pageDtos[^1];
+        DateTime cursorDate = orderByReu ? lastDto.RdfecReu : lastDto.RdfecTra;
+        int cursorId = lastDto.IdReuDia;
+
+        Response.Headers["X-Next-LastDate"] = cursorDate.ToString("o");
+        Response.Headers["X-Next-LastId"]   = cursorId.ToString();
+        Response.Headers["X-PageSize"]      = size.ToString();
+    }
+
+    return Ok(pageDtos);
 }
 
 
