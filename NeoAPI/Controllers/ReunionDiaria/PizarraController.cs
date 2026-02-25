@@ -9,6 +9,7 @@ using NeoAPI.DTOs.Maestra;
 using NeoAPI.DTOs.ReunionDiaria;
 using NeoAPI.Logic.ReunionDia;
 using NeoAPI.Interface;
+using System.Linq;
 
 
 namespace NeoAPI.Controllers.Pizarra;
@@ -88,22 +89,14 @@ public class PizarraController : ControllerBase
         }
     }
 
-[HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
-public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
-    string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion)
-{
-    estado = Uri.UnescapeDataString(estado);
-
-    IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
-    CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
-
-    string centro = centrodiv.Cnom;
-    string div    = centrodiv.Dnombre;
-
-    List<Reunion> reudiatablas = new List<Reunion>();
-
-    if (tipo == "1")
+    [HttpGet("GetPendientes/{idcentro}/{iddiv}/{f1:DateTime}/{f2:DateTime}/{tipo}/{estado}/{reunion:int}")]
+    public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
+        string idcentro, string iddiv, DateTime f1, DateTime f2, string tipo, string estado, int reunion,
+        [FromQuery] int? pageSize = null,
+        [FromQuery] DateTime? lastDate = null,
+        [FromQuery] int? lastId = null)
     {
+<<<<<<< HEAD
         if (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
         {
             reudiatablas = await _context.Reunions
@@ -237,54 +230,197 @@ public async Task<ActionResult<List<ReunionDTO>>> GetPendientes(
                 .ToListAsync();
         }
     }
+=======
+        estado = Uri.UnescapeDataString(estado);
+>>>>>>> revision
 
-    var reunionDtos = _mapper.Map<List<ReunionDTO>>(reudiatablas);
+        int size = Math.Clamp(pageSize ?? 500, 1, 2000);
 
-    for (int i = 0; i < reunionDtos.Count; i++)
-    {
-        var dto     = reunionDtos[i];
-        var entidad = reudiatablas[i];
+        IReunionDiaLogic getDiv = new ReunionDiaLogic(_context);
+        CentroDivisionDTO centrodiv = await getDiv.GetCentroDivi(idcentro, iddiv, 0);
 
-        if (entidad?.IdMasterNavigation != null)
+        string centro = centrodiv.Cnom;
+        string div    = centrodiv.Dnombre;
+
+        IQueryable<Reunion> q = _context.Reunions
+            .AsNoTracking()
+            .Where(a => a.Rdcentro == centro
+                    && a.IdTipReu == reunion
+                    && a.Rddiv == div
+                    && a.Rdstatus != "En Curso");
+
+        if (tipo == "1")
         {
-            dto.IdLinea   = entidad.IdMasterNavigation.IdLinea;
-            dto.IdEmpresa = entidad.IdMasterNavigation.IdEmpresa;
-            dto.IdPais    = entidad.IdMasterNavigation.IdPais;
+            q = q.Where(a => a.Rdstatus != "Listo"
+                        && a.Rdstatus != "Cerrado"
+                        && a.Rdstatus != "Rechazada");
+
+            var desde = (DateTime.Today.DayOfWeek == DayOfWeek.Monday)
+                ? f1.AddDays(-3).Date
+                : f1.Date;
+            var hasta = f2.Date.AddDays(1); // <= inclusive
+
+            q = q.Where(a => a.RdfecReu >= desde && a.RdfecReu <= hasta);
         }
-    }
-
-    var clavesCodLin = reunionDtos
-        .Where(d => !string.IsNullOrEmpty(d.RdcodEq) && d.IdLinea != 0)
-        .Select(d => new { d.RdcodEq, d.IdLinea })
-        .Distinct()
-        .ToList();
-
-    if (clavesCodLin.Count > 0)
-    {
-        var cods   = clavesCodLin.Select(k => k.RdcodEq).Distinct().ToList();
-        var lineas = clavesCodLin.Select(k => k.IdLinea).Distinct().ToList();
-
-        var equipos = await _context.EquipoEams
-            .Where(e => cods.Contains(e.EcodEquiEam) && lineas.Contains(e.IdLinea) && e.EestaEam == true)
-            .Select(e => new { e.EcodEquiEam, e.IdLinea, e.EnombreEam })
-            .ToListAsync();
-
-        var lookup = equipos.ToDictionary(k => (k.EcodEquiEam, k.IdLinea), v => v.EnombreEam);
-
-        foreach (var dto in reunionDtos)
+        else if (tipo == "0")
         {
-            if (!string.IsNullOrEmpty(dto.RdcodEq) && dto.IdLinea != 0)
+            if (estado == "Total Pendiente")
             {
-                if (lookup.TryGetValue((dto.RdcodEq, dto.IdLinea), out var nombre))
-                    dto.EnombreEam = nombre;
-                else
-                    dto.EnombreEam = null; 
+                q = q.Where(a => a.Rdstatus == "Pendiente"
+                            || a.Rdstatus == "Pendiente/Responsable"
+                            || a.Rdstatus == "No Conforme");
+            }
+            else if (estado != "Todo")
+            {
+                q = q.Where(a => a.Rdstatus == estado);
             }
         }
-    }
+        else if (tipo == "2")
+        {
+            if (estado == "Total Pendiente")
+            {
+                q = q.Where(a => a.Rdstatus == "Pendiente"
+                            || a.Rdstatus == "Pendiente/Responsable"
+                            || a.Rdstatus == "No Conforme");
+            }
+            else if (estado != "Todo")
+            {
+                q = q.Where(a => a.Rdstatus == estado);
+            }
+        }
 
-    return Ok(reunionDtos);
-}
+        bool orderByReu = (tipo == "1") || (tipo == "0");
+
+        if (orderByReu)
+        {
+            q = q.OrderByDescending(b => (b.RdfecReu ?? DateTime.MinValue))
+                .ThenByDescending(b => b.IdReuDia);
+
+            if (lastDate.HasValue)
+            {
+                var ld = lastDate.Value;
+                if (lastId.HasValue)
+                {
+                    q = q.Where(b =>
+                        ((b.RdfecReu ?? DateTime.MinValue) < ld)
+                        || ((b.RdfecReu ?? DateTime.MinValue) == ld && b.IdReuDia < lastId.Value));
+                }
+                else
+                {
+                    q = q.Where(b => (b.RdfecReu ?? DateTime.MinValue) < ld);
+                }
+            }
+        }
+        else 
+        {
+            q = q.OrderByDescending(b => b.RdfecTra)
+                .ThenByDescending(b => b.IdReuDia);
+
+            if (lastDate.HasValue)
+            {
+                var ld = lastDate.Value;
+                if (lastId.HasValue)
+                {
+                    q = q.Where(b => (b.RdfecTra < ld) || (b.RdfecTra == ld && b.IdReuDia < lastId.Value));
+                }
+                else
+                {
+                    q = q.Where(b => b.RdfecTra < ld);
+                }
+            }
+        }
+
+        var pageDtos = await q
+            .Select(a => new ReunionDTO
+            {
+                IdReuDia  = a.IdReuDia,
+
+                IdMaster  = a.IdMaster,
+                IdEmpresa = a.IdMasterNavigation != null ? a.IdMasterNavigation.IdEmpresa : 0,
+                IdResReu  = a.IdResReu,
+                Idksf     = a.Idksf,
+
+                Rdcentro  = a.Rdcentro,
+                Rddiv     = a.Rddiv,
+                IdLinea   = a.IdMasterNavigation != null ? a.IdMasterNavigation.IdLinea : 0,
+
+                Rdarea    = a.Rdarea,
+                RdcodEq   = a.RdcodEq,
+                Rddisc    = a.Rddisc,
+                RdcodDis  = a.RdcodDis,
+                RdplanAcc = a.RdplanAcc,
+                Rdtiempo  = a.Rdtiempo,
+                Rdstatus  = a.Rdstatus,
+                Rdodt     = a.Rdodt,
+                RdnumDis  = a.RdnumDis,
+
+                RdfecReu  = a.RdfecReu ?? DateTime.MinValue, 
+                RdfecTra  = a.RdfecTra,                     
+
+                Rdobs     = a.Rdobs,
+                RdfecCrea = a.RdfecCrea,
+
+                IdCausaCal = a.IdCausaCal,
+                OrigenCal  = a.OrigenCal ?? string.Empty,
+
+                IdTipReu   = a.IdTipReu,
+                RdcodRequi = a.RdcodRequi,
+
+                Ksf         = null,
+                Responsable = null,
+
+                IdPais = a.IdMasterNavigation != null ? (int?)a.IdMasterNavigation.IdPais : null,
+
+                EnombreEam = null
+            })
+            .Take(size)
+            .ToListAsync();
+
+        var clavesCodLin = pageDtos
+            .Where(d => !string.IsNullOrEmpty(d.RdcodEq) && d.IdLinea != 0)
+            .Select(d => new { d.RdcodEq, d.IdLinea })
+            .Distinct()
+            .ToList();
+
+        if (clavesCodLin.Any())
+        {
+            var cods   = clavesCodLin.Select(k => k.RdcodEq).Distinct().ToList();
+            var lineas = clavesCodLin.Select(k => k.IdLinea).Distinct().ToList();
+
+            var equipos = await _context.EquipoEams
+                .AsNoTracking()
+                .Where(e => cods.Contains(e.EcodEquiEam)
+                        && lineas.Contains(e.IdLinea)
+                        && e.EestaEam == true)
+                .Select(e => new { e.EcodEquiEam, e.IdLinea, e.EnombreEam })
+                .ToListAsync();
+
+            var lookup = equipos.ToDictionary(k => (k.EcodEquiEam, k.IdLinea), v => v.EnombreEam);
+
+            foreach (var dto in pageDtos)
+            {
+                if (!string.IsNullOrEmpty(dto.RdcodEq) && dto.IdLinea != 0)
+                {
+                    dto.EnombreEam = lookup.TryGetValue((dto.RdcodEq, dto.IdLinea), out var nombre)
+                        ? nombre
+                        : null;
+                }
+            }
+        }
+
+        if (pageDtos.Any())
+        {
+            var lastDto = pageDtos[^1];
+            DateTime cursorDate = orderByReu ? lastDto.RdfecReu : lastDto.RdfecTra;
+            int cursorId = lastDto.IdReuDia;
+
+            Response.Headers["X-Next-LastDate"] = cursorDate.ToString("o");
+            Response.Headers["X-Next-LastId"]   = cursorId.ToString();
+            Response.Headers["X-PageSize"]      = size.ToString();
+        }
+
+        return Ok(pageDtos);
+    }
 
 
 [HttpGet("GetByODT/{ODT}/{idcentro}/{iddiv}/{reunion:int}")]
