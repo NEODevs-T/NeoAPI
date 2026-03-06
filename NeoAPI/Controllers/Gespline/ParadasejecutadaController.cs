@@ -17,6 +17,10 @@ using Microsoft.AspNetCore.Mvc.ApiExplorer;
 using Microsoft.AspNetCore.Http.HttpResults;
 using System.Globalization;
 using NeoAPI.Controllers.Gespline;
+using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace NeoAPI.Controllers.Gespline;
 
@@ -37,66 +41,52 @@ public class GesplineParadasEjecutadasController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales1Turno")]
-    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales1Turno([FromQuery] string? centroCosto)
+    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales1Turno(
+        [FromQuery(Name = "centroCosto")] string? centroCostoStr)
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
+        centroCostoStr = centroCostoStr?.Trim();
+        if (!int.TryParse(centroCostoStr, out int centroCosto))
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
-        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
+        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(59).AddSeconds(59);
         DateTime final = DateTime.Today.AddHours(18);
         try
         {
-            var query = from pe in _context.Paradasejecutadas
-                            join p in _context.Paradas
-                            on pe.Codigoparada equals p.Codigoparada
-                            join gp in _context.Gruposdeparadas
-                            on p.Codigogrupoparada equals gp.Codigogrupoparada
-                            join part in _context.Partes
-                            on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
-                            from pa in partJoin.DefaultIfEmpty()
-                            join ee in _context.Entradaejecucions
-                            on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-                            join te in _context.Tuplaejecucions
-                            on ee.Codigotupla equals te.Codigotupla
-                            where pe.Codigoregistrso != null &&
-                            p.Nombreparada != null &&
-                            gp.Codigogrupoparada != null &&
-                            ee.Fechaentrada >= inicio &&
-                            ee.Fechaentrada < final &&
-                            ee.Fechaentrada.HasValue &&
-                            ee.Fechaentrada.Value.Hour < 17 &&
-                            !p.Codigoparada.EndsWith("0114") &&
-                            te.Codigoproceso == centroCosto
-                            select new
-                            {
-                                CodigoRegistro = pe.Codigoregistrso,
-                                CodigoGrupoParada = gp.Codigogrupoparada,
-                                NombreParada = p.Nombreparada,
-                                FechaInicio = pe.Fechayhoraparada, 
-                                FechaFin = pe.Timespan,             
-                                ParteNombre = pa != null ? pa.ParteNombre : null,
-                                CodigoParte = pa != null ? pa.Codigo : null
-                            };
-            var resultadosIntermedios = await query.ToListAsync();
-            if (resultadosIntermedios == null || !resultadosIntermedios.Any())
-            {
-                return NotFound($"No se encontraron registros para {centroCosto}. Introduzca un centroCosto válido.");
-            }
-            var resultadoFinal = resultadosIntermedios.Select(r => new ParadasActualesDTO
-            {
-                CodigoRegistro = r.CodigoRegistro.ToString(),
-                CodigoGrupoParada = r.CodigoGrupoParada,
-                NombreParada = r.NombreParada,
-                TiempoPerdido = (r.FechaInicio.HasValue && r.FechaFin.HasValue)
-                        ? (r.FechaFin.Value - r.FechaInicio.Value).TotalMinutes
-                        : 0,
-                ParteNombre = r.ParteNombre,
-                CodigoParte = r.CodigoParte
-            })
-            .OrderByDescending(dto => dto.TiempoPerdido)
-            .ToList();
-            return Ok(resultadoFinal);
+            var resultado = await
+                (from pe in _context.Paradasejecutadas
+                join p in _context.Paradas
+                    on pe.Codigoparada equals p.Codigoparada
+                join gp in _context.Gruposdeparadas
+                    on p.Codigogrupoparada equals gp.Codigogrupoparada
+                join part in _context.Partes
+                    on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
+                from pa in partJoin.DefaultIfEmpty()
+                join ee in _context.Entradaejecucions
+                    on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+                join te in _context.Tuplaejecucions
+                    on ee.Codigotupla equals te.Codigotupla
+                where pe.Codigoregistrso != null &&
+                    p.Nombreparada != null &&
+                    gp.Codigogrupoparada != null &&
+                    ee.Fechaentrada >= inicio &&
+                    ee.Fechaentrada < final &&
+                    !p.Codigoparada.EndsWith("0114") &&
+                    te.Codigoproceso == centroCostoStr
+                select new ParadasActualesDTO
+                {
+                    CodigoRegistro = pe.Codigoregistrso.ToString(),
+                    CodigoGrupoParada = gp.Codigogrupoparada,
+                    NombreParada = p.Nombreparada,
+                    TiempoPerdido = (pe.Demoraparada ?? 0) * 60,
+                    ParteNombre = pa != null ? pa.ParteNombre : null,
+                    CodigoParte = pa != null ? pa.Codigo : null
+                })
+                .OrderByDescending(x => x.TiempoPerdido)
+                .ToListAsync();
+            if (resultado.Count == 0)
+                return NotFound($"No se encontraron registros para {centroCostoStr}. Introduzca un centroCosto válido.");
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
@@ -105,17 +95,18 @@ public class GesplineParadasEjecutadasController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales1TurnoAgrupados")]
-    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales1TurnoAgrupados([FromQuery] string? centroCosto)
+    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales1TurnoAgrupados(
+        [FromQuery(Name = "centroCosto")] string? centroCostoStr)
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
-        {
+        centroCostoStr = centroCostoStr?.Trim();
+        if (!int.TryParse(centroCostoStr, out int centroCosto))
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
-        }
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
         DateTime final = DateTime.Today.AddHours(18);
         try
         {
-            var query = from pe in _context.Paradasejecutadas
+            var query = 
+                from pe in _context.Paradasejecutadas
                 join ee in _context.Entradaejecucions
                     on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
                 join te in _context.Tuplaejecucions
@@ -127,59 +118,45 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 join a in _context.Areas
                     on pe.Codigoparada.Substring(0, 4).Trim() equals a.AcodGes.Trim() into aJoin
                 from pa in aJoin.DefaultIfEmpty()
-                where pe.Codigoregistrso != null &&
-                    p.Nombreparada != null &&
-                    gp.Codigogrupoparada != null &&
-                    ee.Fechaentrada >= inicio &&
-                    ee.Fechaentrada < final &&
-                    !p.Codigoparada.EndsWith("0114") &&
-                    te.Codigoproceso == centroCosto
+                where pe.Codigoregistrso != null
+                    && p.Nombreparada != null
+                    && gp.Codigogrupoparada != null
+                    && ee.Fechaentrada >= inicio
+                    && ee.Fechaentrada < final
+                    && !p.Codigoparada.EndsWith("0114")
+                    && te.Codigoproceso == centroCostoStr  
                 select new
                 {
-                    pe,
-                    p,
-                    gp,
-                    pa,
-                    FechaInicio = pe.Fechayhoraparada,
-                    FechaFin = pe.Timespan,
-                    TiempoPerdido = (pe.Fechayhoraparada.HasValue && pe.Timespan.HasValue)
-                                    ? (pe.Timespan.Value - pe.Fechayhoraparada.Value).TotalMinutes
-                                    : 0
+                    p.Codigoparada,
+                    gp.Codigogrupoparada,
+                    ACodGes = pa.AcodGes,   // puede ser null
+                    p.Nombreparada,
+                    Aparte = pa.Aparte,     // puede ser null
+                    Minutos = (pe.Demoraparada ?? 0) * 60
                 };
-    var data = await query.ToListAsync();
-    var result = data
-        .GroupBy(x => new
-        {
-            x.p.Codigoparada,
-            x.gp.Codigogrupoparada,
-            ACodGes = x.pa?.AcodGes ?? "NULL",
-            x.p.Nombreparada,
-            Aparte = x.pa?.Aparte ?? "NULL"
-        })
-        .Select(grp => new
-        {
-            CodigoParada = grp.Key.Codigoparada,
-            CodigoGrupoParada = grp.Key.Codigogrupoparada,
-            ACodGes = grp.Key.ACodGes,
-            NombreParada = grp.Key.Nombreparada,
-            Aparte = grp.Key.Aparte,
-            TiempoPerdido = grp.Sum(x => x.TiempoPerdido)
-        })
-        .OrderByDescending(x => x.TiempoPerdido)
-        .Select(grp => new ParadasActualesAgrupadasDTO
-        {
-            CodigoParada = grp.CodigoParada,
-            CodigoGrupoParada = grp.CodigoGrupoParada,
-            ACodGes = grp.ACodGes,
-            NombreParada = grp.NombreParada,
-            Aparte = grp.Aparte,
-            TiempoPerdido = grp.TiempoPerdido
-        });
-        if (result == null || !result.Any())
-        {
-            return NotFound($"No se encontraron registros para {centroCosto}. Introduzca un centroCosto válido.");
-        }
-        return Ok(result);
+            var result = await query
+                .GroupBy(x => new
+                {
+                    x.Codigoparada,
+                    x.Codigogrupoparada,
+                    ACodGes = x.ACodGes ?? "NULL",
+                    x.Nombreparada,
+                    Aparte = x.Aparte ?? "NULL"
+                })
+                .Select(grp => new ParadasActualesAgrupadasDTO
+                {
+                    CodigoParada = grp.Key.Codigoparada,
+                    CodigoGrupoParada = grp.Key.Codigogrupoparada,
+                    ACodGes = grp.Key.ACodGes,
+                    NombreParada = grp.Key.Nombreparada,
+                    Aparte = grp.Key.Aparte,
+                    TiempoPerdido = grp.Sum(x => x.Minutos)
+                })
+                .OrderByDescending(x => x.TiempoPerdido)
+                .ToListAsync();
+            if (result.Count == 0)
+                return NotFound($"No se encontraron registros para {centroCostoStr}. Introduzca un centroCosto válido.");
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -188,66 +165,56 @@ public class GesplineParadasEjecutadasController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales2TurnoAntesDeLas0am")]
-    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2TurnoAntesDeLas0am([FromQuery] string? centroCosto)
+    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2TurnoAntesDeLas0am(
+        [FromQuery(Name = "centroCosto")] string? centroCostoStr)
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
+        centroCostoStr = centroCostoStr?.Trim();
+        if (!int.TryParse(centroCostoStr, out _))
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
-        DateTime inicio = DateTime.Today.AddHours(18);
-        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+
+        DateTime inicio = DateTime.Today.AddHours(18);       // HOY 18:00
+        DateTime final  = DateTime.Today.AddDays(1).Date;    // MAÑANA 00:00
+
         try
         {
-            var query = from pe in _context.Paradasejecutadas
-                            join p in _context.Paradas
-                            on pe.Codigoparada equals p.Codigoparada
-                            join gp in _context.Gruposdeparadas
-                            on p.Codigogrupoparada equals gp.Codigogrupoparada
-                            join part in _context.Partes
-                            on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
-                            from pa in partJoin.DefaultIfEmpty()
-                            join ee in _context.Entradaejecucions
-                            on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-                            join te in _context.Tuplaejecucions
-                            on ee.Codigotupla equals te.Codigotupla
-                            where pe.Codigoregistrso != null &&
-                            p.Nombreparada != null &&
-                            gp.Codigogrupoparada != null &&
-                            ee.Fechaentrada >= inicio &&
-                            ee.Fechaentrada < final &&
-                            ee.Fechaentrada.HasValue &&
-                            ee.Fechaentrada.Value.Hour >= 17 &&
-                            !p.Codigoparada.EndsWith("0114") &&
-                            te.Codigoproceso == centroCosto
-                            select new
-                            {
-                                CodigoRegistro = pe.Codigoregistrso,
-                                CodigoGrupoParada = gp.Codigogrupoparada,
-                                NombreParada = p.Nombreparada,
-                                FechaInicio = pe.Fechayhoraparada, 
-                                FechaFin = pe.Timespan,             
-                                ParteNombre = pa != null ? pa.ParteNombre : null,
-                                CodigoParte = pa != null ? pa.Codigo : null
-                            };
-            var resultadosIntermedios = await query.ToListAsync();
-            if (resultadosIntermedios == null || !resultadosIntermedios.Any())
-            {
-                return NotFound($"No se encontraron registros para {centroCosto}. Introduzca un centroCosto válido.");
-            }
-            var resultadoFinal = resultadosIntermedios.Select(r => new ParadasActualesDTO
-            {
-                CodigoRegistro = r.CodigoRegistro.ToString(),
-                CodigoGrupoParada = r.CodigoGrupoParada,
-                NombreParada = r.NombreParada,
-                TiempoPerdido = (r.FechaInicio.HasValue && r.FechaFin.HasValue)
-                        ? (r.FechaFin.Value - r.FechaInicio.Value).TotalMinutes
-                        : 0,
-                ParteNombre = r.ParteNombre,
-                CodigoParte = r.CodigoParte
-            })
-            .OrderByDescending(dto => dto.TiempoPerdido)
-            .ToList();
-            return Ok(resultadoFinal);
+            var resultado = await
+                (from pe in _context.Paradasejecutadas.AsNoTracking()
+                join p in _context.Paradas.AsNoTracking()
+                    on pe.Codigoparada equals p.Codigoparada
+                join gp in _context.Gruposdeparadas.AsNoTracking()
+                    on p.Codigogrupoparada equals gp.Codigogrupoparada
+                join part in _context.Partes.AsNoTracking()
+                    on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
+                from pa in partJoin.DefaultIfEmpty()
+                join ee in _context.Entradaejecucions.AsNoTracking()
+                    on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+                join te in _context.Tuplaejecucions.AsNoTracking()
+                    on ee.Codigotupla equals te.Codigotupla
+                where pe.Codigoregistrso != null
+                    && p.Nombreparada != null
+                    && gp.Codigogrupoparada != null
+                    && ee.Fechaentrada >= inicio
+                    && ee.Fechaentrada < final
+                    && !p.Codigoparada.EndsWith("0114")
+                    && te.Codigoproceso == centroCostoStr
+                select new ParadasActualesDTO
+                {
+                    CodigoRegistro    = pe.Codigoregistrso.ToString(),
+                    CodigoGrupoParada = gp.Codigogrupoparada,
+                    NombreParada      = p.Nombreparada,
+                    TiempoPerdido     = (pe.Demoraparada ?? 0) * 60,
+                    ParteNombre       = pa != null ? pa.ParteNombre : null,
+                    CodigoParte       = pa != null ? pa.Codigo : null
+                })
+                .OrderByDescending(x => x.TiempoPerdido)
+                .ToListAsync();
+
+            if (resultado.Count == 0)
+                return NotFound($"No se encontraron registros para {centroCostoStr}. Introduzca un centroCosto válido.");
+
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
@@ -256,81 +223,73 @@ public class GesplineParadasEjecutadasController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales2TurnoAntesDeLas0amAgrupadas")]
-    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales2TurnoAntesDeLas0AmAgrupadas([FromQuery] string? centroCosto)
+    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales2TurnoAntesDeLas0AmAgrupadas(
+        [FromQuery(Name = "centroCosto")] string? centroCostoStr)
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
-        {
+        centroCostoStr = centroCostoStr?.Trim();
+        if (!int.TryParse(centroCostoStr, out _))
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
-        }
-        DateTime inicio = DateTime.Today.AddHours(17).AddMinutes(50);
-        DateTime final = DateTime.Today.AddDays(1).AddHours(6);
+
+        DateTime inicio = DateTime.Today.AddHours(18);       // HOY 18:00
+        DateTime final  = DateTime.Today.AddDays(1).Date;    // MAÑANA 00:00
+
         try
         {
-            var query = from pe in _context.Paradasejecutadas
-                join ee in _context.Entradaejecucions
+            var query =
+                from pe in _context.Paradasejecutadas.AsNoTracking()
+                join ee in _context.Entradaejecucions.AsNoTracking()
                     on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-                join te in _context.Tuplaejecucions
+                join te in _context.Tuplaejecucions.AsNoTracking()
                     on ee.Codigotupla equals te.Codigotupla
-                join p in _context.Paradas
+                join p in _context.Paradas.AsNoTracking()
                     on pe.Codigoparada equals p.Codigoparada
-                join gp in _context.Gruposdeparadas
+                join gp in _context.Gruposdeparadas.AsNoTracking()
                     on p.Codigogrupoparada equals gp.Codigogrupoparada
-                join a in _context.Areas
+                join a in _context.Areas.AsNoTracking()
                     on pe.Codigoparada.Substring(0, 4).Trim() equals a.AcodGes.Trim() into aJoin
                 from pa in aJoin.DefaultIfEmpty()
-                where pe.Codigoregistrso != null &&
-                    p.Nombreparada != null &&
-                    gp.Codigogrupoparada != null &&
-                    ee.Fechaentrada >= inicio &&
-                    ee.Fechaentrada < final &&
-                    !p.Codigoparada.EndsWith("0114") &&
-                    te.Codigoproceso == centroCosto
+                where pe.Codigoregistrso != null
+                && p.Nombreparada != null
+                && gp.Codigogrupoparada != null
+                && ee.Fechaentrada >= inicio
+                && ee.Fechaentrada < final
+                && !p.Codigoparada.EndsWith("0114")
+                && te.Codigoproceso == centroCostoStr  
                 select new
                 {
-                    pe,
-                    p,
-                    gp,
-                    pa,
-                    FechaInicio = pe.Fechayhoraparada,
-                    FechaFin = pe.Timespan,
-                    TiempoPerdido = (pe.Fechayhoraparada.HasValue && pe.Timespan.HasValue)
-                                    ? (pe.Timespan.Value - pe.Fechayhoraparada.Value).TotalMinutes
-                                    : 0
+                    p.Codigoparada,
+                    gp.Codigogrupoparada,
+                    ACodGes = pa.AcodGes,
+                    p.Nombreparada,
+                    Aparte  = pa.Aparte,  
+                    Minutos = (pe.Demoraparada ?? 0) * 60 
                 };
-    var data = await query.ToListAsync();
-    var result = data
-        .GroupBy(x => new
-        {
-            x.p.Codigoparada,
-            x.gp.Codigogrupoparada,
-            ACodGes = x.pa?.AcodGes ?? "NULL",
-            x.p.Nombreparada,
-            Aparte = x.pa?.Aparte ?? "NULL"
-        })
-        .Select(grp => new
-        {
-            CodigoParada = grp.Key.Codigoparada,
-            CodigoGrupoParada = grp.Key.Codigogrupoparada,
-            ACodGes = grp.Key.ACodGes,
-            NombreParada = grp.Key.Nombreparada,
-            Aparte = grp.Key.Aparte,
-            TiempoPerdido = grp.Sum(x => x.TiempoPerdido)
-        })
-        .OrderByDescending(x => x.TiempoPerdido)
-        .Select(grp => new ParadasActualesAgrupadasDTO
-        {
-            CodigoParada = grp.CodigoParada,
-            CodigoGrupoParada = grp.CodigoGrupoParada,
-            ACodGes = grp.ACodGes,
-            NombreParada = grp.NombreParada,
-            Aparte = grp.Aparte,
-            TiempoPerdido = grp.TiempoPerdido
-        });
-        if (result == null || !result.Any())
-        {
-            return NotFound($"No se encontraron registros para {centroCosto}. Introduzca un centroCosto válido.");
-        }
-        return Ok(result);
+
+            var result = await query
+                .GroupBy(x => new
+                {
+                    x.Codigoparada,
+                    x.Codigogrupoparada,
+                    ACodGes = x.ACodGes ?? "NULL",
+                    x.Nombreparada,
+                    Aparte  = x.Aparte ?? "NULL"
+                })
+                .Select(grp => new ParadasActualesAgrupadasDTO
+                {
+                    CodigoParada      = grp.Key.Codigoparada,
+                    CodigoGrupoParada = grp.Key.Codigogrupoparada,
+                    ACodGes           = grp.Key.ACodGes,
+                    NombreParada      = grp.Key.Nombreparada,
+                    Aparte            = grp.Key.Aparte,
+                    TiempoPerdido     = grp.Sum(x => x.Minutos)
+                })
+                .OrderByDescending(x => x.TiempoPerdido)
+                .ToListAsync();
+
+            if (result.Count == 0)
+                return NotFound($"No se encontraron registros para {centroCostoStr}. Introduzca un centroCosto válido.");
+
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -339,66 +298,57 @@ public class GesplineParadasEjecutadasController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales2TurnoDespuesDeLas0am")]
-    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2TurnoDespuesDeLas0am([FromQuery] string? centroCosto)
+    public async Task<ActionResult<List<ParadasActualesDTO>>> GetParadasActuales2TurnoDespuesDeLas0am(
+        [FromQuery(Name = "centroCosto")] string? centroCostoStr)
+
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
+        centroCostoStr = centroCostoStr?.Trim();
+        if (!int.TryParse(centroCostoStr, out _))
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
-        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(18);
-        DateTime final = DateTime.Today.AddHours(6);
+
+        DateTime inicio = DateTime.Today.AddDays(1).Date;        // 00:00 de mañana
+        DateTime final  = DateTime.Today.AddDays(1).AddHours(6); // 06:00 de mañana
+
         try
         {
-            var query = from pe in _context.Paradasejecutadas
-                            join p in _context.Paradas
-                            on pe.Codigoparada equals p.Codigoparada
-                            join gp in _context.Gruposdeparadas
-                            on p.Codigogrupoparada equals gp.Codigogrupoparada
-                            join part in _context.Partes
-                            on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
-                            from pa in partJoin.DefaultIfEmpty()
-                            join ee in _context.Entradaejecucions
-                            on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-                            join te in _context.Tuplaejecucions
-                            on ee.Codigotupla equals te.Codigotupla
-                            where pe.Codigoregistrso != null &&
-                            p.Nombreparada != null &&
-                            gp.Codigogrupoparada != null &&
-                            ee.Fechaentrada >= inicio &&
-                            ee.Fechaentrada < final &&
-                            ee.Fechaentrada.HasValue &&
-                            ee.Fechaentrada.Value.Hour >= 17 &&
-                            !p.Codigoparada.EndsWith("0114") &&
-                            te.Codigoproceso == centroCosto
-                            select new
-                            {
-                                CodigoRegistro = pe.Codigoregistrso,
-                                CodigoGrupoParada = gp.Codigogrupoparada,
-                                NombreParada = p.Nombreparada,
-                                FechaInicio = pe.Fechayhoraparada, 
-                                FechaFin = pe.Timespan,             
-                                ParteNombre = pa != null ? pa.ParteNombre : null,
-                                CodigoParte = pa != null ? pa.Codigo : null
-                            };
-            var resultadosIntermedios = await query.ToListAsync();
-            if (resultadosIntermedios == null || !resultadosIntermedios.Any())
-            {
-                return NotFound($"No se encontraron registros para {centroCosto}. Introduzca un centroCosto válido.");
-            }
-            var resultadoFinal = resultadosIntermedios.Select(r => new ParadasActualesDTO
-            {
-                CodigoRegistro = r.CodigoRegistro.ToString(),
-                CodigoGrupoParada = r.CodigoGrupoParada,
-                NombreParada = r.NombreParada,
-                TiempoPerdido = (r.FechaInicio.HasValue && r.FechaFin.HasValue)
-                        ? (r.FechaFin.Value - r.FechaInicio.Value).TotalMinutes
-                        : 0,
-                ParteNombre = r.ParteNombre,
-                CodigoParte = r.CodigoParte
-            })
-            .OrderByDescending(dto => dto.TiempoPerdido)
-            .ToList();
-            return Ok(resultadoFinal);
+            var resultado = await
+                (from pe in _context.Paradasejecutadas.AsNoTracking()
+                join p in _context.Paradas.AsNoTracking()
+                    on pe.Codigoparada equals p.Codigoparada
+                join gp in _context.Gruposdeparadas.AsNoTracking()
+                    on p.Codigogrupoparada equals gp.Codigogrupoparada
+                join part in _context.Partes.AsNoTracking()
+                    on pe.Codigoparada.Substring(0, 2).ToUpper().Trim() equals part.Codigo.Trim() into partJoin
+                from pa in partJoin.DefaultIfEmpty()
+                join ee in _context.Entradaejecucions.AsNoTracking()
+                    on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+                join te in _context.Tuplaejecucions.AsNoTracking()
+                    on ee.Codigotupla equals te.Codigotupla
+                where pe.Codigoregistrso != null
+                    && p.Nombreparada != null
+                    && gp.Codigogrupoparada != null
+                    && ee.Fechaentrada >= inicio
+                    && ee.Fechaentrada < final
+                    && !p.Codigoparada.EndsWith("0114")
+                    && te.Codigoproceso == centroCostoStr
+                select new ParadasActualesDTO
+                {
+                    CodigoRegistro    = pe.Codigoregistrso.ToString(),
+                    CodigoGrupoParada = gp.Codigogrupoparada,
+                    NombreParada      = p.Nombreparada,
+                    TiempoPerdido     = (pe.Demoraparada ?? 0) * 60,
+                    ParteNombre       = pa != null ? pa.ParteNombre : null,
+                    CodigoParte       = pa != null ? pa.Codigo : null
+                })
+                .OrderByDescending(x => x.TiempoPerdido)
+                .ToListAsync();
+
+            if (resultado.Count == 0)
+                return NotFound($"No se encontraron registros para {centroCostoStr} en la ventana {inicio:yyyy-MM-dd HH:mm} — {final:yyyy-MM-dd HH:mm}.");
+
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
@@ -407,81 +357,73 @@ public class GesplineParadasEjecutadasController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales2TurnoDespuesDeLas0amAgrupadas")]
-    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales2TurnoDespuesDeLas0amAgrupadas([FromQuery] string? centroCosto)
+    public async Task<ActionResult<List<ParadasActualesAgrupadasDTO>>> GetParadasActuales2TurnoDespuesDeLas0amAgrupadas(
+        [FromQuery(Name = "centroCosto")] string? centroCostoStr)
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
-        {
+        centroCostoStr = centroCostoStr?.Trim();
+        if (!int.TryParse(centroCostoStr, out _))
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
-        }
-        DateTime inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(50);
-        DateTime final = DateTime.Today.AddHours(6);
+
+     DateTime inicio = DateTime.Today.AddDays(1).Date;        // 00:00 de mañana 
+        DateTime final  = DateTime.Today.AddDays(1).AddHours(6); // 06:00 de mañana
+
         try
         {
-            var query = from pe in _context.Paradasejecutadas
-                join ee in _context.Entradaejecucions
+            var query =
+                from pe in _context.Paradasejecutadas.AsNoTracking()
+                join ee in _context.Entradaejecucions.AsNoTracking()
                     on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-                join te in _context.Tuplaejecucions
+                join te in _context.Tuplaejecucions.AsNoTracking()
                     on ee.Codigotupla equals te.Codigotupla
-                join p in _context.Paradas
+                join p in _context.Paradas.AsNoTracking()
                     on pe.Codigoparada equals p.Codigoparada
-                join gp in _context.Gruposdeparadas
+                join gp in _context.Gruposdeparadas.AsNoTracking()
                     on p.Codigogrupoparada equals gp.Codigogrupoparada
-                join a in _context.Areas
+                join a in _context.Areas.AsNoTracking()
                     on pe.Codigoparada.Substring(0, 4).Trim() equals a.AcodGes.Trim() into aJoin
                 from pa in aJoin.DefaultIfEmpty()
-                where pe.Codigoregistrso != null &&
-                    p.Nombreparada != null &&
-                    gp.Codigogrupoparada != null &&
-                    ee.Fechaentrada >= inicio &&
-                    ee.Fechaentrada < final &&
-                    !p.Codigoparada.EndsWith("0114") &&
-                    te.Codigoproceso == centroCosto
+                where pe.Codigoregistrso != null
+                && p.Nombreparada != null
+                && gp.Codigogrupoparada != null
+                && ee.Fechaentrada >= inicio
+                && ee.Fechaentrada < final
+                && !p.Codigoparada.EndsWith("0114")
+                && te.Codigoproceso == centroCostoStr  
                 select new
                 {
-                    pe,
-                    p,
-                    gp,
-                    pa,
-                    FechaInicio = pe.Fechayhoraparada,
-                    FechaFin = pe.Timespan,
-                    TiempoPerdido = (pe.Fechayhoraparada.HasValue && pe.Timespan.HasValue)
-                                    ? (pe.Timespan.Value - pe.Fechayhoraparada.Value).TotalMinutes
-                                    : 0
+                    p.Codigoparada,
+                    gp.Codigogrupoparada,
+                    ACodGes = pa.AcodGes,
+                    p.Nombreparada,
+                    Aparte  = pa.Aparte,  
+                    Minutos = (pe.Demoraparada ?? 0) * 60 
                 };
-    var data = await query.ToListAsync();
-    var result = data
-        .GroupBy(x => new
-        {
-            x.p.Codigoparada,
-            x.gp.Codigogrupoparada,
-            ACodGes = x.pa?.AcodGes ?? "NULL",
-            x.p.Nombreparada,
-            Aparte = x.pa?.Aparte ?? "NULL"
-        })
-        .Select(grp => new
-        {
-            CodigoParada = grp.Key.Codigoparada,
-            CodigoGrupoParada = grp.Key.Codigogrupoparada,
-            ACodGes = grp.Key.ACodGes,
-            NombreParada = grp.Key.Nombreparada,
-            Aparte = grp.Key.Aparte,
-            TiempoPerdido = grp.Sum(x => x.TiempoPerdido)
-        })
-        .OrderByDescending(x => x.TiempoPerdido)
-        .Select(grp => new ParadasActualesAgrupadasDTO
-        {
-            CodigoParada = grp.CodigoParada,
-            CodigoGrupoParada = grp.CodigoGrupoParada,
-            ACodGes = grp.ACodGes,
-            NombreParada = grp.NombreParada,
-            Aparte = grp.Aparte,
-            TiempoPerdido = grp.TiempoPerdido
-        });
-        if (result == null || !result.Any())
-        {
-            return NotFound($"No se encontraron registros para {centroCosto}. Introduzca un centroCosto válido.");
-        }
-        return Ok(result);
+
+            var result = await query
+                .GroupBy(x => new
+                {
+                    x.Codigoparada,
+                    x.Codigogrupoparada,
+                    ACodGes = x.ACodGes ?? "NULL",
+                    x.Nombreparada,
+                    Aparte  = x.Aparte ?? "NULL"
+                })
+                .Select(grp => new ParadasActualesAgrupadasDTO
+                {
+                    CodigoParada      = grp.Key.Codigoparada,
+                    CodigoGrupoParada = grp.Key.Codigogrupoparada,
+                    ACodGes           = grp.Key.ACodGes,
+                    NombreParada      = grp.Key.Nombreparada,
+                    Aparte            = grp.Key.Aparte,
+                    TiempoPerdido     = grp.Sum(x => x.Minutos)
+                })
+                .OrderByDescending(x => x.TiempoPerdido)
+                .ToListAsync();
+
+            if (result.Count == 0)
+                return NotFound($"No se encontraron registros para {centroCostoStr}. Introduzca un centroCosto válido.");
+
+            return Ok(result);
         }
         catch (Exception ex)
         {
@@ -490,46 +432,58 @@ public class GesplineParadasEjecutadasController : ControllerBase
     }
 
     [HttpGet("GetParadasActuales2Turno")]
-    public async Task<ActionResult<List<List<string>>>> GetParadasActuales2Turno(string centroCosto)
+    public async Task<ActionResult<List<List<string>>>> GetParadasActuales2Turno(
+        [FromQuery(Name = "centroCosto")] string? centroCostoStr)
     {
-        if (string.IsNullOrWhiteSpace(centroCosto) || !Regex.IsMatch(centroCosto, @"^\d+$"))
+        centroCostoStr = centroCostoStr?.Trim();
+        if (!int.TryParse(centroCostoStr, out _))
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
-        DateTime hoy = DateTime.Now;
+
+        var ahora = DateTime.Now; 
+
         try
         {
             ActionResult<List<ParadasActualesDTO>> actionResult;
-            if (hoy.Hour < 6)
+
+            if (ahora.Hour < 6)
             {
-                actionResult = await GetParadasActuales2TurnoDespuesDeLas0am(centroCosto);
+                actionResult = await GetParadasActuales2TurnoDespuesDeLas0am(centroCostoStr);
             }
-            else if (hoy.Hour >= 18)
+            else if (ahora.Hour >= 18)
             {
-                actionResult = await GetParadasActuales2TurnoAntesDeLas0am(centroCosto);
+                actionResult = await GetParadasActuales2TurnoAntesDeLas0am(centroCostoStr);
             }
             else
             {
-                return NotFound("El servicio está disponible solo durante los turnos definidos (00:00-06:00 y 18:00-23:59).");
+                return NotFound("El servicio está disponible solo durante los turnos definidos (00:00–06:00 y 18:00–23:59).");
             }
-            if (actionResult.Value is null)
+
+            if (actionResult.Result is ObjectResult orr)
             {
-                return NotFound();
+                var status = orr.StatusCode ?? StatusCodes.Status500InternalServerError;
+                return StatusCode(status, orr.Value);
             }
-            var resultado = actionResult.Value.Select(dto => new List<string>
-    {
-        dto.CodigoRegistro,
-        dto.CodigoGrupoParada,
-        dto.NombreParada,
-        dto.TiempoPerdido.ToString(),
-        dto.ParteNombre,
-        dto.CodigoParte
-    }).ToList();
-    if (resultado == null || !resultado.Any())
+
+            var lista = actionResult.Value;
+            if (lista is null || !lista.Any())
+                return NotFound($"No se encontraron registros para {centroCostoStr}.");
+
+            var resultado = lista.Select(dto => new List<string>
             {
-                return NotFound($"No se encontraron registros para {centroCosto}.");
-            }
-            return resultado;
+                dto.CodigoRegistro ?? string.Empty,
+                dto.CodigoGrupoParada ?? string.Empty,
+                dto.NombreParada ?? string.Empty,
+                Math.Round(dto.TiempoPerdido, 2).ToString(CultureInfo.InvariantCulture),
+                dto.ParteNombre ?? string.Empty,
+                dto.CodigoParte ?? string.Empty
+            }).ToList();
+
+            if (!resultado.Any())
+                return NotFound($"No se encontraron registros para {centroCostoStr}.");
+
+            return Ok(resultado);
         }
         catch (Exception ex)
         {
