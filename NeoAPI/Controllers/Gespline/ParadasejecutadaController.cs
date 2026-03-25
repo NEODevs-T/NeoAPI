@@ -49,7 +49,7 @@ public class GesplineParadasEjecutadasController : ControllerBase
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
-        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(59).AddSeconds(59);
+        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(54).AddSeconds(59);
         DateTime final = DateTime.Today.AddHours(18);
         try
         {
@@ -79,8 +79,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                     CodigoGrupoParada = gp.Codigogrupoparada,
                     NombreParada = p.Nombreparada,
                     TiempoPerdido = (pe.Demoraparada ?? 0) * 60,
-                    ParteNombre = pa != null ? pa.ParteNombre : null,
-                    CodigoParte = pa != null ? pa.Codigo : null
+                    ParteNombre = pa != null ? pa.ParteNombre : "Equipo no Registrado",
+                    CodigoParte = pa != null ? pa.Codigo : "Código no Registrado"
                 })
                 .OrderByDescending(x => x.TiempoPerdido)
                 .ToListAsync();
@@ -101,8 +101,9 @@ public class GesplineParadasEjecutadasController : ControllerBase
         centroCostoStr = centroCostoStr?.Trim();
         if (!int.TryParse(centroCostoStr, out int centroCosto))
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
-        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(50);
+        DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(54).AddSeconds(59);
         DateTime final = DateTime.Today.AddHours(18);
+        bool centroCostoSinEquipo = centroCostoStr == "103103" || centroCostoStr == "103105" || centroCostoStr == "103106";
         try
         {
             var query = 
@@ -124,7 +125,7 @@ public class GesplineParadasEjecutadasController : ControllerBase
                     && ee.Fechaentrada >= inicio
                     && ee.Fechaentrada < final
                     && !p.Codigoparada.EndsWith("0114")
-                    && te.Codigoproceso == centroCostoStr  
+                    && te.Codigoproceso == centroCostoStr               
                 select new
                 {
                     p.Codigoparada,
@@ -139,9 +140,9 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 {
                     x.Codigoparada,
                     x.Codigogrupoparada,
-                    ACodGes = x.ACodGes ?? "NULL",
+                    ACodGes = x.ACodGes ?? "Código no Registrado",
                     x.Nombreparada,
-                    Aparte = x.Aparte ?? "NULL"
+                    Aparte = x.Aparte ?? (centroCostoSinEquipo ? "" : "Equipo no Registrado")
                 })
                 .Select(grp => new ParadasActualesAgrupadasDTO
                 {
@@ -205,8 +206,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                     CodigoGrupoParada = gp.Codigogrupoparada,
                     NombreParada      = p.Nombreparada,
                     TiempoPerdido     = (pe.Demoraparada ?? 0) * 60,
-                    ParteNombre       = pa != null ? pa.ParteNombre : null,
-                    CodigoParte       = pa != null ? pa.Codigo : null
+                    ParteNombre       = pa != null ? pa.ParteNombre : "Equipo no Registrado",
+                    CodigoParte       = pa != null ? pa.Codigo : "Código no Registrado"
                 })
                 .OrderByDescending(x => x.TiempoPerdido)
                 .ToListAsync();
@@ -232,7 +233,7 @@ public class GesplineParadasEjecutadasController : ControllerBase
 
         DateTime inicio = DateTime.Today.AddHours(18);       // HOY 18:00
         DateTime final  = DateTime.Today.AddDays(1).Date;    // MAÑANA 00:00
-
+        bool centroCostoSinEquipo = centroCostoStr == "103103" || centroCostoStr == "103105" || centroCostoStr == "103106";
         try
         {
             var query =
@@ -270,9 +271,9 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 {
                     x.Codigoparada,
                     x.Codigogrupoparada,
-                    ACodGes = x.ACodGes ?? "NULL",
+                    ACodGes = x.ACodGes ?? "Código no Registrado",
                     x.Nombreparada,
-                    Aparte  = x.Aparte ?? "NULL"
+                    Aparte = x.Aparte ?? (centroCostoSinEquipo ? "" : "Equipo no Registrado")
                 })
                 .Select(grp => new ParadasActualesAgrupadasDTO
                 {
@@ -310,7 +311,6 @@ public class GesplineParadasEjecutadasController : ControllerBase
 
         DateTime inicio = DateTime.Today.AddDays(1).Date;        // 00:00 de mañana
         DateTime final  = DateTime.Today.AddDays(1).AddHours(6); // 06:00 de mañana
-
         try
         {
             var resultado = await
@@ -339,8 +339,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                     CodigoGrupoParada = gp.Codigogrupoparada,
                     NombreParada      = p.Nombreparada,
                     TiempoPerdido     = (pe.Demoraparada ?? 0) * 60,
-                    ParteNombre       = pa != null ? pa.ParteNombre : null,
-                    CodigoParte       = pa != null ? pa.Codigo : null
+                    ParteNombre       = pa != null ? pa.ParteNombre : "Equipo no Registrado",
+                    CodigoParte       = pa != null ? pa.Codigo : "Código no Registrado"
                 })
                 .OrderByDescending(x => x.TiempoPerdido)
                 .ToListAsync();
@@ -364,9 +364,9 @@ public class GesplineParadasEjecutadasController : ControllerBase
         if (!int.TryParse(centroCostoStr, out _))
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
 
-     DateTime inicio = DateTime.Today.AddDays(1).Date;        // 00:00 de mañana 
+        DateTime inicio = DateTime.Today.AddDays(1).Date;        // 00:00 de mañana 
         DateTime final  = DateTime.Today.AddDays(1).AddHours(6); // 06:00 de mañana
-
+        bool centroCostoSinEquipo = centroCostoStr == "103103" || centroCostoStr == "103105" || centroCostoStr == "103106";
         try
         {
             var query =
@@ -404,9 +404,9 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 {
                     x.Codigoparada,
                     x.Codigogrupoparada,
-                    ACodGes = x.ACodGes ?? "NULL",
+                    ACodGes = x.ACodGes ?? "Código no Registrado",
                     x.Nombreparada,
-                    Aparte  = x.Aparte ?? "NULL"
+                    Aparte = x.Aparte ?? (centroCostoSinEquipo ? "" : "Equipo no Registrado")
                 })
                 .Select(grp => new ParadasActualesAgrupadasDTO
                 {
@@ -437,40 +437,40 @@ public class GesplineParadasEjecutadasController : ControllerBase
     {
         centroCostoStr = centroCostoStr?.Trim();
         if (!int.TryParse(centroCostoStr, out _))
-        {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
-        }
-
-        var ahora = DateTime.Now; 
-
+        var ahora = DateTime.Now;
+        var hora = ahora.TimeOfDay;
         try
         {
-            ActionResult<List<ParadasActualesDTO>> actionResult;
-
-            if (ahora.Hour < 6)
+            var listaFinal = new List<ParadasActualesDTO>();
+            if (hora >= TimeSpan.FromHours(18))
             {
-                actionResult = await GetParadasActuales2TurnoDespuesDeLas0am(centroCostoStr);
+                var antes = await GetParadasActuales2TurnoAntesDeLas0am(centroCostoStr);
+                if (antes.Result is ObjectResult error)
+                    return StatusCode(error.StatusCode ?? 500, error.Value);
+                if (antes.Value != null)
+                    listaFinal.AddRange(antes.Value);
             }
-            else if (ahora.Hour >= 18)
+            else if (hora < TimeSpan.FromHours(6))
             {
-                actionResult = await GetParadasActuales2TurnoAntesDeLas0am(centroCostoStr);
+                var antes = await GetParadasActuales2TurnoAntesDeLas0am(centroCostoStr);
+                var despues = await GetParadasActuales2TurnoDespuesDeLas0am(centroCostoStr);
+                if (antes.Result is ObjectResult errorAntes)
+                    return StatusCode(errorAntes.StatusCode ?? 500, errorAntes.Value);
+                if (despues.Result is ObjectResult errorDespues)
+                    return StatusCode(errorDespues.StatusCode ?? 500, errorDespues.Value);
+                if (antes.Value != null)
+                    listaFinal.AddRange(antes.Value);
+                if (despues.Value != null)
+                    listaFinal.AddRange(despues.Value);
             }
             else
             {
-                return NotFound("El servicio está disponible solo durante los turnos definidos (00:00–06:00 y 18:00–23:59).");
+                return NotFound("El servicio está disponible solamente entre 18:00–05:59.");
             }
-
-            if (actionResult.Result is ObjectResult orr)
-            {
-                var status = orr.StatusCode ?? StatusCodes.Status500InternalServerError;
-                return StatusCode(status, orr.Value);
-            }
-
-            var lista = actionResult.Value;
-            if (lista is null || !lista.Any())
+            if (!listaFinal.Any())
                 return NotFound($"No se encontraron registros para {centroCostoStr}.");
-
-            var resultado = lista.Select(dto => new List<string>
+            var resultado = listaFinal.Select(dto => new List<string>
             {
                 dto.CodigoRegistro ?? string.Empty,
                 dto.CodigoGrupoParada ?? string.Empty,
@@ -479,10 +479,6 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 dto.ParteNombre ?? string.Empty,
                 dto.CodigoParte ?? string.Empty
             }).ToList();
-
-            if (!resultado.Any())
-                return NotFound($"No se encontraron registros para {centroCostoStr}.");
-
             return Ok(resultado);
         }
         catch (Exception ex)
@@ -490,62 +486,42 @@ public class GesplineParadasEjecutadasController : ControllerBase
             return BadRequest($"Ocurrió un error inesperado: {ex.Message}");
         }
     }
-
+    
     [HttpGet("GetPrimeraParadaPorLinea")]
-    public async Task<ActionResult<PrimeraParadaPorLineaDTO>> GetPrimeraParadaPorLinea()
+    public async Task<ActionResult<List<PrimeraParadaPorLineaDTO>>> GetPrimeraParadaPorLinea()
     {
-        var horaActual = DateTime.Now.Hour;
-        ActionResult<List<string>> resultadoTurno;
-        if (horaActual >= 6 && horaActual < 18)
-        {
-            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos1Turno();
-        }
-        else if (horaActual >= 18 && horaActual < 22)
-        {
-            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos2TurnoAntes0am();
-        }
-        else
-        {
-            resultadoTurno = await _maquinasGesplineLogic.GetMaquinasGesplineActivos2TurnoDespues0am();
-        }
-        List<string> turnoList = null;
-        if (resultadoTurno.Result is OkObjectResult okResult)
-        {
-            turnoList = okResult.Value as List<string>;
-        }
-        else
-        {
-            turnoList = resultadoTurno.Value;
-        }
-        if (turnoList == null)
-        {
-            return StatusCode(StatusCodes.Status500InternalServerError, "El resultado del turno es nulo o inválido.");
-        }
         try
         {
-            var registro = await (
-    from pe in _context.Paradasejecutadas
-    join ee in _context.Entradaejecucions
-        on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-    join te in _context.Tuplaejecucions
-        on ee.Codigotupla equals te.Codigotupla
-    join tw in _context.Transmicionwebs
-        on ee.Codigoentradaejecucion equals tw.Codigoentradaejecucion
-    orderby pe.Fechayhoraparada
-    select new PrimeraParadaPorLineaDTO
-    {
-        CodigoProceso = te.Codigoproceso,
-        FechaYHoraParada = pe.Fechayhoraparada,
-        Timespan = pe.Timespan
-    })
-    .GroupBy(dto => dto.CodigoProceso)
-    .Select(grupo => grupo.OrderBy(dto => dto.FechaYHoraParada).FirstOrDefault())
-    .ToListAsync();
-            if (registro == null)
+            var paradas = await (
+                from pe in _context.Paradasejecutadas
+                join ee in _context.Entradaejecucions
+                    on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
+                join te in _context.Tuplaejecucions
+                    on ee.Codigotupla equals te.Codigotupla
+                join tw in _context.Transmicionwebs
+                    on ee.Codigoentradaejecucion equals tw.Codigoentradaejecucion
+                where pe.Fechayhoraparada != null
+                select new PrimeraParadaPorLineaDTO
+                {
+                    CodigoProceso = te.Codigoproceso,
+                    FechaYHoraParada = pe.Fechayhoraparada,
+                    Timespan = pe.Timespan
+                }
+            )
+            .GroupBy(x => x.CodigoProceso)
+
+            .Select(g => g
+                .OrderBy(x => x.FechaYHoraParada)
+                .FirstOrDefault()
+            )
+            .ToListAsync();
+
+            if (paradas == null || !paradas.Any())
             {
-                return NotFound("No se encontró registro para el proceso especificado.");
+                return NotFound("No se encontraron paradas para las líneas.");
             }
-            return Ok(registro);
+
+            return Ok(paradas);
         }
         catch (Exception ex)
         {
