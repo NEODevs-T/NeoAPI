@@ -69,8 +69,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 where pe.Codigoregistrso != null &&
                     p.Nombreparada != null &&
                     gp.Codigogrupoparada != null &&
-                    ee.Fechaentrada >= inicio &&
-                    ee.Fechaentrada < final &&
+                    pe.Fechayhoraparada >= inicio && 
+                    pe.Fechayhoraparada < final &&
                     !p.Codigoparada.EndsWith("0114") &&
                     te.Codigoproceso == centroCostoStr
                 select new ParadasActualesDTO
@@ -122,8 +122,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 where pe.Codigoregistrso != null
                     && p.Nombreparada != null
                     && gp.Codigogrupoparada != null
-                    && ee.Fechaentrada >= inicio
-                    && ee.Fechaentrada < final
+                    && pe.Fechayhoraparada >= inicio
+                    && pe.Fechayhoraparada < final
                     && !p.Codigoparada.EndsWith("0114")
                     && te.Codigoproceso == centroCostoStr               
                 select new
@@ -174,10 +174,25 @@ public class GesplineParadasEjecutadasController : ControllerBase
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
+        DateTime ahora = DateTime.Now;
 
-        DateTime inicio = DateTime.Today.AddHours(18);       // HOY 18:00
-        DateTime final  = DateTime.Today.AddDays(1).Date;    // MAÑANA 00:00
+        DateTime inicio;
+        DateTime final;
 
+        if (ahora.Hour > 17 || (ahora.Hour == 17 && ahora.Minute >= 55))
+        {
+            inicio = DateTime.Today.AddHours(17).AddMinutes(55);
+            final  = DateTime.Today.AddDays(1);
+        }
+        else if (ahora.Hour < 6)
+        {
+            inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(55);
+            final  = DateTime.Today;
+        }
+        else
+        {
+            return BadRequest("El segundo turno solo aplica desde las 17:55 hasta las 06:00.");
+        }
         try
         {
             var resultado = await
@@ -196,8 +211,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 where pe.Codigoregistrso != null
                     && p.Nombreparada != null
                     && gp.Codigogrupoparada != null
-                    && ee.Fechaentrada >= inicio
-                    && ee.Fechaentrada < final
+                    && pe.Fechayhoraparada >= inicio
+                    && pe.Fechayhoraparada < final
                     && !p.Codigoparada.EndsWith("0114")
                     && te.Codigoproceso == centroCostoStr
                 select new ParadasActualesDTO
@@ -229,10 +244,28 @@ public class GesplineParadasEjecutadasController : ControllerBase
     {
         centroCostoStr = centroCostoStr?.Trim();
         if (!int.TryParse(centroCostoStr, out _))
+        {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
+        }
+        DateTime ahora = DateTime.Now;
 
-        DateTime inicio = DateTime.Today.AddHours(18);       // HOY 18:00
-        DateTime final  = DateTime.Today.AddDays(1).Date;    // MAÑANA 00:00
+        DateTime inicio;
+        DateTime final;
+
+        if (ahora.Hour > 17 || (ahora.Hour == 17 && ahora.Minute >= 55))
+        {
+            inicio = DateTime.Today.AddHours(17).AddMinutes(55);
+            final  = DateTime.Today.AddDays(1);
+        }
+        else if (ahora.Hour < 6)
+        {
+            inicio = DateTime.Today.AddDays(-1).AddHours(17).AddMinutes(55);
+            final  = DateTime.Today;
+        }
+        else
+        {
+            return BadRequest("El segundo turno solo aplica desde las 17:55 hasta las 06:00.");
+        }
         bool centroCostoSinEquipo = centroCostoStr == "103103" || centroCostoStr == "103105" || centroCostoStr == "103106";
         try
         {
@@ -252,8 +285,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 where pe.Codigoregistrso != null
                 && p.Nombreparada != null
                 && gp.Codigogrupoparada != null
-                && ee.Fechaentrada >= inicio
-                && ee.Fechaentrada < final
+                && pe.Fechayhoraparada >= inicio
+                && pe.Fechayhoraparada < final
                 && !p.Codigoparada.EndsWith("0114")
                 && te.Codigoproceso == centroCostoStr  
                 select new
@@ -308,9 +341,20 @@ public class GesplineParadasEjecutadasController : ControllerBase
         {
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
         }
+        DateTime ahora = DateTime.Now;
 
-        DateTime inicio = DateTime.Today.AddDays(1).Date;        // 00:00 de mañana
-        DateTime final  = DateTime.Today.AddDays(1).AddHours(6); // 06:00 de mañana
+        DateTime inicio;
+        DateTime final;
+
+        if (ahora.Hour < 6)
+        {
+            inicio = DateTime.Today;           // HOY 00:00
+            final  = DateTime.Today.AddHours(6); // HOY 06:00
+        }
+        else
+        {
+            return BadRequest("Este método solo aplica de 00:00 a 06:00.");
+        }
         try
         {
             var resultado = await
@@ -329,8 +373,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 where pe.Codigoregistrso != null
                     && p.Nombreparada != null
                     && gp.Codigogrupoparada != null
-                    && ee.Fechaentrada >= inicio
-                    && ee.Fechaentrada < final
+                    && pe.Fechayhoraparada >= inicio
+                    && pe.Fechayhoraparada < final
                     && !p.Codigoparada.EndsWith("0114")
                     && te.Codigoproceso == centroCostoStr
                 select new ParadasActualesDTO
@@ -363,9 +407,20 @@ public class GesplineParadasEjecutadasController : ControllerBase
         centroCostoStr = centroCostoStr?.Trim();
         if (!int.TryParse(centroCostoStr, out _))
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
+        DateTime ahora = DateTime.Now;
 
-        DateTime inicio = DateTime.Today.AddDays(1).Date;        // 00:00 de mañana 
-        DateTime final  = DateTime.Today.AddDays(1).AddHours(6); // 06:00 de mañana
+        DateTime inicio;
+        DateTime final;
+
+        if (ahora.Hour < 6)
+        {
+            inicio = DateTime.Today;           // HOY 00:00
+            final  = DateTime.Today.AddHours(6); // HOY 06:00
+        }
+        else
+        {
+            return BadRequest("Este método solo aplica de 00:00 a 06:00.");
+        }
         bool centroCostoSinEquipo = centroCostoStr == "103103" || centroCostoStr == "103105" || centroCostoStr == "103106";
         try
         {
@@ -385,8 +440,8 @@ public class GesplineParadasEjecutadasController : ControllerBase
                 where pe.Codigoregistrso != null
                 && p.Nombreparada != null
                 && gp.Codigogrupoparada != null
-                && ee.Fechaentrada >= inicio
-                && ee.Fechaentrada < final
+                && pe.Fechayhoraparada >= inicio
+                && pe.Fechayhoraparada < final
                 && !p.Codigoparada.EndsWith("0114")
                 && te.Codigoproceso == centroCostoStr  
                 select new
