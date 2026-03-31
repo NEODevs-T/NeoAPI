@@ -527,13 +527,22 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetFechaTrabajoXIdMaster/{IdMaster:int}")]
-        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXIdMaster(int IdMaster)
+        public async Task<ActionResult<List<FechaProgDTO>>> GetFechaTrabajoXIdMaster(
+            int IdMaster,
+            [FromQuery] bool incluirInactivos = false)
         {
+            var query = _context.FechaProgs
+                .Where(f =>
+                    f.IdMaster == IdMaster &&
+                    f.Fpprogra.Date >= DateTime.Now.Date
+                );
 
-            List<FechaProg> data = await this._context.FechaProgs
-                .Where(f => f.IdMaster == IdMaster && f.Fpestado == true && f.Fpprogra.Date >= DateTime.Now.Date)
-                .ToListAsync();
+            if (!incluirInactivos)
+            {
+                query = query.Where(f => f.Fpestado == true);
+            }
 
+            var data = await query.ToListAsync();
             return Ok(_mapper.Map<List<FechaProgDTO>>(data));
         }
 
