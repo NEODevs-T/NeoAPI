@@ -28,6 +28,10 @@ public partial class Producto
 
     public DateTime? Timespan { get; set; }
 
+    public string? Referencia { get; set; }
+
+    public string? Grupoarticulos { get; set; }
+
     public virtual Centro? CodigocentroNavigation { get; set; }
 
     public virtual ICollection<Ordenproduccionxproducto> Ordenproduccionxproductos { get; set; } = new List<Ordenproduccionxproducto>();

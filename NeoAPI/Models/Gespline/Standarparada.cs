@@ -17,6 +17,8 @@ public partial class Standarparada
 
     public DateTime? Timespan { get; set; }
 
+    public double Tiempoalerta { get; set; }
+
     public virtual Parada? CodigoparadaNavigation { get; set; }
 
     public virtual Producto? CodigoproductosNavigation { get; set; }

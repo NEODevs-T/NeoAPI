@@ -47,6 +47,10 @@ public partial class Personal
 
     public DateTime? Timespan { get; set; }
 
+    public string? Codigoconfirmacion { get; set; }
+
+    public byte[]? Imagen { get; set; }
+
     public virtual Tipocargospersonal? CodidocargospersonalNavigation { get; set; }
 
     public virtual ICollection<Entradaejecucion> Entradaejecucions { get; set; } = new List<Entradaejecucion>();

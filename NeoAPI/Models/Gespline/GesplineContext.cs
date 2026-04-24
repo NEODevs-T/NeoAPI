@@ -19,7 +19,11 @@ public partial class GesplineContext : DbContext
 
     public virtual DbSet<Centro> Centros { get; set; }
 
+    public virtual DbSet<Comentariosparadasejecutada> Comentariosparadasejecutadas { get; set; }
+
     public virtual DbSet<Entradaejecucion> Entradaejecucions { get; set; }
+
+    public virtual DbSet<Equipo> Equipos { get; set; }
 
     public virtual DbSet<Gruposdeparada> Gruposdeparadas { get; set; }
 
@@ -89,7 +93,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigocentro);
 
-            entity.ToTable("CENTROS", tb => tb.HasTrigger("TR_CENTROS"));
+            entity.ToTable("CENTROS");
 
             entity.Property(e => e.Codigocentro)
                 .HasMaxLength(50)
@@ -106,6 +110,28 @@ public partial class GesplineContext : DbContext
                 .HasColumnName("TIMESPAN");
         });
 
+        modelBuilder.Entity<Comentariosparadasejecutada>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__COMENTAR__3214EC27822581BC");
+
+            entity.ToTable("COMENTARIOSPARADASEJECUTADAS");
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Comentarios)
+                .IsUnicode(false)
+                .HasColumnName("COMENTARIOS");
+            entity.Property(e => e.Idparadaejecutada).HasColumnName("IDPARADAEJECUTADA");
+            entity.Property(e => e.Timespan)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("TIMESPAN");
+
+            entity.HasOne(d => d.IdparadaejecutadaNavigation).WithMany(p => p.Comentariosparadasejecutada)
+                .HasForeignKey(d => d.Idparadaejecutada)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_COMENTARIOS_PARADA");
+        });
+
         modelBuilder.Entity<Entradaejecucion>(entity =>
         {
             entity.HasKey(e => e.Codigoentradaejecucion);
@@ -114,7 +140,9 @@ public partial class GesplineContext : DbContext
 
             entity.HasIndex(e => e.Codigotupla, "INDEX_ENTRADAEJECUCION_CODIGOTUPLA").HasFillFactor(90);
 
-            entity.HasIndex(e => e.Fechaentrada, "INDEX_FECHA");
+            entity.HasIndex(e => e.Fechaentrada, "INDEX_FECHA").HasFillFactor(90);
+
+            entity.HasIndex(e => e.Timespan, "IX_ENTRADAEJECUCIONTIMESPAN").HasFillFactor(90);
 
             entity.Property(e => e.Codigoentradaejecucion).HasColumnName("CODIGOENTRADAEJECUCION");
             entity.Property(e => e.Avancex100enentrada).HasColumnName("AVANCEX100ENENTRADA");
@@ -193,11 +221,37 @@ public partial class GesplineContext : DbContext
                 .HasConstraintName("FK_ENTRADAE_REFERENCE_TIPOSDET");
         });
 
+        modelBuilder.Entity<Equipo>(entity =>
+        {
+            entity.HasKey(e => e.Id).HasName("PK__EQUIPOS__3214EC272D054A45");
+
+            entity.ToTable("EQUIPOS");
+
+            entity.HasIndex(e => e.Codigoequipo, "UQ__EQUIPOS__914DA65F871509B3").IsUnique();
+
+            entity.Property(e => e.Id).HasColumnName("ID");
+            entity.Property(e => e.Codigoequipo)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CODIGOEQUIPO");
+            entity.Property(e => e.Estado)
+                .HasDefaultValue(true)
+                .HasColumnName("ESTADO");
+            entity.Property(e => e.Nombreequipo)
+                .HasMaxLength(100)
+                .IsUnicode(false)
+                .HasColumnName("NOMBREEQUIPO");
+            entity.Property(e => e.Timespan)
+                .HasDefaultValueSql("(getdate())")
+                .HasColumnType("datetime")
+                .HasColumnName("TIMESPAN");
+        });
+
         modelBuilder.Entity<Gruposdeparada>(entity =>
         {
             entity.HasKey(e => e.Codigogrupoparada);
 
-            entity.ToTable("GRUPOSDEPARADAS", tb => tb.HasTrigger("TR_GRUPOSDEPARADAS"));
+            entity.ToTable("GRUPOSDEPARADAS");
 
             entity.Property(e => e.Codigogrupoparada)
                 .HasMaxLength(50)
@@ -225,7 +279,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigoordenproduccion);
 
-            entity.ToTable("ORDENES_DE_PRODUCCION", tb => tb.HasTrigger("TR_ORDENES_DE_PRODUCCION"));
+            entity.ToTable("ORDENES_DE_PRODUCCION");
 
             entity.Property(e => e.Codigoordenproduccion)
                 .HasMaxLength(50)
@@ -277,7 +331,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => new { e.Codigoordenproduccion, e.Codigoproductos });
 
-            entity.ToTable("ORDENPRODUCCIONXPRODUCTO", tb => tb.HasTrigger("TR_ORDENPRODUCCIONXPRODUCTO"));
+            entity.ToTable("ORDENPRODUCCIONXPRODUCTO");
 
             entity.Property(e => e.Codigoordenproduccion)
                 .HasMaxLength(50)
@@ -324,7 +378,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigoparada);
 
-            entity.ToTable("PARADAS", tb => tb.HasTrigger("TR_PARADAS"));
+            entity.ToTable("PARADAS");
 
             entity.Property(e => e.Codigoparada)
                 .HasMaxLength(50)
@@ -358,9 +412,11 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigoregistrso).HasName("PK__PARADASEJECUTADA__7755B73D");
 
-            entity.ToTable("PARADASEJECUTADAS");
+            entity.ToTable("PARADASEJECUTADAS", tb => tb.HasTrigger("TR_Audit_ParadasEjecutadas"));
 
-            entity.HasIndex(e => e.Codigoentradaejecucion, "IX_PARADASEJECUTADAS");
+            entity.HasIndex(e => e.Codigoentradaejecucion, "IX_PARADASEJECUTADAS").HasFillFactor(90);
+
+            entity.HasIndex(e => e.Timespan, "IX_PARADASEJECUTADASTIMESPAN").HasFillFactor(90);
 
             entity.Property(e => e.Codigoregistrso).HasColumnName("CODIGOREGISTRSO");
             entity.Property(e => e.Codigoentradaejecucion).HasColumnName("CODIGOENTRADAEJECUCION");
@@ -405,7 +461,7 @@ public partial class GesplineContext : DbContext
 
         modelBuilder.Entity<Parte>(entity =>
         {
-            entity.HasKey(e => e.PartesId).HasName("PK__Partes__590F666F0804063F");
+            entity.HasKey(e => e.PartesId).HasName("PK__Partes__590F666F376C8FDD");
 
             entity.Property(e => e.PartesId).HasColumnName("PartesID");
             entity.Property(e => e.Codigo)
@@ -421,7 +477,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigopersonal);
 
-            entity.ToTable("PERSONAL", tb => tb.HasTrigger("TR_PERSONAL"));
+            entity.ToTable("PERSONAL");
 
             entity.Property(e => e.Codigopersonal)
                 .HasMaxLength(100)
@@ -443,6 +499,10 @@ public partial class GesplineContext : DbContext
                 .HasMaxLength(50)
                 .IsUnicode(false)
                 .HasColumnName("CODIDOCARGOSPERSONAL");
+            entity.Property(e => e.Codigoconfirmacion)
+                .HasMaxLength(50)
+                .IsUnicode(false)
+                .HasColumnName("CODIGOCONFIRMACION");
             entity.Property(e => e.Codigosueldo)
                 .HasMaxLength(50)
                 .IsUnicode(false)
@@ -511,7 +571,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigoproceso);
 
-            entity.ToTable("PROCESO", tb => tb.HasTrigger("TR_PROCESO"));
+            entity.ToTable("PROCESO");
 
             entity.Property(e => e.Codigoproceso)
                 .HasMaxLength(100)
@@ -536,11 +596,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigoproductos).IsClustered(false);
 
-            entity.ToTable("PRODUCTOS", tb =>
-                {
-                    tb.HasComment("Tabla que relaciona los productos");
-                    tb.HasTrigger("TR_PRODUCTOS");
-                });
+            entity.ToTable("PRODUCTOS", tb => tb.HasComment("Tabla que relaciona los productos"));
 
             entity.Property(e => e.Codigoproductos)
                 .HasMaxLength(50)
@@ -555,12 +611,18 @@ public partial class GesplineContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("CODIGOCENTRO");
             entity.Property(e => e.Estadoproducto).HasColumnName("ESTADOPRODUCTO");
+            entity.Property(e => e.Grupoarticulos)
+                .HasMaxLength(50)
+                .HasColumnName("GRUPOARTICULOS");
             entity.Property(e => e.Nombreproducto)
                 .HasMaxLength(100)
                 .IsUnicode(false)
                 .HasColumnName("NOMBREPRODUCTO");
             entity.Property(e => e.Pesoproducto).HasColumnName("PESOPRODUCTO");
             entity.Property(e => e.Presentacionproducto).HasColumnName("PRESENTACIONPRODUCTO");
+            entity.Property(e => e.Referencia)
+                .HasMaxLength(50)
+                .HasColumnName("REFERENCIA");
             entity.Property(e => e.Timespan)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -580,7 +642,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => new { e.Codigoproductos, e.Codigoproceso });
 
-            entity.ToTable("PRODUCTOPORPROCESO", tb => tb.HasTrigger("TR_PRODUCTOPORPROCESO"));
+            entity.ToTable("PRODUCTOPORPROCESO");
 
             entity.Property(e => e.Codigoproductos)
                 .HasMaxLength(50)
@@ -610,7 +672,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigopuesto);
 
-            entity.ToTable("PUESTOSDETRABAJO", tb => tb.HasTrigger("TR_PUESTOSDETRABAJO"));
+            entity.ToTable("PUESTOSDETRABAJO");
 
             entity.Property(e => e.Codigopuesto)
                 .HasMaxLength(50)
@@ -681,7 +743,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => new { e.Codigoproductos, e.Codigoproceso, e.Codigopuesto });
 
-            entity.ToTable("PUESTOTRABAJOSEGUNPRODUCTO", tb => tb.HasTrigger("TR_PUESTOTRABAJOSEGUNPRODUCTO"));
+            entity.ToTable("PUESTOTRABAJOSEGUNPRODUCTO");
 
             entity.Property(e => e.Codigoproductos)
                 .HasMaxLength(50)
@@ -707,6 +769,7 @@ public partial class GesplineContext : DbContext
             entity.Property(e => e.Factorvariable1)
                 .HasDefaultValue(1.0)
                 .HasColumnName("FACTORVARIABLE1");
+            entity.Property(e => e.Factorvariable2).HasColumnName("FACTORVARIABLE2");
             entity.Property(e => e.Multiplicadorsensor).HasColumnName("MULTIPLICADORSENSOR");
             entity.Property(e => e.Multiplicadorsensor2y3)
                 .HasDefaultValue(1.0)
@@ -736,7 +799,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.IdStandar);
 
-            entity.ToTable("STANDARPARADAS", tb => tb.HasTrigger("TR_STANDARPARADAS"));
+            entity.ToTable("STANDARPARADAS");
 
             entity.Property(e => e.IdStandar).HasColumnName("ID_STANDAR");
             entity.Property(e => e.Codigoparada)
@@ -752,6 +815,7 @@ public partial class GesplineContext : DbContext
                 .IsUnicode(false)
                 .HasColumnName("CODIGOPUESTO");
             entity.Property(e => e.Standarparada1).HasColumnName("STANDARPARADA");
+            entity.Property(e => e.Tiempoalerta).HasColumnName("TIEMPOALERTA");
             entity.Property(e => e.Timespan)
                 .HasDefaultValueSql("(getdate())")
                 .HasColumnType("datetime")
@@ -774,7 +838,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codidocargospersonal);
 
-            entity.ToTable("TIPOCARGOSPERSONAL", tb => tb.HasTrigger("TR_TIPOCARGOSPERSONAL"));
+            entity.ToTable("TIPOCARGOSPERSONAL");
 
             entity.Property(e => e.Codidocargospersonal)
                 .HasMaxLength(50)
@@ -795,7 +859,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigoturno);
 
-            entity.ToTable("TIPOSDETURNOS", tb => tb.HasTrigger("TR_TIPOSDETURNOS"));
+            entity.ToTable("TIPOSDETURNOS");
 
             entity.Property(e => e.Codigoturno)
                 .HasMaxLength(50)
@@ -824,7 +888,7 @@ public partial class GesplineContext : DbContext
         {
             entity.HasKey(e => e.Codigo);
 
-            entity.ToTable("TIPOSDEUNIDADESMATERIALES", tb => tb.HasTrigger("TR_TIPOSDEUNIDADESMATERIALES"));
+            entity.ToTable("TIPOSDEUNIDADESMATERIALES");
 
             entity.Property(e => e.Codigo)
                 .HasMaxLength(50)
@@ -903,6 +967,8 @@ public partial class GesplineContext : DbContext
             entity.HasKey(e => e.Codigotupla);
 
             entity.ToTable("TUPLAEJECUCION");
+
+            entity.HasIndex(e => e.Timespan, "IX_TUPLAEJECUCIONTIMESPAN").HasFillFactor(90);
 
             entity.Property(e => e.Codigotupla).HasColumnName("CODIGOTUPLA");
             entity.Property(e => e.Codigoordenproduccion)

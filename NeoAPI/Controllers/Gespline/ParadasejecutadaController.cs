@@ -99,64 +99,168 @@ public class GesplineParadasEjecutadasController : ControllerBase
         [FromQuery(Name = "centroCosto")] string? centroCostoStr)
     {
         centroCostoStr = centroCostoStr?.Trim();
-        if (!int.TryParse(centroCostoStr, out int centroCosto))
+
+        if (!int.TryParse(centroCostoStr, out int _))
             return BadRequest("El centro de costo es obligatorio y debe contener solo valores numéricos.");
+
         DateTime inicio = DateTime.Today.AddHours(5).AddMinutes(54).AddSeconds(59);
-        DateTime final = DateTime.Today.AddHours(18);
+        DateTime final  = DateTime.Today.AddHours(18);
+
         bool centroCostoSinEquipo = centroCostoStr == "103103" || centroCostoStr == "103105" || centroCostoStr == "103106";
+
+        // Helper local: extraer CODIGOEQUIPO del JSON en COMENTARIOS
+        static string? ExtraerCodigoEquipo(string? comentariosJson)
+        {
+            if (string.IsNullOrWhiteSpace(comentariosJson))
+                return null;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(comentariosJson);
+                if (doc.RootElement.ValueKind == JsonValueKind.Object &&
+                    doc.RootElement.TryGetProperty("CODIGOEQUIPO", out var prop))
+                {
+                    var value = prop.GetString();
+                    return string.IsNullOrWhiteSpace(value) ? null : value.Trim();
+                }
+            }
+            catch
+            {
+                // Si no es JSON válido, se ignora
+            }
+
+            return null;
+        }
+
         try
         {
-            var query = 
-                from pe in _context.Paradasejecutadas
-                join ee in _context.Entradaejecucions
+            // 1) Traer base de paradas (SIN join a comentarios para evitar duplicados)
+            var baseRows = await (
+                from pe in _context.Paradasejecutadas.AsNoTracking()
+                join ee in _context.Entradaejecucions.AsNoTracking()
                     on pe.Codigoentradaejecucion equals ee.Codigoentradaejecucion
-                join te in _context.Tuplaejecucions
+                join te in _context.Tuplaejecucions.AsNoTracking()
                     on ee.Codigotupla equals te.Codigotupla
-                join p in _context.Paradas
+                join p in _context.Paradas.AsNoTracking()
                     on pe.Codigoparada equals p.Codigoparada
-                join gp in _context.Gruposdeparadas
+                join gp in _context.Gruposdeparadas.AsNoTracking()
                     on p.Codigogrupoparada equals gp.Codigogrupoparada
-                join a in _context.Areas
-                    on pe.Codigoparada.Substring(0, 4).Trim() equals a.AcodGes.Trim() into aJoin
-                from pa in aJoin.DefaultIfEmpty()
                 where pe.Codigoregistrso != null
                     && p.Nombreparada != null
                     && gp.Codigogrupoparada != null
                     && pe.Fechayhoraparada >= inicio
                     && pe.Fechayhoraparada < final
                     && !p.Codigoparada.EndsWith("0114")
-                    && te.Codigoproceso == centroCostoStr               
+                    && te.Codigoproceso == centroCostoStr
                 select new
                 {
+                    pe.Codigoregistrso,
                     p.Codigoparada,
                     gp.Codigogrupoparada,
-                    ACodGes = pa.AcodGes,   // puede ser null
                     p.Nombreparada,
-                    Aparte = pa.Aparte,     // puede ser null
                     Minutos = (pe.Demoraparada ?? 0) * 60
+                }
+            ).ToListAsync();
+
+            if (baseRows.Count == 0)
+                return NotFound($"No se encontraron registros para {centroCostoStr}. Introduzca un centroCosto válido.");
+
+            // 2) Buscar comentarios asociados a esas paradas
+            var registros = baseRows
+                .Select(x => x.Codigoregistrso)
+                .Distinct()
+                .ToList();
+
+            var comentariosRows = await _context.Comentariosparadasejecutadas.AsNoTracking()
+                .Where(c => registros.Contains(c.Idparadaejecutada))
+                .Select(c => new { c.Idparadaejecutada, c.Comentarios, c.Timespan })
+                .ToListAsync();
+
+            // 3) Tomar el comentario MÁS RECIENTE por parada (por Timespan)
+            var comentarioPorRegistro = comentariosRows
+                .GroupBy(x => x.Idparadaejecutada)
+                .ToDictionary(
+                    g => g.Key,
+                    g => g.OrderByDescending(x => x.Timespan).FirstOrDefault()?.Comentarios
+                );
+
+            // 4) Extraer códigos de equipo desde JSON
+            var codigosEquipos = baseRows
+                .Select(r =>
+                {
+                    comentarioPorRegistro.TryGetValue(r.Codigoregistrso, out var json);
+                    return ExtraerCodigoEquipo(json);
+                })
+                .Where(c => !string.IsNullOrWhiteSpace(c))
+                .Distinct()
+                .ToList()!;
+
+            // 5) Consultar EQUIPOS y armar diccionario: CODIGOEQUIPO => NOMBREEQUIPO
+            var equiposDict = await _context.Equipos.AsNoTracking()
+                .Where(e => codigosEquipos.Contains(e.Codigoequipo))
+                .Select(e => new { e.Codigoequipo, e.Nombreequipo })
+                .ToDictionaryAsync(x => x.Codigoequipo, x => x.Nombreequipo);
+
+            // 6) Enriquecer cada fila con CODIGOEQUIPO + NOMBREEQUIPO
+            var enriched = baseRows.Select(r =>
+            {
+                comentarioPorRegistro.TryGetValue(r.Codigoregistrso, out var json);
+                var codigoEquipo = ExtraerCodigoEquipo(json);
+
+                // ACodGes = CODIGOEQUIPO (o "Código no Registrado")
+                var aCodGes = codigoEquipo ?? "Código no Registrado";
+
+                // Aparte = NOMBREEQUIPO (o fallback)
+                string aparte;
+                if (centroCostoSinEquipo)
+                {
+                    // Para centros que “no llevan equipo”, se deja vacío como tu lógica original
+                    aparte = "";
+                }
+                else
+                {
+                    if (!string.IsNullOrWhiteSpace(codigoEquipo) && equiposDict.TryGetValue(codigoEquipo!, out var nombreEquipo))
+                        aparte = nombreEquipo;
+                    else
+                        aparte = "Equipo no Registrado";
+                }
+
+                return new
+                {
+                    r.Codigoparada,
+                    r.Codigogrupoparada,
+                    r.Nombreparada,
+                    ACodGes = aCodGes,
+                    Aparte  = aparte,
+                    r.Minutos
                 };
-            var result = await query
+            });
+
+            // 7) Agrupar y devolver
+            var result = enriched
                 .GroupBy(x => new
                 {
                     x.Codigoparada,
                     x.Codigogrupoparada,
-                    ACodGes = x.ACodGes ?? "Código no Registrado",
+                    x.ACodGes,
                     x.Nombreparada,
-                    Aparte = x.Aparte ?? (centroCostoSinEquipo ? "" : "Equipo no Registrado")
+                    x.Aparte
                 })
                 .Select(grp => new ParadasActualesAgrupadasDTO
                 {
-                    CodigoParada = grp.Key.Codigoparada,
+                    CodigoParada      = grp.Key.Codigoparada,
                     CodigoGrupoParada = grp.Key.Codigogrupoparada,
-                    ACodGes = grp.Key.ACodGes,
-                    NombreParada = grp.Key.Nombreparada,
-                    Aparte = grp.Key.Aparte,
-                    TiempoPerdido = grp.Sum(x => x.Minutos)
+                    ACodGes           = grp.Key.ACodGes,      // ✅ CODIGOEQUIPO (o "Código no Registrado")
+                    NombreParada      = grp.Key.Nombreparada,
+                    Aparte            = grp.Key.Aparte,       // ✅ NOMBREEQUIPO (o fallback)
+                    TiempoPerdido     = grp.Sum(x => x.Minutos)
                 })
                 .OrderByDescending(x => x.TiempoPerdido)
-                .ToListAsync();
+                .ToList();
+
             if (result.Count == 0)
                 return NotFound($"No se encontraron registros para {centroCostoStr}. Introduzca un centroCosto válido.");
+
             return Ok(result);
         }
         catch (Exception ex)
