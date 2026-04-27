@@ -150,7 +150,7 @@ public class GesplineParadasEjecutadasController : ControllerBase
                     && gp.Codigogrupoparada != null
                     && pe.Fechayhoraparada >= inicio
                     && pe.Fechayhoraparada < final
-                    && !p.Codigoparada.EndsWith("0114")
+                    && p.Codigoparada != "0107"
                     && te.Codigoproceso == centroCostoStr
                 select new
                 {
@@ -415,7 +415,7 @@ public class GesplineParadasEjecutadasController : ControllerBase
                     && gp.Codigogrupoparada != null
                     && pe.Fechayhoraparada >= inicio
                     && pe.Fechayhoraparada < final
-                    && !p.Codigoparada.EndsWith("0114")
+                    && p.Codigoparada != "0107"
                     && te.Codigoproceso == centroCostoStr
                 select new
                 {
@@ -673,7 +673,7 @@ public class GesplineParadasEjecutadasController : ControllerBase
                     && gp.Codigogrupoparada != null
                     && pe.Fechayhoraparada >= inicio
                     && pe.Fechayhoraparada < final
-                    && !p.Codigoparada.EndsWith("0114")
+                    && p.Codigoparada != "0107"
                     && te.Codigoproceso == centroCostoStr
                 select new
                 {
