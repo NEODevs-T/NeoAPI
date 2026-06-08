@@ -37,6 +37,8 @@ public partial class Puestotrabajosegunproducto
 
     public DateTime? Timespan { get; set; }
 
+    public double? Factorvariable2 { get; set; }
+
     public virtual Puestosdetrabajo CodigopuestoNavigation { get; set; } = null!;
 
     public virtual Productoporproceso Productoporproceso { get; set; } = null!;

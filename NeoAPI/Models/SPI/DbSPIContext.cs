@@ -1,8 +1,10 @@
 ﻿using System;
 using System.Collections.Generic;
 using Microsoft.EntityFrameworkCore;
+using NeoAPI.Models.SPI;
 
 namespace NeoAPI.Models.SPI;
+
 
 public partial class DbSPIContext : DbContext
 {

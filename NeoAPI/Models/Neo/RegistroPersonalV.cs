@@ -35,7 +35,11 @@ public partial class RegistroPersonalV
 
     public string TipoDeIncidencia { get; set; } = null!;
 
+    public int IdTipSuple { get; set; }
+
     public string TipoDeSuplencia { get; set; } = null!;
 
     public string? Suplido { get; set; }
+
+    public int IdLinea { get; set; }
 }

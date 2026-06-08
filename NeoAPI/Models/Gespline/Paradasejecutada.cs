@@ -30,4 +30,6 @@ public partial class Paradasejecutada
     public virtual Parada? CodigoparadaNavigation { get; set; }
 
     public virtual Personal? CodigopersonalatiendeNavigation { get; set; }
+
+    public virtual ICollection<Comentariosparadasejecutada> Comentariosparadasejecutada { get; set; } = new List<Comentariosparadasejecutada>();
 }

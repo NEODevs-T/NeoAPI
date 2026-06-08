@@ -1,9 +1,9 @@
-using System;
+﻿using System;
 using System.Collections.Generic;
 
-namespace NeoAPI.DTOs.ReunionDiaria;
+namespace NeoAPI.Models.Neo;
 
-public partial class ReunionDTO
+public partial class Reunion2
 {
     public int IdReuDia { get; set; }
 
@@ -18,7 +18,6 @@ public partial class ReunionDTO
     public string? Rdcentro { get; set; }
 
     public string? Rddiv { get; set; }
-    public int IdLinea {get; set;}
 
     public string? Rdarea { get; set; }
 
@@ -30,7 +29,7 @@ public partial class ReunionDTO
 
     public string? RdplanAcc { get; set; }
 
-    public double? Rdtiempo { get; set; }
+    public string? Rdtiempo { get; set; }
 
     public string? Rdstatus { get; set; }
 
@@ -38,7 +37,7 @@ public partial class ReunionDTO
 
     public string? RdnumDis { get; set; }
 
-    public DateTime RdfecReu { get; set; }
+    public DateTime? RdfecReu { get; set; }
 
     public DateTime RdfecTra { get; set; }
 
@@ -46,19 +45,11 @@ public partial class ReunionDTO
 
     public DateTime? RdfecCrea { get; set; }
 
-    public int IdCausaCal { get; set; }
+    public int? IdCausaCal { get; set; }
 
-    public string OrigenCal { get; set; } = null!;
+    public string? OrigenCal { get; set; }
 
-    public int IdTipReu { get; set; }
-    
+    public int? IdTipReu { get; set; }
+
     public string? RdcodRequi { get; set; }
-
-    public string? Ksf {get; set; }
-    
-    public string? Responsable {get; set; }
-
-    public int? IdPais {get; set; }
-
-    public string? EnombreEam { get; set; }
 }

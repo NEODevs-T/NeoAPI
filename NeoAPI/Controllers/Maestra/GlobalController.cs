@@ -258,6 +258,54 @@ namespace NeoAPI.Controllers.Maestras
             return Ok(persona);
         }
 
+        [HttpGet("GetGrupoYTurnoActual")]
+        public async Task<ActionResult<GrupoTurnoDTO>> GetGrupoYTurnoActual()
+        {
+            try
+            {
+                var ahora = DateTime.Now;
+                int hora = ahora.Hour;
 
+                int turno;
+                int fecha;
+
+                if (hora >= 6 && hora < 18)
+                {
+                    turno = 1;
+                    fecha = int.Parse(ahora.ToString("yyyyMMdd"));
+                }
+                else if (hora >= 0 && hora < 6)
+                {
+                    turno = 2;
+                    fecha = int.Parse(ahora.AddDays(-1).ToString("yyyyMMdd"));
+                }
+                else
+                {
+                    turno = 2;
+                    fecha = int.Parse(ahora.ToString("yyyyMMdd"));
+                }
+
+                var resultado = await (
+                    from rc in _DOCIng.RotaCalida
+                    where rc.Rcfecha == fecha && rc.Rcturno == turno
+                    select new GrupoTurnoDTO
+                    {
+                        turno = rc.Rcturno.ToString(),
+                        grupo = rc.Rcgrupo
+                    }
+                ).FirstOrDefaultAsync();
+
+                if (resultado == null)
+                {
+                    return NotFound("No se encontró información de grupo y turno.");
+                }
+
+                return Ok(resultado);
+            }
+            catch (Exception ex)
+            {
+                return StatusCode(500, $"Error interno: {ex.Message}");
+            }
+        }
     }
 }

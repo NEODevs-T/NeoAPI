@@ -12,6 +12,7 @@ using NeoAPI.Models.Gespline;
 using NeoAPI.Interface;
 using NeoAPI.Logic.MaquinasGespline;
 using NeoAPI.Logic.Reuniones;
+using NeoAPI.RRHHModels;
 
 
 var builder = WebApplication.CreateBuilder(args);
@@ -29,6 +30,7 @@ builder.Services.AddSwaggerGen();
 builder.Services.AddControllers().AddJsonOptions(x =>x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
 builder.Services.AddDbContext<DbNeoIiContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DOCIng")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<DbRRHHContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("UsrConexion")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseVen")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCol")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
