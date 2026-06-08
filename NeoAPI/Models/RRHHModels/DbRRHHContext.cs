@@ -23,10 +23,6 @@ public partial class DbRRHHContext : DbContext
 
     public virtual DbSet<RepososV> RepososVs { get; set; }
 
-    protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
-#warning To protect potentially sensitive information in your connection string, you should move it out of source code. You can avoid scaffolding the connection string by using the Name= syntax to read it from configuration - see https://go.microsoft.com/fwlink/?linkid=2131148. For more guidance on storing connection strings, see https://go.microsoft.com/fwlink/?LinkId=723263.
-        => optionsBuilder.UseSqlServer("Data Source=AZTDTDB03\\DBVEN01;Initial Catalog=SERVICIO_MEDICO;TrustServerCertificate=True;Persist Security Info=True;User ID=UsrConexion;Password=Sql*Db-2626**");
-
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AusenciaV>(entity =>
@@ -34,7 +30,6 @@ public partial class DbRRHHContext : DbContext
             entity
                 .HasNoKey()
                 .ToView("Ausencia_v", "SPI");
-
             entity.Property(e => e.Añodnh)
                 .HasColumnType("numeric(4, 0)")
                 .HasColumnName("AÑODNH");
