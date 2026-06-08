@@ -5,9 +5,9 @@ namespace NeoAPI.DTOs.RRHH;
 
 public partial class PeriodosVDTO
 {
-    public string Ciafpr { get; set; } = null!;
+    public string? Ciafpr { get; set; } = null!;
 
-    public string Tpnfpr { get; set; } = null!;
+    public string? Tpnfpr { get; set; } = null!;
 
     public decimal Añofpr { get; set; }
 
