@@ -15,6 +15,8 @@ public partial class DbNeoBonoContext : DbContext
     {
     }
 
+    public virtual DbSet<EstaAproba> EstaAprobas { get; set; }
+
     public virtual DbSet<ResumEspecial> ResumEspecials { get; set; }
 
     public virtual DbSet<ResumEspecialAproba> ResumEspecialAprobas { get; set; }
@@ -27,6 +29,18 @@ public partial class DbNeoBonoContext : DbContext
 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<EstaAproba>(entity =>
+        {
+            entity.HasKey(e => e.IdEstado).HasName("PK__CatEstad__FBB0EDC1E519DEF0");
+
+            entity.ToTable("EstaAproba", "per");
+
+            entity.Property(e => e.IdEstado).ValueGeneratedNever();
+            entity.Property(e => e.NombreEstado)
+                .HasMaxLength(50)
+                .IsUnicode(false);
+        });
+
         modelBuilder.Entity<ResumEspecial>(entity =>
         {
             entity.HasKey(e => e.IdEspecial).HasName("PK__ResumenE__19E030606630180F");
@@ -40,6 +54,11 @@ public partial class DbNeoBonoContext : DbContext
             entity.Property(e => e.UsuarioSolicita)
                 .HasMaxLength(50)
                 .IsUnicode(false);
+
+            entity.HasOne(d => d.IdEstadoNavigation).WithMany(p => p.ResumEspecials)
+                .HasForeignKey(d => d.IdEstado)
+                .OnDelete(DeleteBehavior.ClientSetNull)
+                .HasConstraintName("FK_ResumenEspecial_Estado");
 
             entity.HasOne(d => d.IdResumenNavigation).WithMany(p => p.ResumEspecials)
                 .HasForeignKey(d => d.IdResumen)

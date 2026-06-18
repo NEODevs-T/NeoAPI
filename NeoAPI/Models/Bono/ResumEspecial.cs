@@ -17,6 +17,8 @@ public partial class ResumEspecial
 
     public string UsuarioSolicita { get; set; } = null!;
 
+    public virtual EstaAproba IdEstadoNavigation { get; set; } = null!;
+
     public virtual Resuman IdResumenNavigation { get; set; } = null!;
 
     public virtual ICollection<ResumEspecialAproba> ResumEspecialAprobas { get; set; } = new List<ResumEspecialAproba>();

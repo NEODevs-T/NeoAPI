@@ -9,6 +9,7 @@ using NeoAPI.Logic;
 using NeoAPI.Extensions;
 using NeoAPI.Models.SPI;
 using NeoAPI.Models.Gespline;
+using NeoAPI.Models.Bono;
 using NeoAPI.Interface;
 using NeoAPI.Logic.MaquinasGespline;
 using NeoAPI.Logic.Reuniones;
@@ -34,6 +35,8 @@ builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlSe
 builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<DbSPIContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("SPI")), ServiceLifetime.Transient);
 builder.Services.AddDbContext<GesplineContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Gespline")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<DbNeoBonoContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DbNeoBono")));
+
 
 builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();
