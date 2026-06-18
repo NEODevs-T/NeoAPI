@@ -37,12 +37,6 @@ public class BonoController : ControllerBase
                 if (string.IsNullOrWhiteSpace(dto.Motivo))
                     return BadRequest(new { message = "El campo Motivo es obligatorio cuando EsEspecial es true." });
 
-                if (!dto.IdEstado.HasValue)
-                    return BadRequest(new { message = "El campo IdEstado es obligatorio cuando EsEspecial es true." });
-
-                if (!dto.FechaSolicitud.HasValue)
-                    return BadRequest(new { message = "El campo FechaSolicitud es obligatorio cuando EsEspecial es true." });
-
                 if (string.IsNullOrWhiteSpace(dto.UsuarioSolicita))
                     return BadRequest(new { message = "El campo UsuarioSolicita es obligatorio cuando EsEspecial es true." });
             }
@@ -75,7 +69,7 @@ public class BonoController : ControllerBase
                 {
                     IdResumen = resumen.IdResumen,
                     Motivo = dto.Motivo!,
-                    IdEstado = dto.IdEstado!.Value,
+                    IdEstado = 1, // Siempre inicia en 1
                     FechaSolicitud = DateTime.Now,
                     UsuarioSolicita = dto.UsuarioSolicita!
                 };
@@ -89,12 +83,14 @@ public class BonoController : ControllerBase
             return Ok(new
             {
                 message = dto.EsEspecial
-                    ? "Registro insertado correctamente en Resuman y ResumEspecial."
-                    : "Registro insertado correctamente en Resuman.",
+                    ? "Registro especial insertado correctamente en Resuman y ResumEspecial."
+                    : "Registro normal insertado correctamente en Resuman.",
                 data = new
                 {
-                    resumen,
-                    resumEspecial = especial
+                    idResumen = resumen.IdResumen,
+                    esEspecial = resumen.EsEspecial,
+                    idEspecial = especial?.IdEspecial,
+                    estadoInicial = especial?.IdEstado
                 }
             });
         }
@@ -184,6 +180,57 @@ public class BonoController : ControllerBase
             return StatusCode(500, new
             {
                 message = "Ocurrió un error al actualizar el estado del registro especial.",
+                error = ex.Message
+            });
+        }
+    }
+
+    [HttpGet("especial/{idEspecial}/historial")]
+    public async Task<IActionResult> ObtenerHistorialEspecial(int idEspecial)
+    {
+        try
+        {
+            var existeEspecial = await _context.ResumEspecials
+                .AnyAsync(x => x.IdEspecial == idEspecial);
+
+            if (!existeEspecial)
+            {
+                return NotFound(new
+                {
+                    message = $"No existe un registro en ResumEspecial con IdEspecial = {idEspecial}."
+                });
+            }
+
+            var historial = await _context.ResumEspecialAprobas
+                .Where(x => x.IdEspecial == idEspecial)
+                .OrderBy(x => x.FechaAccion)
+                .Select(x => new
+                {
+                    x.IdAprobacion,
+                    x.IdEspecial,
+                    x.Nivel,
+                    x.UsuarioAprobador,
+                    x.Accion,
+                    x.Comentario,
+                    x.FechaAccion
+                })
+                .ToListAsync();
+
+            return Ok(new
+            {
+                message = historial.Any()
+                    ? "Historial obtenido correctamente."
+                    : "El registro existe, pero aún no tiene historial.",
+                idEspecial = idEspecial,
+                total = historial.Count,
+                data = historial
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                message = "Ocurrió un error al consultar el historial del registro especial.",
                 error = ex.Message
             });
         }

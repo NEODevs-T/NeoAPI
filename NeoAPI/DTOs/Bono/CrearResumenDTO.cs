@@ -15,8 +15,7 @@ public class CrearResumenDto
     public int RhoraTrab { get; set; }
     public DateTime? RfechaReal { get; set; }
     public bool EsEspecial { get; set; }
+    // Solo si es especial
     public string? Motivo { get; set; }
-    public int? IdEstado { get; set; }
-    public DateTime? FechaSolicitud { get; set; }
     public string? UsuarioSolicita { get; set; }
 }
