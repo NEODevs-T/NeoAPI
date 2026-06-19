@@ -32,6 +32,21 @@ public class BonoController : ControllerBase
             if (string.IsNullOrWhiteSpace(dto.RuserVali))
                 return BadRequest(new { message = "El campo RuserVali es obligatorio." });
 
+            if (dto.IdPersonal <= 0)
+                return BadRequest(new { message = "El campo IdPersonal debe ser mayor a cero." });
+
+            if (dto.IdTipSuple <= 0)
+                return BadRequest(new { message = "El campo IdTipSuple debe ser mayor a cero." });
+
+            if (dto.IdTipIncen <= 0)
+                return BadRequest(new { message = "El campo IdTipIncen debe ser mayor a cero." });
+
+            if (dto.Rturno <= 0)
+                return BadRequest(new { message = "El campo Rturno debe ser mayor a cero." });
+
+            if (dto.RhoraTrab <= 0)
+                return BadRequest(new { message = "El campo RhoraTrab debe ser mayor a cero." });
+
             if (dto.EsEspecial)
             {
                 if (string.IsNullOrWhiteSpace(dto.Motivo))
@@ -41,6 +56,8 @@ public class BonoController : ControllerBase
                     return BadRequest(new { message = "El campo UsuarioSolicita es obligatorio cuando EsEspecial es true." });
             }
 
+            const int idMontoEspecialTemporal = 156;
+
             var resumen = new Resuman
             {
                 IdTipSuple = dto.IdTipSuple,
@@ -49,7 +66,7 @@ public class BonoController : ControllerBase
                 Rgrupo = dto.Rgrupo,
                 IdPersonal = dto.IdPersonal,
                 Rsuplido = dto.Rsuplido,
-                IdMontos = dto.IdMontos,
+                IdMontos = dto.EsEspecial ? idMontoEspecialTemporal : dto.IdMontos,
                 RuserVali = dto.RuserVali,
                 IdTipIncen = dto.IdTipIncen,
                 RisMarcaje = dto.RisMarcaje,
@@ -69,7 +86,7 @@ public class BonoController : ControllerBase
                 {
                     IdResumen = resumen.IdResumen,
                     Motivo = dto.Motivo!,
-                    IdEstado = 1, // Siempre inicia en 1
+                    IdEstado = 1,
                     FechaSolicitud = DateTime.Now,
                     UsuarioSolicita = dto.UsuarioSolicita!
                 };
@@ -101,7 +118,9 @@ public class BonoController : ControllerBase
             return StatusCode(500, new
             {
                 message = "Error al insertar el registro.",
-                error = ex.Message
+                error = ex.Message,
+                innerError = ex.InnerException?.Message,
+                detalleCompleto = ex.ToString()
             });
         }
     }
