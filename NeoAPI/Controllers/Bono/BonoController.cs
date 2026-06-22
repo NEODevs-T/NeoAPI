@@ -100,8 +100,8 @@ public class BonoController : ControllerBase
             return Ok(new
             {
                 message = dto.EsEspecial
-                    ? "Registro especial insertado correctamente en Resuman y ResumEspecial."
-                    : "Registro normal insertado correctamente en Resuman.",
+                    ? "Registro especial insertado correctamente."
+                    : "Registro insertado correctamente.",
                 data = new
                 {
                     idResumen = resumen.IdResumen,
@@ -255,4 +255,54 @@ public class BonoController : ControllerBase
         }
     }
 
+    [HttpGet("especiales-pendientes")]
+    public async Task<IActionResult> ObtenerEspecialesPendientes()
+    {
+        try
+        {
+            var data = await _context.ResumEspecials
+                .Include(e => e.IdResumenNavigation)
+                .Where(e => e.IdEstado == 1 || e.IdEstado == 2 || e.IdEstado == 3)
+                .Select(e => new
+                {
+                    idEspecial = e.IdEspecial,
+                    idResumen = e.IdResumen,
+                    idEstado = e.IdEstado,
+                    motivo = e.Motivo,
+                    fechaSolicitud = e.FechaSolicitud,
+                    usuarioSolicita = e.UsuarioSolicita,
+
+                    idPersonal = e.IdResumenNavigation.IdPersonal,
+                    rfecha = e.IdResumenNavigation.Rfecha,
+                    rfechaReal = e.IdResumenNavigation.RfechaReal,
+                    rturno = e.IdResumenNavigation.Rturno,
+                    rgrupo = e.IdResumenNavigation.Rgrupo,
+                    rsuplido = e.IdResumenNavigation.Rsuplido,
+                    rhoraTrab = e.IdResumenNavigation.RhoraTrab,
+                    ruserVali = e.IdResumenNavigation.RuserVali,
+                    risMarcaje = e.IdResumenNavigation.RisMarcaje
+                })
+                .OrderBy(x => x.idEstado)
+                .ThenByDescending(x => x.fechaSolicitud)
+                .ToListAsync();
+
+            return Ok(new
+            {
+                message = data.Any()
+                    ? "Pendientes obtenidos correctamente."
+                    : "No hay trabajos especiales pendientes.",
+                total = data.Count,
+                data
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                message = "Ocurrió un error al consultar los pendientes.",
+                error = ex.Message,
+                innerError = ex.InnerException?.Message
+            });
+        }
+    }
 }
