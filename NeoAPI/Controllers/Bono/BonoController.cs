@@ -2,6 +2,8 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.Bono;
 using NeoAPI.Models.Bono;
+using BonoResuman = NeoAPI.Models.Bono.Resuman;
+using NeoDbContext = NeoAPI.Models.Neo.DbNeoIiContext;
 
 namespace NeoAPI.Controllers.Bono;
 
@@ -9,11 +11,14 @@ namespace NeoAPI.Controllers.Bono;
 [Route("api/[controller]")]
 public class BonoController : ControllerBase
 {
-    private readonly DbNeoBonoContext _context;
 
-    public BonoController(DbNeoBonoContext context)
+    private readonly DbNeoBonoContext _context;
+    private readonly NeoDbContext _neoContext;
+
+    public BonoController(DbNeoBonoContext context, NeoDbContext neoContext)
     {
         _context = context;
+        _neoContext = neoContext;
     }
 
     [HttpPost("InsertarResumen")]
@@ -58,7 +63,7 @@ public class BonoController : ControllerBase
 
             const int idMontoEspecialTemporal = 156;
 
-            var resumen = new Resuman
+            var resumen = new BonoResuman
             {
                 IdTipSuple = dto.IdTipSuple,
                 Rfecha = dto.Rfecha,
@@ -260,10 +265,53 @@ public class BonoController : ControllerBase
     {
         try
         {
-            var data = await _context.ResumEspecials
+            var especiales = await _context.ResumEspecials
                 .Include(e => e.IdResumenNavigation)
                 .Where(e => e.IdEstado == 1 || e.IdEstado == 2 || e.IdEstado == 3)
                 .Select(e => new
+                {
+                    e.IdEspecial,
+                    e.IdResumen,
+                    e.IdEstado,
+                    e.Motivo,
+                    e.FechaSolicitud,
+                    e.UsuarioSolicita,
+
+                    IdPersonal = e.IdResumenNavigation.IdPersonal,
+                    Rfecha = e.IdResumenNavigation.Rfecha,
+                    RfechaReal = e.IdResumenNavigation.RfechaReal,
+                    Rturno = e.IdResumenNavigation.Rturno,
+                    Rgrupo = e.IdResumenNavigation.Rgrupo,
+                    Rsuplido = e.IdResumenNavigation.Rsuplido,
+                    RhoraTrab = e.IdResumenNavigation.RhoraTrab,
+                    RuserVali = e.IdResumenNavigation.RuserVali,
+                    RisMarcaje = e.IdResumenNavigation.RisMarcaje
+                })
+                .OrderBy(x => x.IdEstado)
+                .ThenByDescending(x => x.FechaSolicitud)
+                .ToListAsync();
+
+            var idsPersonal = especiales
+                .Select(x => x.IdPersonal)
+                .Distinct()
+                .ToList();
+
+            var personalDict = await _neoContext.Personals
+                .Where(p => idsPersonal.Contains(p.IdPersonal))
+                .Select(p => new
+                {
+                    p.IdPersonal,
+                    p.PeFicha,
+                    p.PeNombre,
+                    p.PeApellido
+                })
+                .ToDictionaryAsync(p => p.IdPersonal);
+
+            var data = especiales.Select(e =>
+            {
+                personalDict.TryGetValue(e.IdPersonal, out var personal);
+
+                return new
                 {
                     idEspecial = e.IdEspecial,
                     idResumen = e.IdResumen,
@@ -272,19 +320,25 @@ public class BonoController : ControllerBase
                     fechaSolicitud = e.FechaSolicitud,
                     usuarioSolicita = e.UsuarioSolicita,
 
-                    idPersonal = e.IdResumenNavigation.IdPersonal,
-                    rfecha = e.IdResumenNavigation.Rfecha,
-                    rfechaReal = e.IdResumenNavigation.RfechaReal,
-                    rturno = e.IdResumenNavigation.Rturno,
-                    rgrupo = e.IdResumenNavigation.Rgrupo,
-                    rsuplido = e.IdResumenNavigation.Rsuplido,
-                    rhoraTrab = e.IdResumenNavigation.RhoraTrab,
-                    ruserVali = e.IdResumenNavigation.RuserVali,
-                    risMarcaje = e.IdResumenNavigation.RisMarcaje
-                })
-                .OrderBy(x => x.idEstado)
-                .ThenByDescending(x => x.fechaSolicitud)
-                .ToListAsync();
+                    idPersonal = e.IdPersonal,
+
+                    peFicha = personal?.PeFicha ?? string.Empty,
+
+                    nombreTrabajador = personal == null
+                        ? string.Empty
+                        : $"{personal.PeNombre ?? string.Empty} {personal.PeApellido ?? string.Empty}".Trim(),
+
+                    rfecha = e.Rfecha,
+                    rfechaReal = e.RfechaReal,
+                    rturno = e.Rturno,
+                    rgrupo = e.Rgrupo,
+                    rsuplido = e.Rsuplido,
+                    rhoraTrab = e.RhoraTrab,
+                    ruserVali = e.RuserVali,
+                    risMarcaje = e.RisMarcaje
+                };
+            })
+            .ToList();
 
             return Ok(new
             {
@@ -300,6 +354,127 @@ public class BonoController : ControllerBase
             return StatusCode(500, new
             {
                 message = "Ocurrió un error al consultar los pendientes.",
+                error = ex.Message,
+                innerError = ex.InnerException?.Message
+            });
+        }
+    }
+
+    [HttpGet("especiales-historico")]
+    public async Task<IActionResult> ObtenerHistoricoEspeciales()
+    {
+        try
+        {
+            var especiales = await _context.ResumEspecials
+                .Include(e => e.IdResumenNavigation)
+                .Where(e => e.IdEstado == 4 || e.IdEstado == 5)
+                .Select(e => new
+                {
+                    e.IdEspecial,
+                    e.IdResumen,
+                    e.IdEstado,
+                    e.Motivo,
+                    e.FechaSolicitud,
+                    e.UsuarioSolicita,
+
+                    IdPersonal = e.IdResumenNavigation.IdPersonal,
+                    Rfecha = e.IdResumenNavigation.Rfecha,
+                    RfechaReal = e.IdResumenNavigation.RfechaReal,
+                    Rturno = e.IdResumenNavigation.Rturno,
+                    Rgrupo = e.IdResumenNavigation.Rgrupo,
+                    Rsuplido = e.IdResumenNavigation.Rsuplido,
+                    RhoraTrab = e.IdResumenNavigation.RhoraTrab,
+                    RuserVali = e.IdResumenNavigation.RuserVali,
+                    RisMarcaje = e.IdResumenNavigation.RisMarcaje
+                })
+                .OrderByDescending(x => x.FechaSolicitud)
+                .ToListAsync();
+
+            var idsPersonal = especiales
+                .Select(x => x.IdPersonal)
+                .Distinct()
+                .ToList();
+
+            var personalDict = await _neoContext.Personals
+                .Where(p => idsPersonal.Contains(p.IdPersonal))
+                .Select(p => new
+                {
+                    p.IdPersonal,
+                    p.PeFicha,
+                    p.PeNombre,
+                    p.PeApellido
+                })
+                .ToDictionaryAsync(p => p.IdPersonal);
+
+            var idsEspeciales = especiales
+                .Select(x => x.IdEspecial)
+                .Distinct()
+                .ToList();
+
+            var comentariosRechazoDict = await _context.ResumEspecialAprobas
+                .Where(a => idsEspeciales.Contains(a.IdEspecial)
+                            && a.Accion == "Rechazado")
+                .OrderByDescending(a => a.FechaAccion)
+                .GroupBy(a => a.IdEspecial)
+                .Select(g => new
+                {
+                    IdEspecial = g.Key,
+                    Comentario = g.First().Comentario
+                })
+                .ToDictionaryAsync(x => x.IdEspecial, x => x.Comentario);
+
+            var data = especiales.Select(e =>
+            {
+                personalDict.TryGetValue(e.IdPersonal, out var personal);
+                comentariosRechazoDict.TryGetValue(e.IdEspecial, out var comentarioRechazo);
+
+                return new
+                {
+                    idEspecial = e.IdEspecial,
+                    idResumen = e.IdResumen,
+                    idEstado = e.IdEstado,
+                    motivo = e.Motivo,
+                    fechaSolicitud = e.FechaSolicitud,
+                    usuarioSolicita = e.UsuarioSolicita,
+
+                    idPersonal = e.IdPersonal,
+
+                    peFicha = personal?.PeFicha ?? string.Empty,
+
+                    nombreTrabajador = personal == null
+                        ? string.Empty
+                        : $"{personal.PeNombre ?? string.Empty} {personal.PeApellido ?? string.Empty}".Trim(),
+
+                    rfecha = e.Rfecha,
+                    rfechaReal = e.RfechaReal,
+                    rturno = e.Rturno,
+                    rgrupo = e.Rgrupo,
+                    rsuplido = e.Rsuplido,
+                    rhoraTrab = e.RhoraTrab,
+                    ruserVali = e.RuserVali,
+                    risMarcaje = e.RisMarcaje,
+
+                    comentarioRechazo = e.IdEstado == 5
+                        ? comentarioRechazo
+                        : null
+                };
+            })
+            .ToList();
+
+            return Ok(new
+            {
+                message = data.Any()
+                    ? "Histórico consultado correctamente."
+                    : "No hay pagos especiales en histórico.",
+                total = data.Count,
+                data
+            });
+        }
+        catch (Exception ex)
+        {
+            return StatusCode(500, new
+            {
+                message = "Ocurrió un error al consultar el histórico de pagos especiales.",
                 error = ex.Message,
                 innerError = ex.InnerException?.Message
             });
