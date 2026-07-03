@@ -8,11 +8,11 @@ namespace NeoAPI.Controllers.RRHH;
 
 [ApiController]
 [Route("api/[controller]")]
-public class PermisosNomDiariaVController : ControllerBase
+public class PermisosNomDiariaHistVController : ControllerBase
 {
     private readonly DbRRHHContext _context;
 
-    public PermisosNomDiariaVController(DbRRHHContext context)
+    public PermisosNomDiariaHistVController(DbRRHHContext context)
     {
         _context = context;
     }
@@ -26,7 +26,7 @@ public class PermisosNomDiariaVController : ControllerBase
         string? ficha,
         string? departamento)
     {
-        var query = _context.PermisosNomDiariaVs.AsQueryable();
+        var query = _context.PermisosNomDiariaHistVs.AsQueryable();
 
         // ✅ FILTROS
 
@@ -57,19 +57,19 @@ public class PermisosNomDiariaVController : ControllerBase
         if (!string.IsNullOrEmpty(ficha))
         {
             query = query.Where(x =>
-                (x.Fichnh ?? "").Trim() == ficha.Trim());
+                x.Fichnh == ficha);
         }
 
         if (!string.IsNullOrEmpty(departamento))
         {
             query = query.Where(x =>
-                (x.Dpthnh ?? "").Trim() == departamento.Trim());
+                x.Dpthnh == departamento);
         }
 
         // ✅ RESPUESTA
 
         var result = await query
-            .Select(x => new PermisosNomDiariaVDTO
+            .Select(x => new PermisosNomDiariaHistVDTO
             {
                 Ciahnh = (x.Ciahnh ?? "").Trim(),
                 Tpnhnh = (x.Tpnhnh ?? "").Trim(),
