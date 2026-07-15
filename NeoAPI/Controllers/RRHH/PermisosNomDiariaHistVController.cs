@@ -231,7 +231,7 @@ public class PermisosNomDiariaHistVController : ControllerBase
 
         int ausencias = permisos + faltas + reposos;
 
-        return Ok(new VRotacionHistResumenDTO
+        return Ok(new IndicadoresResumenDTO
         {
             Anio = anio,
             Mes = mes,

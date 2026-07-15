@@ -1,6 +1,6 @@
 namespace NeoAPI.DTOs.RRHH;
 
-public class VRotacionHistResumenDTO
+public class IndicadoresResumenDTO
 {
     public decimal Anio { get; set; }
 
