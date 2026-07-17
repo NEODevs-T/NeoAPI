@@ -165,9 +165,6 @@ public class PermisosNomDiariaHistVController : ControllerBase
 
         int permisos = 0;
         int faltas = 0;
-        int vacaciones = 0;
-        int libres = 0;
-        int utilidades = 0;
 
         foreach (var item in data)
         {
@@ -184,65 +181,21 @@ public class PermisosNomDiariaHistVController : ControllerBase
 
             foreach (var dia in dias)
             {
-                var valor = (dia ?? "")
-                    .Trim()
-                    .ToUpper();
+                var valor = (dia ?? "").Trim().ToUpper();
 
-                switch (valor)
-                {
-                    case "P":
-                        permisos++;
-                        break;
-
-                    case "F":
-                        faltas++;
-                        break;
-
-                    case "V":
-                        vacaciones++;
-                        break;
-
-                    case "L":
-                        libres++;
-                        break;
-
-                    case "U":
-                        utilidades++;
-                        break;
-                }
+                if (valor == "P")
+                    permisos++;
+                else if (valor == "F")
+                    faltas++;
             }
         }
-
-        var repososQuery = _context.RepososVs
-            .AsNoTracking()
-            .Where(x =>
-                x.FechaDesde != null &&
-                x.FechaDesde.Value.Year == (int)anio);
-
-        if (mes.HasValue)
-        {
-            repososQuery = repososQuery.Where(x =>
-                x.FechaDesde != null &&
-                x.FechaDesde.Value.Month == mes.Value);
-        }
-
-        int reposos = await repososQuery
-            .SumAsync(x => x.CanDiasReposo ?? 0);
-
-        int ausencias = permisos + faltas + reposos;
 
         return Ok(new IndicadoresResumenDTO
         {
             Anio = anio,
             Mes = mes,
             Permisos = permisos,
-            Faltas = faltas,
-            Vacaciones = vacaciones,
-            Libres = libres,
-            Reposos = reposos,
-            Ausencias = ausencias,
-            Utilidades = utilidades,
-            TotalRegistros = data.Count
+            Faltas = faltas
         });
     }
 }
