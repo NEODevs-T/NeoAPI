@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.RRHH;
@@ -14,7 +15,25 @@ public class VRotacionHistController : ControllerBase
     public VRotacionHistController(DbRRHHContext context)
     {
         _context = context;
-        _context.Database.SetCommandTimeout(TimeSpan.FromMinutes(20));
+
+        _context.Database.SetCommandTimeout(
+            TimeSpan.FromMinutes(20));
+    }
+
+    private static (int Inicio, int Fin) ObtenerRangoPeriodos(
+        int anio,
+        int mes)
+    {
+        var primerDiaMes = new DateTime(anio, mes, 1);
+
+        var ultimoDiaMes = primerDiaMes
+            .AddMonths(1)
+            .AddDays(-1);
+
+        int inicio = ISOWeek.GetWeekOfYear(primerDiaMes);
+        int fin = ISOWeek.GetWeekOfYear(ultimoDiaMes);
+
+        return (inicio, fin);
     }
 
     // =========================================
@@ -46,7 +65,8 @@ public class VRotacionHistController : ControllerBase
             _ => pageSize
         };
 
-        IQueryable<VRotacionHist> query = _context.VRotacionHists
+        IQueryable<VRotacionHist> query = _context
+            .VRotacionHists
             .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(ficha))
@@ -77,14 +97,17 @@ public class VRotacionHistController : ControllerBase
         {
             return BadRequest(new
             {
-                Message = $"La página solicitada ({page}) excede el total de páginas disponibles ({totalPages}).",
+                Message =
+                    $"La página solicitada ({page}) excede el total de páginas disponibles ({totalPages}).",
                 TotalRecords = totalRecords,
                 TotalPages = totalPages
             });
         }
 
         var result = await query
-            .OrderBy(x => x.Fichnh)
+            .OrderBy(x => x.Añohnh)
+            .ThenBy(x => x.Prdhnh)
+            .ThenBy(x => x.Fichnh)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(x => new VRotacionHistDTO
@@ -137,10 +160,17 @@ public class VRotacionHistController : ControllerBase
             .AsNoTracking()
             .Where(x => x.Añohnh == anio);
 
+        // PRDHNH = PERIODO (1-52 / 53)
+        // NO ES MES
         if (mes.HasValue)
         {
+            var rango = ObtenerRangoPeriodos(
+                (int)anio,
+                mes.Value);
+
             query = query.Where(x =>
-                x.Prdhnh == mes.Value);
+                x.Prdhnh >= rango.Inicio &&
+                x.Prdhnh <= rango.Fin);
         }
 
         var data = await query
@@ -190,12 +220,18 @@ public class VRotacionHistController : ControllerBase
 
             foreach (var dia in dias)
             {
-                var valor = (dia ?? "").Trim().ToUpper();
+                var valor = (dia ?? "")
+                    .Trim()
+                    .ToUpper();
 
                 if (valor == "P")
+                {
                     permisos++;
+                }
                 else if (valor == "F")
+                {
                     faltas++;
+                }
             }
         }
 

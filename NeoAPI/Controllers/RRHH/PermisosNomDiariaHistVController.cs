@@ -1,3 +1,4 @@
+using System.Globalization;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.RRHH;
@@ -16,8 +17,21 @@ public class PermisosNomDiariaHistVController : ControllerBase
         _context = context;
     }
 
+    private static (int Inicio, int Fin) ObtenerRangoPeriodos(
+        int anio,
+        int mes)
+    {
+        var primerDiaMes = new DateTime(anio, mes, 1);
+        var ultimoDiaMes = primerDiaMes.AddMonths(1).AddDays(-1);
+
+        int inicio = ISOWeek.GetWeekOfYear(primerDiaMes);
+        int fin = ISOWeek.GetWeekOfYear(ultimoDiaMes);
+
+        return (inicio, fin);
+    }
+
     // ======================================
-    // CONSULTA DETALLADA CON PAGINACION
+    // CONSULTA DETALLADA
     // ======================================
     [HttpGet]
     public async Task<IActionResult> GetPermisos(
@@ -26,19 +40,8 @@ public class PermisosNomDiariaHistVController : ControllerBase
         decimal? anio,
         decimal? periodo,
         string? ficha,
-        string? departamento,
-        int page = 1,
-        int pageSize = 500)
+        string? departamento)
     {
-        page = page <= 0 ? 1 : page;
-
-        pageSize = pageSize switch
-        {
-            <= 0 => 500,
-            > 2000 => 2000,
-            _ => pageSize
-        };
-
         var query = _context.PermisosNomDiariaHistVs
             .AsNoTracking()
             .AsQueryable();
@@ -79,25 +82,10 @@ public class PermisosNomDiariaHistVController : ControllerBase
                 x.Dpthnh == departamento);
         }
 
-        var totalRecords = await query.CountAsync();
-
-        int totalPages = (int)Math.Ceiling(
-            totalRecords / (double)pageSize);
-
-        if (page > totalPages && totalPages > 0)
-        {
-            return BadRequest(new
-            {
-                Message = $"La página solicitada ({page}) excede el total de páginas disponibles ({totalPages}).",
-                TotalRecords = totalRecords,
-                TotalPages = totalPages
-            });
-        }
-
         var result = await query
-            .OrderBy(x => x.Fichnh)
-            .Skip((page - 1) * pageSize)
-            .Take(pageSize)
+            .OrderBy(x => x.Añohnh)
+            .ThenBy(x => x.Prdhnh)
+            .ThenBy(x => x.Fichnh)
             .Select(x => new PermisosNomDiariaHistVDTO
             {
                 Ciahnh = (x.Ciahnh ?? "").Trim(),
@@ -122,14 +110,7 @@ public class PermisosNomDiariaHistVController : ControllerBase
             return NotFound("No se encontraron registros.");
         }
 
-        return Ok(new PagedResponse<PermisosNomDiariaHistVDTO>
-        {
-            Page = page,
-            PageSize = pageSize,
-            TotalRecords = totalRecords,
-            TotalPages = totalPages,
-            Data = result
-        });
+        return Ok(result);
     }
 
     // ======================================
@@ -146,8 +127,13 @@ public class PermisosNomDiariaHistVController : ControllerBase
 
         if (mes.HasValue)
         {
+            var rango = ObtenerRangoPeriodos(
+                (int)anio,
+                mes.Value);
+
             query = query.Where(x =>
-                x.Prdhnh == mes.Value);
+                x.Prdhnh >= rango.Inicio &&
+                x.Prdhnh <= rango.Fin);
         }
 
         var data = await query
@@ -181,12 +167,18 @@ public class PermisosNomDiariaHistVController : ControllerBase
 
             foreach (var dia in dias)
             {
-                var valor = (dia ?? "").Trim().ToUpper();
+                var valor = (dia ?? "")
+                    .Trim()
+                    .ToUpper();
 
                 if (valor == "P")
+                {
                     permisos++;
+                }
                 else if (valor == "F")
+                {
                     faltas++;
+                }
             }
         }
 
