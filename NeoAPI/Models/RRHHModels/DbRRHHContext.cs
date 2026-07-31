@@ -31,6 +31,8 @@ public partial class DbRRHHContext : DbContext
 
     public virtual DbSet<VHistoricoCarg> VHistoricoCargs { get; set; }
 
+    public virtual DbSet<VHistCargProcesada> VHistCargProcesadas { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AusenciaV>(entity =>
@@ -550,6 +552,73 @@ public partial class DbRRHHContext : DbContext
                 .HasMaxLength(4)
                 .IsUnicode(false)
                 .HasColumnName("TPNHNH");
+        });
+
+                modelBuilder.Entity<VHistCargProcesada>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("V_HistCargProcesadas", "SPI");
+
+            entity.Property(e => e.Cedfic)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("CEDFIC");
+
+            entity.Property(e => e.Ciafic)
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .HasColumnName("CIAFIC");
+
+            entity.Property(e => e.Codfic)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("CODFIC");
+
+            entity.Property(e => e.Dgadlf)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DGADLF");
+
+            entity.Property(e => e.Diadlf)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DIADLF");
+
+            entity.Property(e => e.Diidlf)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DIIDLF");
+
+            entity.Property(e => e.Dimdlf)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DIMDLF");
+
+            entity.Property(e => e.Divdlf)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DIVDLF");
+
+            entity.Property(e => e.Dmedlf)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DMEDLF");
+
+            entity.Property(e => e.Nacfic)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("NACFIC");
+
+            entity.Property(e => e.Otddlf)
+                .HasMaxLength(150)
+                .IsUnicode(false)
+                .HasColumnName("OTDDLF");
+
+            entity.Property(e => e.Tpnfic)
+                .HasMaxLength(4)
+                .IsUnicode(false)
+                .HasColumnName("TPNFIC");
         });
 
         OnModelCreatingPartial(modelBuilder);

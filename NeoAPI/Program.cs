@@ -14,6 +14,7 @@ using NeoAPI.Logic.MaquinasGespline;
 using NeoAPI.Logic.Reuniones;
 using NeoAPI.RRHHModels;
 
+
 var builder = WebApplication.CreateBuilder(args);
 
 // Add services to the container.
@@ -22,60 +23,26 @@ builder.Services.AddControllers();
 builder.Services.AddScoped<IMaquinasGesplineLogic, MaquinasGesplineLogic>();
 builder.Services.AddScoped<IReunionesLogic, ReunionesLogic>();
 
+
 // Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
+builder.Services.AddControllers().AddJsonOptions(x =>x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
+builder.Services.AddDbContext<DbNeoIiContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Neo")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<DOCIngContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("DOCIng")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<DbRRHHContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("UsrConexion")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSVenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseVen")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSColContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCol")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<PolybaseBPCSCenContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("PolybaseCen")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<DbSPIContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("SPI")), ServiceLifetime.Transient);
+builder.Services.AddDbContext<GesplineContext>(options =>options.UseSqlServer(builder.Configuration.GetConnectionString("Gespline")), ServiceLifetime.Transient);
 
-builder.Services.AddControllers()
-    .AddJsonOptions(x =>
-        x.JsonSerializerOptions.ReferenceHandler = ReferenceHandler.IgnoreCycles);
-
-builder.Services.AddDbContext<DbNeoIiContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("Neo")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<DOCIngContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("DOCIng")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<DbRRHHContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("UsrConexion")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<PolybaseBPCSVenContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("PolybaseVen")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<PolybaseBPCSColContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("PolybaseCol")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<PolybaseBPCSCenContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("PolybaseCen")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<DbSPIContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("SPI")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddDbContext<GesplineContext>(
-    options => options.UseSqlServer(
-        builder.Configuration.GetConnectionString("Gespline")),
-    ServiceLifetime.Transient);
-
-builder.Services.AddAutoMapper(typeof(Program));
-
+builder.Services.AddAutoMapper(typeof(Program));//Configurar mapeos de Profiles
 var app = builder.Build();
 
-// Configure the HTTP request pipeline.
 
+
+// Configure the HTTP request pipeline.
 if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
@@ -83,9 +50,7 @@ if (app.Environment.IsDevelopment())
 }
 
 app.UseAuthorization();
-
 app.useErrorHandlingMiddleware();
-
 app.MapControllers();
 
 app.Run();
