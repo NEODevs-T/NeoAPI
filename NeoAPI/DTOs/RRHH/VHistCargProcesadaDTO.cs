@@ -3,7 +3,7 @@ using System.Collections.Generic;
 
 namespace NeoAPI.DTOs.RRHH;
 
-public partial class VHistCargProcesada
+public partial class VHistCargProcesadaDTO
 {
     public string Ciafic { get; set; } = null!;
 

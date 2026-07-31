@@ -1,5 +1,6 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using NeoAPI.DTOs.RRHH;
 using NeoAPI.RRHHModels;
 
 namespace NeoAPI.Controllers.RRHH;
