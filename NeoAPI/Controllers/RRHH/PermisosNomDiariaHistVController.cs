@@ -31,8 +31,43 @@ public class PermisosNomDiariaHistVController : ControllerBase
     }
 
     // ======================================
+    // FECHAS EXCLUIDAS (BASE FUTURA)
+    // ======================================
+
+    private static DateTime ObtenerInicioPeriodo(
+        int anio,
+        int periodo)
+    {
+        return ISOWeek.ToDateTime(
+            anio,
+            periodo,
+            DayOfWeek.Monday);
+    }
+
+    private async Task<HashSet<DateTime>> ObtenerFechasExcluidasAsync()
+    {
+        // FUTURO:
+        //
+        // return await _context.ConfigFechasExcluidas
+        //     .AsNoTracking()
+        //     .Where(x => x.Activo)
+        //     .Select(x => x.Fecha.Date)
+        //     .ToHashSetAsync();
+
+        return new HashSet<DateTime>();
+    }
+
+    private static bool FechaExcluida(
+        DateTime fecha,
+        HashSet<DateTime> fechasExcluidas)
+    {
+        return fechasExcluidas.Contains(fecha.Date);
+    }
+
+    // ======================================
     // CONSULTA DETALLADA
     // ======================================
+
     [HttpGet]
     public async Task<IActionResult> GetPermisos(
         string? ciahnh,
@@ -42,9 +77,38 @@ public class PermisosNomDiariaHistVController : ControllerBase
         string? ficha,
         string? departamento)
     {
+        ficha = ficha?.Trim();
+
         var query = _context.PermisosNomDiariaHistVs
             .AsNoTracking()
             .AsQueryable();
+
+        // SOLO NOMINA DIARIA (TPNHNH = 1101)
+        query = query.Where(x =>
+            !string.IsNullOrWhiteSpace(x.Fichnh));
+
+        // SOLO PERSONAS CON P O F
+        query = query.Where(x =>
+            (x.Dg01hh ?? "").Trim().ToUpper() == "P" ||
+            (x.Dg01hh ?? "").Trim().ToUpper() == "F" ||
+
+            (x.Dg02hh ?? "").Trim().ToUpper() == "P" ||
+            (x.Dg02hh ?? "").Trim().ToUpper() == "F" ||
+
+            (x.Dg03hh ?? "").Trim().ToUpper() == "P" ||
+            (x.Dg03hh ?? "").Trim().ToUpper() == "F" ||
+
+            (x.Dg04hh ?? "").Trim().ToUpper() == "P" ||
+            (x.Dg04hh ?? "").Trim().ToUpper() == "F" ||
+
+            (x.Dg05hh ?? "").Trim().ToUpper() == "P" ||
+            (x.Dg05hh ?? "").Trim().ToUpper() == "F" ||
+
+            (x.Dg06hh ?? "").Trim().ToUpper() == "P" ||
+            (x.Dg06hh ?? "").Trim().ToUpper() == "F" ||
+
+            (x.Dg07hh ?? "").Trim().ToUpper() == "P" ||
+            (x.Dg07hh ?? "").Trim().ToUpper() == "F");
 
         if (!string.IsNullOrWhiteSpace(ciahnh))
         {
@@ -73,14 +137,17 @@ public class PermisosNomDiariaHistVController : ControllerBase
         if (!string.IsNullOrWhiteSpace(ficha))
         {
             query = query.Where(x =>
-                x.Fichnh == ficha);
+                (x.Fichnh ?? "").Trim() == ficha);
         }
 
         if (!string.IsNullOrWhiteSpace(departamento))
         {
             query = query.Where(x =>
-                x.Dpthnh == departamento);
+                (x.Dpthnh ?? "").Trim() == departamento.Trim());
         }
+
+        query = query.Where(x =>
+            x.Tpnhnh == "1101");
 
         var result = await query
             .OrderBy(x => x.Añohnh)
@@ -116,6 +183,7 @@ public class PermisosNomDiariaHistVController : ControllerBase
     // ======================================
     // RESUMEN DASHBOARD
     // ======================================
+
     [HttpGet("resumen")]
     public async Task<IActionResult> GetResumen(
         decimal anio,
@@ -124,6 +192,35 @@ public class PermisosNomDiariaHistVController : ControllerBase
         var query = _context.PermisosNomDiariaHistVs
             .AsNoTracking()
             .Where(x => x.Añohnh == anio);
+
+        // SOLO NOMINA DIARIA
+        query = query.Where(x =>
+            x.Tpnhnh == "1101");
+
+        query = query.Where(x =>
+
+                (x.Dg01hh ?? "").Trim().ToUpper() == "P"
+            || (x.Dg01hh ?? "").Trim().ToUpper() == "F"
+
+            || (x.Dg02hh ?? "").Trim().ToUpper() == "P"
+            || (x.Dg02hh ?? "").Trim().ToUpper() == "F"
+
+            || (x.Dg03hh ?? "").Trim().ToUpper() == "P"
+            || (x.Dg03hh ?? "").Trim().ToUpper() == "F"
+
+            || (x.Dg04hh ?? "").Trim().ToUpper() == "P"
+            || (x.Dg04hh ?? "").Trim().ToUpper() == "F"
+
+            || (x.Dg05hh ?? "").Trim().ToUpper() == "P"
+            || (x.Dg05hh ?? "").Trim().ToUpper() == "F"
+
+            || (x.Dg06hh ?? "").Trim().ToUpper() == "P"
+            || (x.Dg06hh ?? "").Trim().ToUpper() == "F"
+
+            || (x.Dg07hh ?? "").Trim().ToUpper() == "P"
+            || (x.Dg07hh ?? "").Trim().ToUpper() == "F"
+        );
+
 
         if (mes.HasValue)
         {
@@ -137,23 +234,24 @@ public class PermisosNomDiariaHistVController : ControllerBase
         }
 
         var data = await query
-            .Select(x => new
-            {
-                x.Dg01hh,
-                x.Dg02hh,
-                x.Dg03hh,
-                x.Dg04hh,
-                x.Dg05hh,
-                x.Dg06hh,
-                x.Dg07hh
-            })
             .ToListAsync();
+
+        var fechasExcluidas =
+            await ObtenerFechasExcluidasAsync();
 
         int permisos = 0;
         int faltas = 0;
 
         foreach (var item in data)
         {
+            if (item.Prdhnh == null)
+                continue;
+
+            var inicioPeriodo =
+                ObtenerInicioPeriodo(
+                    (int)anio,
+                    Convert.ToInt32(item.Prdhnh));
+
             var dias = new[]
             {
                 item.Dg01hh,
@@ -165,9 +263,25 @@ public class PermisosNomDiariaHistVController : ControllerBase
                 item.Dg07hh
             };
 
-            foreach (var dia in dias)
+            for (int i = 0; i < dias.Length; i++)
             {
-                var valor = (dia ?? "")
+                var fecha =
+                    inicioPeriodo.AddDays(i);
+
+                if (FechaExcluida(
+                    fecha,
+                    fechasExcluidas))
+                {
+                    continue;
+                }
+
+                // Se mantiene la lógica actual:
+                // DG01HH (01/01) no se cuenta.
+
+                if (i == 0)
+                    continue;
+
+                var valor = (dias[i] ?? "")
                     .Trim()
                     .ToUpper();
 
