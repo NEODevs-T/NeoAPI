@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using NeoAPI.DTOs.RRHH;
 using NeoAPI.RRHHModels;
+using System.Diagnostics;
 
 namespace NeoAPI.Controllers.RRHH;
 
@@ -44,26 +45,6 @@ public class PermisosNomDiariaHistVController : ControllerBase
             DayOfWeek.Monday);
     }
 
-    private async Task<HashSet<DateTime>> ObtenerFechasExcluidasAsync()
-    {
-        // FUTURO:
-        //
-        // return await _context.ConfigFechasExcluidas
-        //     .AsNoTracking()
-        //     .Where(x => x.Activo)
-        //     .Select(x => x.Fecha.Date)
-        //     .ToHashSetAsync();
-
-        return new HashSet<DateTime>();
-    }
-
-    private static bool FechaExcluida(
-        DateTime fecha,
-        HashSet<DateTime> fechasExcluidas)
-    {
-        return fechasExcluidas.Contains(fecha.Date);
-    }
-
     // ======================================
     // CONSULTA DETALLADA
     // ======================================
@@ -72,43 +53,25 @@ public class PermisosNomDiariaHistVController : ControllerBase
     public async Task<IActionResult> GetPermisos(
         string? ciahnh,
         string? tpnhnh,
-        decimal? anio,
+        [FromQuery] decimal anio,
         decimal? periodo,
         string? ficha,
-        string? departamento)
+        string? departamento,
+        int page = 1,
+        int pageSize = 5000)
     {
+        if (anio <= 0)
+        {
+            return BadRequest(new
+            {
+                Mensaje = "Debe seleccionar un año para realizar la consulta."
+            });
+        }
+
         ficha = ficha?.Trim();
 
         var query = _context.PermisosNomDiariaHistVs
-            .AsNoTracking()
-            .AsQueryable();
-
-        // SOLO NOMINA DIARIA (TPNHNH = 1101)
-        query = query.Where(x =>
-            !string.IsNullOrWhiteSpace(x.Fichnh));
-
-        // SOLO PERSONAS CON P O F
-        query = query.Where(x =>
-            (x.Dg01hh ?? "").Trim().ToUpper() == "P" ||
-            (x.Dg01hh ?? "").Trim().ToUpper() == "F" ||
-
-            (x.Dg02hh ?? "").Trim().ToUpper() == "P" ||
-            (x.Dg02hh ?? "").Trim().ToUpper() == "F" ||
-
-            (x.Dg03hh ?? "").Trim().ToUpper() == "P" ||
-            (x.Dg03hh ?? "").Trim().ToUpper() == "F" ||
-
-            (x.Dg04hh ?? "").Trim().ToUpper() == "P" ||
-            (x.Dg04hh ?? "").Trim().ToUpper() == "F" ||
-
-            (x.Dg05hh ?? "").Trim().ToUpper() == "P" ||
-            (x.Dg05hh ?? "").Trim().ToUpper() == "F" ||
-
-            (x.Dg06hh ?? "").Trim().ToUpper() == "P" ||
-            (x.Dg06hh ?? "").Trim().ToUpper() == "F" ||
-
-            (x.Dg07hh ?? "").Trim().ToUpper() == "P" ||
-            (x.Dg07hh ?? "").Trim().ToUpper() == "F");
+            .AsNoTracking();
 
         if (!string.IsNullOrWhiteSpace(ciahnh))
         {
@@ -122,11 +85,8 @@ public class PermisosNomDiariaHistVController : ControllerBase
                 (x.Tpnhnh ?? "").Trim() == tpnhnh.Trim());
         }
 
-        if (anio.HasValue)
-        {
             query = query.Where(x =>
-                x.Añohnh == anio.Value);
-        }
+        x.Añohnh == anio);
 
         if (periodo.HasValue)
         {
@@ -146,13 +106,16 @@ public class PermisosNomDiariaHistVController : ControllerBase
                 (x.Dpthnh ?? "").Trim() == departamento.Trim());
         }
 
-        query = query.Where(x =>
-            x.Tpnhnh == "1101");
+        var sw = Stopwatch.StartNew();
+
+        var totalRegistros = await query.CountAsync();
 
         var result = await query
             .OrderBy(x => x.Añohnh)
             .ThenBy(x => x.Prdhnh)
             .ThenBy(x => x.Fichnh)
+            .Skip((page - 1) * pageSize)
+            .Take(pageSize)
             .Select(x => new PermisosNomDiariaHistVDTO
             {
                 Ciahnh = (x.Ciahnh ?? "").Trim(),
@@ -172,12 +135,24 @@ public class PermisosNomDiariaHistVController : ControllerBase
             })
             .ToListAsync();
 
+        sw.Stop();
+
         if (!result.Any())
         {
             return NotFound("No se encontraron registros.");
         }
 
-        return Ok(result);
+        return Ok(new
+        {
+            TotalRegistros = totalRegistros,
+            PaginaActual = page,
+            TamanioPagina = pageSize,
+            TotalPaginas = (int)Math.Ceiling(
+                (double)totalRegistros / pageSize),
+            TiempoMs = sw.ElapsedMilliseconds,
+            Data = result
+        });
+
     }
 
     // ======================================
@@ -186,41 +161,27 @@ public class PermisosNomDiariaHistVController : ControllerBase
 
     [HttpGet("resumen")]
     public async Task<IActionResult> GetResumen(
-        decimal anio,
+        int anio,
+        string? tpnhnh,
         int? mes = null)
     {
+        if (anio <= 0)
+        {
+            return BadRequest(new
+            {
+                Mensaje = "Debe seleccionar un año para realizar la consulta."
+            });
+        }
         var query = _context.PermisosNomDiariaHistVs
-            .AsNoTracking()
-            .Where(x => x.Añohnh == anio);
+        .AsNoTracking();
 
-        // SOLO NOMINA DIARIA
-        query = query.Where(x =>
-            x.Tpnhnh == "1101");
+        query = query.Where(x => x.Añohnh == anio);
 
-        query = query.Where(x =>
-
-                (x.Dg01hh ?? "").Trim().ToUpper() == "P"
-            || (x.Dg01hh ?? "").Trim().ToUpper() == "F"
-
-            || (x.Dg02hh ?? "").Trim().ToUpper() == "P"
-            || (x.Dg02hh ?? "").Trim().ToUpper() == "F"
-
-            || (x.Dg03hh ?? "").Trim().ToUpper() == "P"
-            || (x.Dg03hh ?? "").Trim().ToUpper() == "F"
-
-            || (x.Dg04hh ?? "").Trim().ToUpper() == "P"
-            || (x.Dg04hh ?? "").Trim().ToUpper() == "F"
-
-            || (x.Dg05hh ?? "").Trim().ToUpper() == "P"
-            || (x.Dg05hh ?? "").Trim().ToUpper() == "F"
-
-            || (x.Dg06hh ?? "").Trim().ToUpper() == "P"
-            || (x.Dg06hh ?? "").Trim().ToUpper() == "F"
-
-            || (x.Dg07hh ?? "").Trim().ToUpper() == "P"
-            || (x.Dg07hh ?? "").Trim().ToUpper() == "F"
-        );
-
+        if (!string.IsNullOrWhiteSpace(tpnhnh))
+        {
+            query = query.Where(x =>
+                (x.Tpnhnh ?? "").Trim() == tpnhnh.Trim());
+        }
 
         if (mes.HasValue)
         {
@@ -234,10 +195,19 @@ public class PermisosNomDiariaHistVController : ControllerBase
         }
 
         var data = await query
-            .ToListAsync();
+            .Select(x => new
+            {
+                x.Prdhnh,
 
-        var fechasExcluidas =
-            await ObtenerFechasExcluidasAsync();
+                x.Dg01hh,
+                x.Dg02hh,
+                x.Dg03hh,
+                x.Dg04hh,
+                x.Dg05hh,
+                x.Dg06hh,
+                x.Dg07hh
+            })
+            .ToListAsync();
 
         int permisos = 0;
         int faltas = 0;
@@ -268,16 +238,7 @@ public class PermisosNomDiariaHistVController : ControllerBase
                 var fecha =
                     inicioPeriodo.AddDays(i);
 
-                if (FechaExcluida(
-                    fecha,
-                    fechasExcluidas))
-                {
-                    continue;
-                }
-
-                // Se mantiene la lógica actual:
-                // DG01HH (01/01) no se cuenta.
-
+                // DG01HH no se cuenta
                 if (i == 0)
                     continue;
 
