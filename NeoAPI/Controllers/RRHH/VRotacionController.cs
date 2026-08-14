@@ -330,9 +330,18 @@ public async Task<IActionResult> GetRotacion(
             anio,
             mes.Value);
 
-        query = query.Where(x =>
-            x.Prdhnh >= rango.Inicio &&
-            x.Prdhnh <= rango.Fin);
+        if (rango.Fin >= rango.Inicio)
+        {
+            query = query.Where(x =>
+                x.Prdhnh >= rango.Inicio &&
+                x.Prdhnh <= rango.Fin);
+        }
+        else
+        {
+            query = query.Where(x =>
+                x.Prdhnh >= rango.Inicio ||
+                x.Prdhnh <= rango.Fin);
+        }
     }
 
     var data = await query

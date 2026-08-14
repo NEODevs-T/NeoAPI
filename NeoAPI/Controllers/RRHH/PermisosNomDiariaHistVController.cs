@@ -185,13 +185,23 @@ public class PermisosNomDiariaHistVController : ControllerBase
 
         if (mes.HasValue)
         {
-            var rango = ObtenerRangoPeriodos(
-                (int)anio,
-                mes.Value);
+var rango = ObtenerRangoPeriodos(anio, mes.Value);
 
-            query = query.Where(x =>
-                x.Prdhnh >= rango.Inicio &&
-                x.Prdhnh <= rango.Fin);
+Console.WriteLine(
+    $"Año:{anio} Mes:{mes.Value} Inicio:{rango.Inicio} Fin:{rango.Fin}");
+
+            if (rango.Fin >= rango.Inicio)
+            {
+                query = query.Where(x =>
+                    x.Prdhnh >= rango.Inicio &&
+                    x.Prdhnh <= rango.Fin);
+            }
+            else
+            {
+                query = query.Where(x =>
+                    x.Prdhnh >= rango.Inicio ||
+                    x.Prdhnh <= rango.Fin);
+            }
         }
 
         var data = await query
