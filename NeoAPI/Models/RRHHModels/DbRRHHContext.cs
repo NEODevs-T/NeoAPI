@@ -33,6 +33,8 @@ public partial class DbRRHHContext : DbContext
 
     public virtual DbSet<VHistCargProcesada> VHistCargProcesadas { get; set; }
 
+    public virtual DbSet<PermisosNomDiariaV> PermisosNomDiariaVs { get; set; }
+
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<AusenciaV>(entity =>
@@ -619,6 +621,64 @@ public partial class DbRRHHContext : DbContext
                 .HasMaxLength(4)
                 .IsUnicode(false)
                 .HasColumnName("TPNFIC");
+        });
+
+        modelBuilder.Entity<PermisosNomDiariaV>(entity =>
+        {
+            entity
+                .HasNoKey()
+                .ToView("Permisos_NomDiaria_v", "SPI");
+
+            entity.Property(e => e.Añohnh)
+                .HasColumnType("numeric(4, 0)")
+                .HasColumnName("AÑOHNH");
+            entity.Property(e => e.Ciahnh)
+                .HasMaxLength(2)
+                .IsUnicode(false)
+                .HasColumnName("CIAHNH");
+            entity.Property(e => e.Dg01hh)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DG01HH");
+            entity.Property(e => e.Dg02hh)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DG02HH");
+            entity.Property(e => e.Dg03hh)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DG03HH");
+            entity.Property(e => e.Dg04hh)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DG04HH");
+            entity.Property(e => e.Dg05hh)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DG05HH");
+            entity.Property(e => e.Dg06hh)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DG06HH");
+            entity.Property(e => e.Dg07hh)
+                .HasMaxLength(1)
+                .IsUnicode(false)
+                .HasColumnName("DG07HH");
+            entity.Property(e => e.Dpthnh)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("DPTHNH");
+            entity.Property(e => e.Fichnh)
+                .HasMaxLength(10)
+                .IsUnicode(false)
+                .HasColumnName("FICHNH");
+            entity.Property(e => e.Prdhnh)
+                .HasColumnType("numeric(3, 0)")
+                .HasColumnName("PRDHNH");
+            entity.Property(e => e.Tpnhnh)
+                .HasMaxLength(4)
+                .IsUnicode(false)
+                .HasColumnName("TPNHNH");
         });
 
         OnModelCreatingPartial(modelBuilder);

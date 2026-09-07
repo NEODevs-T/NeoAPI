@@ -40,35 +40,55 @@ public class VHistCargProcesadasController : ControllerBase
     // =========================================
 
     [HttpGet]
-    public async Task<IActionResult> GetDetalle(string? ficha = null)
+    public async Task<IActionResult> GetDetalle(
+        string? ficha = null,
+        string? tpnfic = null,
+        string? ciafic = null)
     {
         ficha = ficha?.Trim();
+        tpnfic = tpnfic?.Trim();
+        ciafic = ciafic?.Trim();
 
-        var query = _context.VHistCargProcesadas
+        IQueryable<VHistCargProcesada> query = _context.VHistCargProcesadas
             .AsNoTracking()
             .AsQueryable();
 
+        // FILTRO FICHA
         if (!string.IsNullOrWhiteSpace(ficha))
         {
             query = query.Where(x =>
-                x.Codfic.Trim() == ficha);
+                (x.Codfic ?? "").Trim() == ficha);
+        }
+
+        // FILTRO NÓMINA
+        if (!string.IsNullOrWhiteSpace(tpnfic))
+        {
+            query = query.Where(x =>
+                (x.Tpnfic ?? "").Trim() == tpnfic);
+        }
+
+        // FILTRO COMPAÑÍA
+        if (!string.IsNullOrWhiteSpace(ciafic))
+        {
+            query = query.Where(x =>
+                (x.Ciafic ?? "").Trim() == ciafic);
         }
 
         var data = await query
             .Select(x => new
             {
-                Ciafic = x.Ciafic.Trim(),
-                Tpnfic = x.Tpnfic.Trim(),
-                Codfic = x.Codfic.Trim(),
-                Nacfic = x.Nacfic.Trim(),
-                Cedfic = x.Cedfic.Trim(),
-                Diadlf = x.Diadlf.Trim(),
-                Divdlf = x.Divdlf.Trim(),
-                Diidlf = x.Diidlf.Trim(),
-                Dimdlf = x.Dimdlf.Trim(),
-                Dmedlf = x.Dmedlf.Trim(),
-                Otddlf = x.Otddlf.Trim(),
-                Dgadlf = x.Dgadlf.Trim()
+                Ciafic = (x.Ciafic ?? "").Trim(),
+                Tpnfic = (x.Tpnfic ?? "").Trim(),
+                Codfic = (x.Codfic ?? "").Trim(),
+                Nacfic = (x.Nacfic ?? "").Trim(),
+                Cedfic = (x.Cedfic ?? "").Trim(),
+                Diadlf = (x.Diadlf ?? "").Trim(),
+                Divdlf = (x.Divdlf ?? "").Trim(),
+                Diidlf = (x.Diidlf ?? "").Trim(),
+                Dimdlf = (x.Dimdlf ?? "").Trim(),
+                Dmedlf = (x.Dmedlf ?? "").Trim(),
+                Otddlf = (x.Otddlf ?? "").Trim(),
+                Dgadlf = (x.Dgadlf ?? "").Trim()
             })
             .OrderBy(x => x.Codfic)
             .ToListAsync();
