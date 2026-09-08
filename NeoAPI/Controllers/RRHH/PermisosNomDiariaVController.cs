@@ -15,6 +15,9 @@ public class PermisosNomDiariaVController : ControllerBase
     public PermisosNomDiariaVController(DbRRHHContext context)
     {
         _context = context;
+
+        _context.Database.SetCommandTimeout(
+            TimeSpan.FromMinutes(20));
     }
 
     [HttpGet]
@@ -46,8 +49,29 @@ public class PermisosNomDiariaVController : ControllerBase
             });
         }
 
-        var query = _context.PermisosNomDiariaVs
+        if (page < 1)
+            page = 1;
+
+        if (pageSize < 1)
+            pageSize = 100;
+
+        if (pageSize > 5000)
+            pageSize = 5000;
+
+        IQueryable<PermisosNomDiariaV> query = _context.PermisosNomDiariaVs
             .AsNoTracking();
+
+        if (anio.HasValue)
+        {
+            query = query.Where(x =>
+                x.Añohnh == anio.Value);
+        }
+
+        if (periodo.HasValue)
+        {
+            query = query.Where(x =>
+                x.Prdhnh == periodo.Value);
+        }
 
         if (!string.IsNullOrWhiteSpace(ciahnh))
         {
@@ -61,14 +85,7 @@ public class PermisosNomDiariaVController : ControllerBase
                 (x.Tpnhnh ?? "").Trim() == tpnhnh.Trim());
         }
 
-        if (consultaPorPeriodo)
-        {
-            query = query.Where(x =>
-                x.Añohnh == anio!.Value &&
-                x.Prdhnh == periodo!.Value);
-        }
-
-        if (consultaPorFicha)
+        if (!string.IsNullOrWhiteSpace(ficha))
         {
             query = query.Where(x =>
                 (x.Fichnh ?? "").Trim() == ficha);
@@ -82,12 +99,8 @@ public class PermisosNomDiariaVController : ControllerBase
 
         var sw = Stopwatch.StartNew();
 
-        var totalRegistros = await query.CountAsync();
-
         var result = await query
-            .OrderBy(x => x.Añohnh)
-            .ThenBy(x => x.Prdhnh)
-            .ThenBy(x => x.Fichnh)
+            .OrderBy(x => x.Fichnh)
             .Skip((page - 1) * pageSize)
             .Take(pageSize)
             .Select(x => new PermisosNomDiariaVDTO
@@ -120,11 +133,9 @@ public class PermisosNomDiariaVController : ControllerBase
 
         return Ok(new
         {
-            TotalRegistros = totalRegistros,
             PaginaActual = page,
             TamanioPagina = pageSize,
-            TotalPaginas = (int)Math.Ceiling(
-                (double)totalRegistros / pageSize),
+            CantidadRegistros = result.Count,
             TiempoMs = sw.ElapsedMilliseconds,
             Data = result
         });
