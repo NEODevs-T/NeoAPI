@@ -181,43 +181,6 @@ public class RegistNominaController : ControllerBase
                 x.Prdhnh == model.Prdhnh &&
                 x.Tpnom == model.Tpnom);
 
-        var dias = new[]
-        {
-            model.Dg01hh,
-            model.Dg02hh,
-            model.Dg03hh,
-            model.Dg04hh,
-            model.Dg05hh,
-            model.Dg06hh,
-            model.Dg07hh,
-            model.Dg08hh,
-            model.Dg09hh,
-            model.Dg010hh,
-            model.Dg011hh,
-            model.Dg012hh,
-            model.Dg013hh,
-            model.Dg014hh,
-            model.Dg015hh
-        };
-
-        foreach (var dia in dias)
-        {
-            if (string.IsNullOrWhiteSpace(dia))
-                continue;
-
-            var valor = dia.Trim().ToUpper();
-
-            if (valor != "R" &&
-                valor != "F" &&
-                valor != "P")
-            {
-                return BadRequest(new
-                {
-                    Mensaje = "Los campos DG01HH a DG015HH solo admiten los valores R, F o P."
-                });
-            }
-        }
-
         if (existe)
         {
             return BadRequest(new
