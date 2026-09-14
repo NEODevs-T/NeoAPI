@@ -41,13 +41,14 @@
         // =========================================
         [HttpGet]
         public async Task<IActionResult> GetRotacionHist(
-            decimal anio,
-            string? tpnhnh,
-            string? ficha,
-            string? departamento,
-            decimal? periodo,
-            int page = 1,
-            int pageSize = 500)
+        decimal anio,
+        string? ciahnh,
+        string? tpnhnh,
+        string? ficha,
+        string? departamento,
+        decimal? periodo,
+        int page = 1,
+        int pageSize = 500)
         {
             ficha = ficha?.Trim();
 
@@ -86,6 +87,12 @@
             {
                 query = query.Where(x =>
                     (x.Tpnhnh ?? "").Trim() == tpnhnh.Trim());
+            }
+
+            if (!string.IsNullOrWhiteSpace(ciahnh))
+            {
+                query = query.Where(x =>
+                    (x.Ciahnh ?? "").Trim() == ciahnh.Trim());
             }
 
             query = query.Where(x =>
@@ -175,6 +182,7 @@
         [HttpGet("resumen")]
         public async Task<IActionResult> GetResumen(
             decimal anio,
+            string? ciahnh,
             int? mes = null)
         {
             var query = _context.VRotacionHists
@@ -183,6 +191,13 @@
 
             // PRDHNH = PERIODO (1-52 / 53)
             // NO ES MES
+
+            if (!string.IsNullOrWhiteSpace(ciahnh))
+            {
+                query = query.Where(x =>
+                    (x.Ciahnh ?? "").Trim() == ciahnh.Trim());
+            }
+
             if (mes.HasValue)
             {
                 var rango = ObtenerRangoPeriodos(

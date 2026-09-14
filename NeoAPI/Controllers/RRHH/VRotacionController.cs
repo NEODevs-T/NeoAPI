@@ -77,6 +77,7 @@ public class VRotacionController : ControllerBase
 [HttpGet]
 public async Task<IActionResult> GetRotacion(
     [FromQuery] decimal anio,
+    string? ciahnh,
     string? tpnhnh,
     string? ficha,
     string? departamento,
@@ -152,6 +153,12 @@ public async Task<IActionResult> GetRotacion(
         (x.Dg15hh ?? "").Trim().ToUpper() == "P" ||
         (x.Dg15hh ?? "").Trim().ToUpper() == "F"
     );
+
+    if (!string.IsNullOrWhiteSpace(ciahnh))
+    {
+        query = query.Where(x =>
+            (x.Ciahnh ?? "").Trim() == ciahnh.Trim());
+    }
 
     query = query.Where(x =>
         x.Añohnh == anio);
@@ -240,6 +247,7 @@ public async Task<IActionResult> GetRotacion(
     [HttpGet("resumen")]
     public async Task<IActionResult> GetResumen(
     int anio,
+    string? ciahnh,
     string? tpnhnh,
     int? mes = null)
     {
@@ -315,10 +323,17 @@ public async Task<IActionResult> GetRotacion(
     || (x.Dg15hh ?? "").Trim().ToUpper() == "F"
 );
 
+
         if (!string.IsNullOrWhiteSpace(tpnhnh))
     {
         query = query.Where(x =>
             (x.Tpnhnh ?? "").Trim() == tpnhnh.Trim());
+    }
+
+    if (!string.IsNullOrWhiteSpace(ciahnh))
+    {
+        query = query.Where(x =>
+            (x.Ciahnh ?? "").Trim() == ciahnh.Trim());
     }
 
     query = query.Where(x =>
