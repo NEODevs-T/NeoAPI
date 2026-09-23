@@ -46,6 +46,9 @@ public class BonoController : ControllerBase
             if (dto.IdTipIncen <= 0)
                 return BadRequest(new { message = "El campo IdTipIncen debe ser mayor a cero." });
 
+            if (dto.IdMontos <= 0)
+                return BadRequest(new { message = "El campo IdMontos debe ser mayor a cero." });
+
             if (dto.Rturno <= 0)
                 return BadRequest(new { message = "El campo Rturno debe ser mayor a cero." });
 
@@ -61,7 +64,6 @@ public class BonoController : ControllerBase
                     return BadRequest(new { message = "El campo UsuarioSolicita es obligatorio cuando EsEspecial es true." });
             }
 
-            const int idMontoEspecialTemporal = 156;
 
             var resumen = new BonoResuman
             {
@@ -71,7 +73,7 @@ public class BonoController : ControllerBase
                 Rgrupo = dto.Rgrupo,
                 IdPersonal = dto.IdPersonal,
                 Rsuplido = dto.Rsuplido,
-                IdMontos = dto.EsEspecial ? idMontoEspecialTemporal : dto.IdMontos,
+                IdMontos = dto.IdMontos,
                 RuserVali = dto.RuserVali,
                 IdTipIncen = dto.IdTipIncen,
                 RisMarcaje = dto.RisMarcaje,

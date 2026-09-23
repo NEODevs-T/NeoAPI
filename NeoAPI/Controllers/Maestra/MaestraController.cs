@@ -125,12 +125,30 @@ namespace NeoAPI.Controllers.Maestras
         }
 
         [HttpGet("GetDivisiones/{idCentro:int}")]
-        public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisiones(int idCentro)
-        {
-            List<DivisionesV> data = await this._context.DivisionesVs.Where(v => v.IdCentro == idCentro && v.Estado == true).ToListAsync();
-            return Ok(_mapper.Map<List<DivisionesVDTO>>(data));
-        }
+public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisiones(int idCentro)
+{
+    List<DivisionesV> data = await this._context.DivisionesVs
+        .Where(v =>
+            v.IdCentro == idCentro &&
+            v.Estado == true &&
+            !v.Ndivision.StartsWith("PagoE"))
+        .ToListAsync();
 
+    return Ok(_mapper.Map<List<DivisionesVDTO>>(data));
+}
+
+[HttpGet("GetDivisionesEspeciales/{idCentro:int}")]
+public async Task<ActionResult<List<DivisionesVDTO>>> GetDivisionesEspeciales(int idCentro)
+{
+    List<DivisionesV> data = await this._context.DivisionesVs
+        .Where(v =>
+            v.IdCentro == idCentro &&
+            v.Estado == true &&
+            v.Ndivision.StartsWith("PagoE"))
+        .ToListAsync();
+
+    return Ok(_mapper.Map<List<DivisionesVDTO>>(data));
+}
         [HttpGet("GetAllLineas")]
         public async Task<ActionResult<List<LineaVDTO>>> GetAllLineas()
         {
