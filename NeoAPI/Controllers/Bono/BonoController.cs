@@ -308,10 +308,29 @@ public class BonoController : ControllerBase
                     p.PeApellido
                 })
                 .ToDictionaryAsync(p => p.IdPersonal);
+                var fichas = personalDict.Values
+                    .Where(p => !string.IsNullOrEmpty(p.PeFicha))
+                    .Select(p => p.PeFicha)
+                    .Distinct()
+                    .ToList();
+
+                var registroPersonalDict = await _neoContext.RegistroPersonalVs
+                    .Where(r => fichas.Contains(r.Ficha))
+                    .GroupBy(r => r.Ficha)
+                    .Select(g => g.First())
+                    .ToDictionaryAsync(
+                        x => x.Ficha,
+                        x => new
+                        {
+                            x.Linea,
+                            x.Centro,
+                            x.Puesto
+        });
 
             var data = especiales.Select(e =>
             {
                 personalDict.TryGetValue(e.IdPersonal, out var personal);
+                registroPersonalDict.TryGetValue(personal?.PeFicha ?? string.Empty, out var registroPersonal);
 
                 return new
                 {
@@ -329,6 +348,10 @@ public class BonoController : ControllerBase
                     nombreTrabajador = personal == null
                         ? string.Empty
                         : $"{personal.PeNombre ?? string.Empty} {personal.PeApellido ?? string.Empty}".Trim(),
+
+                        linea = registroPersonal?.Linea ?? string.Empty,
+                        centro = registroPersonal?.Centro ?? string.Empty,
+                        puesto = registroPersonal?.Puesto ?? string.Empty,
 
                     rfecha = e.Rfecha,
                     rfechaReal = e.RfechaReal,
@@ -408,6 +431,25 @@ public class BonoController : ControllerBase
                 })
                 .ToDictionaryAsync(p => p.IdPersonal);
 
+                var fichas = personalDict.Values
+                .Where(p => !string.IsNullOrEmpty(p.PeFicha))
+                .Select(p => p.PeFicha)
+                .Distinct()
+                .ToList();
+
+            var registroPersonalDict = await _neoContext.RegistroPersonalVs
+                .Where(r => fichas.Contains(r.Ficha))
+                .GroupBy(r => r.Ficha)
+                .Select(g => g.First())
+                .ToDictionaryAsync(
+                    x => x.Ficha,
+                    x => new
+                    {
+                        x.Linea,
+                        x.Centro,
+                        x.Puesto
+                    });
+
             var idsEspeciales = especiales
                 .Select(x => x.IdEspecial)
                 .Distinct()
@@ -428,6 +470,8 @@ public class BonoController : ControllerBase
             var data = especiales.Select(e =>
             {
                 personalDict.TryGetValue(e.IdPersonal, out var personal);
+
+                registroPersonalDict.TryGetValue(personal?.PeFicha ?? string.Empty, out var registroPersonal);
                 comentariosRechazoDict.TryGetValue(e.IdEspecial, out var comentarioRechazo);
 
                 return new
@@ -446,6 +490,10 @@ public class BonoController : ControllerBase
                     nombreTrabajador = personal == null
                         ? string.Empty
                         : $"{personal.PeNombre ?? string.Empty} {personal.PeApellido ?? string.Empty}".Trim(),
+
+                    linea = registroPersonal?.Linea ?? string.Empty,
+                    centro = registroPersonal?.Centro ?? string.Empty,
+                    puesto = registroPersonal?.Puesto ?? string.Empty,
 
                     rfecha = e.Rfecha,
                     rfechaReal = e.RfechaReal,
